@@ -12,3 +12,15 @@ You’ll need a Mac with Xcode and a compatible tvOS SDK, an Apple TV running tv
 4. In Xcode, select the **Io** scheme and your Apple TV as the run destination, then press **⌘R**. Xcode builds, signs, installs and opens Io.
 
 To update Io or renew an expired development installation, run it again from Xcode with the same Team and bundle identifier. Leave the existing installation in place to preserve viewing history.
+
+## ERR content and trademarks
+
+Io is an independently developed Apple TV app. It is not affiliated with
+or endorsed by Eesti Rahvusringhääling (ERR).
+
+Live streams are played directly from sources provided by ERR. Io does not
+host or permanently store the live video. Rights in programmes, artwork,
+logos, and trademarks remain with their respective owners. Publication of
+Io’s source code does not grant any rights to ERR content or services.
+
+[ERR terms of use](https://info.err.ee/982667/kasutustingimused-ja-kommenteerimine)
