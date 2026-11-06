@@ -64,6 +64,7 @@ private struct IoTabController: UIViewControllerRepresentable {
             IoTabNavigation(content: content, programme: programme)
                 // Replacing the root explicitly resets local navigation and focus.
                 .id(UUID())
+                .font(IoDesign.body)
                 .environment(history)
                 .environment(favorites)
                 .tint(.white)

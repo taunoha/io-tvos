@@ -280,6 +280,7 @@ struct TelekavaView: View {
                 if current {
                     Text("PRAEGU").font(IoDesign.badge).tracking(0.8)
                         .padding(.horizontal, IoDesign.Space.small).padding(.vertical, IoDesign.Space.xSmall)
+                        .fixedSize()
                         .background(focused ? .black.opacity(0.08) : accent.opacity(0.16), in: Capsule())
                         .foregroundStyle(focused ? .black : accent)
                 } else if showsReplayHint {

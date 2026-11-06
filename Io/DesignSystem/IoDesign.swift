@@ -17,9 +17,11 @@ enum IoDesign {
     static let sectionTitle = Font.system(size: 34, weight: .semibold)
     static let cardTitle = sectionTitle
     static let body = Font.system(size: 34)
-    static let metadata = Font.system(size: 21, weight: .medium)
-    static let caption = Font.system(size: 21)
-    static let badge = Font.system(size: 13, weight: .bold)
+    // Apple's tvOS legibility minimum is just above the 21 pt Fibonacci step.
+    static let minimumTextSize: CGFloat = 23
+    static let metadata = Font.system(size: minimumTextSize, weight: .medium)
+    static let caption = Font.system(size: minimumTextSize)
+    static let badge = Font.system(size: minimumTextSize, weight: .bold)
     static let inlineIcon = Font.system(size: 13, weight: .semibold)
 
     // The denser three-column guide keeps its tuned type sizes.
@@ -27,7 +29,7 @@ enum IoDesign {
     static let scheduleProgrammeTitle = Font.system(size: 33, weight: .medium)
     static let scheduleDayLabel = Font.system(size: 27, weight: .semibold)
     static let scheduleTimeLabel = Font.system(size: 27, weight: .medium).monospacedDigit()
-    static let scheduleReplayHint = Font.system(size: 23, weight: .medium)
+    static let scheduleReplayHint = metadata
 
     static let contentInset = Space.xxxLarge
     static let cardGap = Space.xLarge
