@@ -8,9 +8,9 @@ struct LiveChannelCard: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let current = schedules.first { $0.contains(context.date) }
-            VStack(alignment: .leading, spacing: IoDesign.Space.large) {
-                Text(channel.title).font(IoDesign.pageTitle)
-                VStack(alignment: .leading, spacing: IoDesign.Space.small) {
+            VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+                Text(channel.title).font(IoDesign.cardTitle)
+                VStack(alignment: .leading, spacing: IoDesign.Space.xxSmall) {
                     Text(current?.title ?? (loaded ? "Saatekava pole saadaval" : "Saatekava laadimine…"))
                         .font(IoDesign.body.weight(.medium))
                         .lineLimit(2, reservesSpace: true)

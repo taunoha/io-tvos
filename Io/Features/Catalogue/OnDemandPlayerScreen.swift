@@ -33,16 +33,18 @@ struct OnDemandPlayerScreen: View {
                             Text(episodeTitle).foregroundStyle(.secondary)
                         }
                     }
-                    .font(IoDesign.caption)
+                    .font(IoDesign.body)
                     .lineLimit(1)
                     .playerInfoCard()
                 }
                 .ignoresSafeArea()
             }
             if let error = playback.error {
-                VStack(spacing: IoDesign.Space.xLarge) {
-                    Text(programme.heading).font(IoDesign.pageTitle)
-                    Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1100)
+                VStack(spacing: IoDesign.shelfGap) {
+                    VStack(spacing: IoDesign.sectionHeadingGap) {
+                        Text(programme.heading).font(IoDesign.pageTitle)
+                        Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1100)
+                    }
                     HStack(spacing: IoDesign.Space.xLarge) {
                         Button("Proovi uuesti") { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }
                         Button("Tagasi saate juurde") { dismiss() }

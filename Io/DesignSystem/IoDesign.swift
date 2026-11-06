@@ -1,7 +1,7 @@
 import SwiftUI
 
-// Adjacent Fibonacci steps approximate the golden ratio at whole tvOS points.
 enum IoDesign {
+    // Adjacent Fibonacci steps approximate the golden ratio at whole points.
     enum Space {
         static let xxSmall: CGFloat = 3
         static let xSmall: CGFloat = 5
@@ -13,34 +13,29 @@ enum IoDesign {
         static let xxxLarge: CGFloat = 89
     }
 
-    static let pageTitle = Font.system(size: 55, weight: .bold)
-    static let sectionTitle = Font.system(size: 34, weight: .semibold)
-    static let cardTitle = sectionTitle
-    static let body = Font.system(size: 34)
-    // Apple's tvOS legibility minimum is just above the 21 pt Fibonacci step.
+    // Perfect Fourth: take each step from 60 pt and round to whole points.
+    static let pageTitle = Font.system(size: 60, weight: .bold)
+    static let sectionTitle = Font.system(size: 45, weight: .semibold)
+    static let cardTitle = Font.system(size: 34, weight: .semibold)
+    static let body = Font.system(size: 25)
     static let minimumTextSize: CGFloat = 23
     static let metadata = Font.system(size: minimumTextSize, weight: .medium)
     static let caption = Font.system(size: minimumTextSize)
     static let badge = Font.system(size: minimumTextSize, weight: .bold)
     static let inlineIcon = Font.system(size: 13, weight: .semibold)
 
-    static let scheduleChannelTitle = Font.system(size: 34, weight: .bold)
-    static let scheduleProgrammeTitle = Font.system(size: 33, weight: .medium)
-    static let scheduleDayLabel = Font.system(size: 27, weight: .semibold)
-    static let scheduleTimeLabel = Font.system(size: 27, weight: .medium).monospacedDigit()
+    static let scheduleTimeLabel = caption.monospacedDigit()
     static let scheduleChannelWidth = Space.xxxLarge + Space.xxLarge
-    static let scheduleRowHeight = Space.xxLarge + Space.medium
+    static let scheduleRowHeight = 2.47 * Space.xLarge
     static let scheduleAxisHeight = Space.xLarge
-    static let scheduleEdgeShadowWidth = Space.xxLarge
+    static let scheduleEdgeShadowWidth = Space.xLarge
     static let scheduleGridCornerRadius = Space.medium
     static let schedulePanelCornerRadius: CGFloat = 20
-    static let scheduleSectionGap = Space.xxLarge + Space.medium
 
     static let contentInset = Space.xxxLarge
     static let cardGap = Space.xLarge
     static let focusRoom = Space.large
     static let sectionHeadingGap = Space.small
-    // The row's focus room and the gap together form a 55 pt shelf separation.
     static let shelfGap = Space.xLarge
 
     static let playerInfoWidth: CGFloat = 1200

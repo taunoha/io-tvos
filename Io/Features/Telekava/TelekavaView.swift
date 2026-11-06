@@ -68,7 +68,7 @@ struct TelekavaView: View {
             let missed = missedFavorites(at: now)
             VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                 header
-                VStack(alignment: .leading, spacing: IoDesign.scheduleSectionGap) {
+                VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                     dayPicker
                     guide(now: now)
                     programmeDetail(now: now)
@@ -146,7 +146,7 @@ struct TelekavaView: View {
 
     private var header: some View {
         let dateTitle = day.formatted(dateFormat.weekday(.wide).day().month(.wide))
-        return HStack(alignment: .firstTextBaseline, spacing: IoDesign.Space.large) {
+        return HStack(alignment: .firstTextBaseline, spacing: IoDesign.Space.medium) {
             Text("Telekava").font(IoDesign.pageTitle).accessibilityAddTraits(.isHeader)
             Text(dateTitle.prefix(1).uppercased() + dateTitle.dropFirst())
                 .font(IoDesign.metadata)
@@ -166,7 +166,7 @@ struct TelekavaView: View {
                     day = date
                 } label: {
                     Text(dayLabel(offset, date: date))
-                        .font(IoDesign.scheduleDayLabel)
+                        .font(IoDesign.cardTitle.weight(.semibold))
                         .padding(.horizontal, IoDesign.Space.large).padding(.vertical, IoDesign.Space.small)
                         .foregroundStyle(focused ? .black : .white)
                         .background(focused ? .white : .white.opacity(day == date ? 0.18 : 0.08), in: Capsule())
@@ -205,7 +205,7 @@ struct TelekavaView: View {
                 Color.clear.frame(height: IoDesign.scheduleAxisHeight).accessibilityHidden(true)
                 ForEach(LiveChannel.all) { channel in
                     Text(channel.title)
-                        .font(IoDesign.scheduleChannelTitle)
+                        .font(IoDesign.cardTitle.weight(.bold))
                         .frame(height: IoDesign.scheduleRowHeight)
                         .accessibilityAddTraits(.isHeader)
                 }
@@ -335,7 +335,7 @@ struct TelekavaView: View {
         } label: {
             Text(entry.title + (entry.isRepeat ? "*" : ""))
                 .lineLimit(1)
-                .font(IoDesign.scheduleProgrammeTitle.weight(current ? .bold : .medium))
+                .font(IoDesign.cardTitle.weight(current ? .bold : .medium))
                 .foregroundStyle(focused ? .black : .white)
                 .padding(.horizontal, min(IoDesign.Space.medium, width / 4))
                 .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
@@ -369,9 +369,9 @@ struct TelekavaView: View {
         } else {
             detail = ("", "")
         }
-        return VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+        return VStack(alignment: .leading, spacing: IoDesign.Space.xSmall) {
             Text(detail.title)
-                .font(IoDesign.scheduleProgrammeTitle)
+                .font(IoDesign.cardTitle)
                 .lineLimit(1, reservesSpace: true)
             Text(detail.metadata)
                 .font(IoDesign.metadata)
@@ -404,7 +404,7 @@ struct TelekavaView: View {
     private func missedFavoritesPanel(_ missed: [MissedFavorite]) -> some View {
         VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
             Label("Maha magatud lemmikud", systemImage: "star.fill")
-                .font(IoDesign.metadata.weight(.semibold))
+                .font(IoDesign.body.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
             ScrollView(.horizontal) {
                 HStack(spacing: IoDesign.Space.medium) {
@@ -425,7 +425,7 @@ struct TelekavaView: View {
     private func missedFavoriteLabel(_ item: MissedFavorite) -> some View {
         VStack(alignment: .leading, spacing: IoDesign.Space.xSmall) {
             Text(item.entry.title)
-                .font(IoDesign.metadata.weight(.semibold))
+                .font(IoDesign.body.weight(.medium))
                 .lineLimit(1)
             Text("\(item.channel.title) · \(item.entry.startLabel)")
                 .font(IoDesign.metadata)

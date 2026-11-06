@@ -15,15 +15,17 @@ struct ProgrammeDetailView: View {
     init(programme: Programme) { self.programme = programme; _requestID = State(initialValue: programme.id) }
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: IoDesign.Space.xxLarge) {
+            LazyVStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                 if loading { ProgressView("Laadin saate andmeid…").padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom) }
                 if let error { LoadFailureView(message: error) { refresh += 1 }.padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom) }
                 if let page, !loading {
                     HStack(alignment: .top, spacing: IoDesign.Space.xxLarge) {
                         VStack(alignment: .leading, spacing: IoDesign.Space.large) {
-                            Text(page.mainContent.rootContent?.heading ?? programme.heading).font(IoDesign.pageTitle)
-                            if page.mainContent.heading != programme.heading { Text(page.mainContent.heading).font(IoDesign.sectionTitle) }
-                            if !page.mainContent.episodeLabel.isEmpty { Text(page.mainContent.episodeLabel).font(IoDesign.metadata).foregroundStyle(.secondary) }
+                            VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+                                Text(page.mainContent.rootContent?.heading ?? programme.heading).font(IoDesign.pageTitle)
+                                if page.mainContent.heading != programme.heading { Text(page.mainContent.heading).font(IoDesign.sectionTitle) }
+                                if !page.mainContent.episodeLabel.isEmpty { Text(page.mainContent.episodeLabel).font(IoDesign.metadata).foregroundStyle(.secondary) }
+                            }
                             Text(page.mainContent.descriptionText).font(IoDesign.body).lineLimit(6).foregroundStyle(.secondary)
                             if programme.source == .lasteekraan && !page.mainContent.hasVideo {
                                 Text("Selle sisu video pole praegu kättesaadav.").font(IoDesign.body).foregroundStyle(.secondary)

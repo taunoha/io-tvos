@@ -13,19 +13,21 @@ struct LiveHomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: IoDesign.Space.xxLarge) {
-                VStack(alignment: .leading, spacing: IoDesign.Space.xLarge) {
+            VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
+                VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                     Text("Io").font(IoDesign.pageTitle)
-                    Text("Vaata otse").font(IoDesign.sectionTitle)
-                    HStack(spacing: IoDesign.cardGap) {
-                        ForEach(LiveChannel.all) { channel in
-                            Button { selectedChannel = channel } label: {
-                                LiveChannelCard(channel: channel)
+                    VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+                        Text("Vaata otse").font(IoDesign.sectionTitle)
+                        HStack(spacing: IoDesign.cardGap) {
+                            ForEach(LiveChannel.all) { channel in
+                                Button { selectedChannel = channel } label: {
+                                    LiveChannelCard(channel: channel)
+                                }
+                                .buttonStyle(.card)
+                                .accessibilityIdentifier("live-channel-\(channel.id)")
+                                .focused($focusedChannelID, equals: channel.id)
+                                .prefersDefaultFocus(channel.id == backgroundChannelID, in: channelFocusScope)
                             }
-                            .buttonStyle(.card)
-                            .accessibilityIdentifier("live-channel-\(channel.id)")
-                            .focused($focusedChannelID, equals: channel.id)
-                            .prefersDefaultFocus(channel.id == backgroundChannelID, in: channelFocusScope)
                         }
                     }
                 }

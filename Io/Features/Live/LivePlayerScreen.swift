@@ -52,7 +52,7 @@ private struct LivePlayerInfo: View {
                 .frame(width: IoDesign.playerInfoLabelWidth, alignment: .leading)
             VStack(alignment: .leading, spacing: IoDesign.playerInfoTimeSpacing) {
                 Text(schedule.title)
-                    .fontWeight(isCurrent ? .semibold : .regular)
+                    .font(isCurrent ? IoDesign.cardTitle : IoDesign.body)
                 Text(schedule.timeRange)
                     .font(IoDesign.caption)
                     .foregroundStyle(.secondary)
@@ -77,9 +77,11 @@ struct LivePlayerScreen: View {
                 .ignoresSafeArea()
             }
             if let error = playback.errorMessage {
-                VStack(spacing: IoDesign.Space.xLarge) {
-                    Text(channel.title).font(IoDesign.pageTitle)
-                    Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1000)
+                VStack(spacing: IoDesign.shelfGap) {
+                    VStack(spacing: IoDesign.sectionHeadingGap) {
+                        Text(channel.title).font(IoDesign.pageTitle)
+                        Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1000)
+                    }
                     HStack(spacing: IoDesign.Space.xLarge) {
                         Button("Proovi uuesti") { playback.start(channel) }
                         Button("Tagasi kanalite juurde") { dismiss() }
