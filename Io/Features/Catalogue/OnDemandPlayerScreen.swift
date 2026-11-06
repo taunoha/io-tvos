@@ -27,15 +27,9 @@ struct OnDemandPlayerScreen: View {
             Color.black.ignoresSafeArea()
             if let player = playback.player {
                 NativePlayer(player: player, onDismiss: { dismiss() }) {
-                    VStack(alignment: .leading, spacing: IoDesign.playerInfoRowSpacing) {
-                        Text(programme.playbackTitle).font(IoDesign.sectionTitle.weight(.bold))
-                        if let episodeTitle = programme.playbackSubtitle {
-                            Text(episodeTitle).foregroundStyle(.secondary)
-                        }
-                    }
-                    .font(IoDesign.body)
-                    .lineLimit(1)
-                    .playerInfoCard()
+                    ProgrammeInfoCard(title: programme.playbackTitle,
+                                      metadata: programme.playbackSubtitle,
+                                      programme: programme)
                 }
                 .ignoresSafeArea()
             }

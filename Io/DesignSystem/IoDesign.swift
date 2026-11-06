@@ -22,11 +22,10 @@ enum IoDesign {
     static let metadata = Font.system(size: minimumTextSize, weight: .medium)
     static let caption = Font.system(size: minimumTextSize)
     static let badge = Font.system(size: minimumTextSize, weight: .bold)
-    static let inlineIcon = Font.system(size: 13, weight: .semibold)
 
     static let scheduleCellTitle = Font.system(size: 27, weight: .semibold)
     static let scheduleDetailTitle = Font.system(size: 44, weight: .semibold)
-    static let scheduleArtworkHeight = Space.xxxLarge + Space.xLarge
+    static let scheduleArtworkHeight = Space.xxxLarge + Space.xLarge * 2
     static let scheduleArtworkWidth = scheduleArtworkHeight * 16 / 9
     static let scheduleTimeLabel = caption.monospacedDigit()
     static let scheduleChannelWidth = Space.xxxLarge + Space.xxLarge
@@ -44,16 +43,8 @@ enum IoDesign {
 
     static let playerInfoWidth: CGFloat = 1200
     static let playerInfoHeight: CGFloat = 260
-    static let playerInfoLiveHeight: CGFloat = 360
-    static let playerInfoHorizontalPadding = Space.xLarge
-    static let playerInfoVerticalPadding = Space.large
     static let playerInfoHorizontalInset = Space.xxLarge
     static let playerInfoCornerRadius: CGFloat = 24
-    static let playerInfoRowSpacing = Space.small
-    static let playerInfoColumnSpacing = Space.medium
-    static let playerInfoMarkerWidth: CGFloat = 32
-    static let playerInfoLabelWidth: CGFloat = 160
-    static let playerInfoTimeSpacing = Space.xxSmall
 }
 
 private struct IoCustomFocusButtonStyle: ButtonStyle {

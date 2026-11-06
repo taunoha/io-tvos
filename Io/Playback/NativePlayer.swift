@@ -7,6 +7,16 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
     var infoHeight: CGFloat = IoDesign.playerInfoHeight
     @ViewBuilder let info: () -> Info
 
+    private struct InfoPanel: View {
+        let content: Info
+
+        var body: some View {
+            content
+                .padding(.horizontal, IoDesign.playerInfoHorizontalInset)
+                .frame(maxHeight: .infinity)
+        }
+    }
+
     final class Coordinator: NSObject, AVPlayerViewControllerDelegate {
         var onDismiss: () -> Void
         init(onDismiss: @escaping () -> Void) { self.onDismiss = onDismiss }
@@ -21,7 +31,7 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
         controller.player = player
         controller.delegate = context.coordinator
         controller.showsPlaybackControls = true
-        let panel = UIHostingController(rootView: info())
+        let panel = UIHostingController(rootView: InfoPanel(content: info()))
         panel.title = "Info"
         panel.preferredContentSize = CGSize(width: IoDesign.playerInfoWidth, height: infoHeight)
         controller.customInfoViewControllers = [panel]
@@ -30,23 +40,11 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: AVPlayerViewController, context: Context) {
         context.coordinator.onDismiss = onDismiss
         if controller.player !== player { controller.player = player }
-        let panel = controller.customInfoViewControllers.first as? UIHostingController<Info>
-        panel?.rootView = info()
+        let panel = controller.customInfoViewControllers.first as? UIHostingController<InfoPanel>
+        panel?.rootView = InfoPanel(content: info())
     }
     static func dismantleUIViewController(_ controller: AVPlayerViewController, coordinator: Coordinator) {
         controller.delegate = nil
         controller.player = nil
-    }
-}
-
-extension View {
-    func playerInfoCard() -> some View {
-        self
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, IoDesign.playerInfoHorizontalPadding)
-            .padding(.vertical, IoDesign.playerInfoVerticalPadding)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: IoDesign.playerInfoCornerRadius))
-            .padding(.horizontal, IoDesign.playerInfoHorizontalInset)
-            .frame(maxHeight: .infinity)
     }
 }

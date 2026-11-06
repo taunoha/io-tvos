@@ -177,7 +177,7 @@ struct TelekavaView: View {
                     day = date
                 } label: {
                     Text(dayLabel(offset, date: date))
-                        .font(IoDesign.cardTitle.weight(.semibold))
+                        .font(IoDesign.body.weight(.semibold))
                         .padding(.horizontal, IoDesign.Space.large).padding(.vertical, IoDesign.Space.small)
                         .foregroundStyle(focused ? .black : .white)
                         .background(focused ? .white : .white.opacity(day == date ? 0.18 : 0.08), in: Capsule())
@@ -391,40 +391,10 @@ struct TelekavaView: View {
 
     private func programmeDetail(_ entry: TelekavaEntry, channel: LiveChannel, now: Date) -> some View {
         let programme = catalogueDetail?.id == entry.contentId ? catalogueDetail : nil
-        let description = Programme.plainDescription(entry.lead)
-        let synopsis = description.isEmpty ? (programme?.descriptionText ?? "") : description
         let status = entry.isCurrent(at: now) ? " · Praegu eetris" : ""
-        return HStack(spacing: IoDesign.Space.xLarge) {
-            ProgrammeArtwork(url: programme?.imageURL) {
-                ZStack {
-                    Color.white.opacity(0.08)
-                    Image(systemName: "tv").font(IoDesign.sectionTitle).foregroundStyle(.secondary)
-                }
-            }
-            .frame(width: IoDesign.scheduleArtworkWidth, height: IoDesign.scheduleArtworkHeight)
-            .clipShape(RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius))
-            .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
-                Text(entry.title)
-                    .font(IoDesign.scheduleDetailTitle)
-                    .lineLimit(1)
-                    .accessibilityAddTraits(.isHeader)
-                Text("\(entry.timeRange) · \(channel.title)\(status)")
-                    .font(IoDesign.metadata)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                if !synopsis.isEmpty {
-                    Text(synopsis)
-                        .font(IoDesign.body)
-                        .foregroundStyle(.white.opacity(0.85))
-                        .lineLimit(2)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(IoDesign.Space.large)
-        .background(.white.opacity(0.065), in: RoundedRectangle(cornerRadius: IoDesign.schedulePanelCornerRadius))
+        return ProgrammeInfoCard(title: entry.title,
+                                 metadata: "\(entry.timeRange) · \(channel.title)\(status)",
+                                 lead: entry.lead, programme: programme)
     }
 
     private var selectedEntry: TelekavaEntry? {

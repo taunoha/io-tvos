@@ -10,6 +10,7 @@
 		6056CF38BCAC410CBFB58D07 /* IoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C636129FC54382AC6CFD38 /* IoApp.swift */; };
 		3FF95EC949464B1B99EDCC29 /* IoRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537EF61C46D946FB90D1562A /* IoRootView.swift */; };
 		1F533B7D07D841D18B772EF7 /* IoDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2444381B824460A82545F7 /* IoDesign.swift */; };
+		89E990B9DF2E452D9CD617C6 /* ProgrammeInfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A52ECEA65914056B0F7A7A8 /* ProgrammeInfoCard.swift */; };
 		43649D6213294046B28988AD /* LoadFailureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8758D4094E1F4C888F78D955 /* LoadFailureView.swift */; };
 		29E6A85EA42B4C618F671198 /* CatalogueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6776082A1124AA5B5FA68C5 /* CatalogueView.swift */; };
 		FFBCA6B5D0A74F2EA7D5DF89 /* OnDemandAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBB43CABEBB340129A320CA1 /* OnDemandAPI.swift */; };
@@ -43,6 +44,7 @@
 		99C636129FC54382AC6CFD38 /* IoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IoApp.swift; sourceTree = "<group>"; };
 		537EF61C46D946FB90D1562A /* IoRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IoRootView.swift; sourceTree = "<group>"; };
 		6C2444381B824460A82545F7 /* IoDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IoDesign.swift; sourceTree = "<group>"; };
+		9A52ECEA65914056B0F7A7A8 /* ProgrammeInfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgrammeInfoCard.swift; sourceTree = "<group>"; };
 		8758D4094E1F4C888F78D955 /* LoadFailureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadFailureView.swift; sourceTree = "<group>"; };
 		F6776082A1124AA5B5FA68C5 /* CatalogueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogueView.swift; sourceTree = "<group>"; };
 		EBB43CABEBB340129A320CA1 /* OnDemandAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDemandAPI.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				6C2444381B824460A82545F7 /* IoDesign.swift */,
+				9A52ECEA65914056B0F7A7A8 /* ProgrammeInfoCard.swift */,
 				8758D4094E1F4C888F78D955 /* LoadFailureView.swift */,
 			);
 			path = DesignSystem;
@@ -277,6 +280,7 @@
 				6056CF38BCAC410CBFB58D07 /* IoApp.swift in Sources */,
 				3FF95EC949464B1B99EDCC29 /* IoRootView.swift in Sources */,
 				1F533B7D07D841D18B772EF7 /* IoDesign.swift in Sources */,
+				89E990B9DF2E452D9CD617C6 /* ProgrammeInfoCard.swift in Sources */,
 				43649D6213294046B28988AD /* LoadFailureView.swift in Sources */,
 				29E6A85EA42B4C618F671198 /* CatalogueView.swift in Sources */,
 				FFBCA6B5D0A74F2EA7D5DF89 /* OnDemandAPI.swift in Sources */,

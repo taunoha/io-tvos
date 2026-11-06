@@ -4,60 +4,53 @@ import AVKit
 private struct LivePlayerInfo: View {
     let channel: LiveChannel
     let player: AVPlayer
-    @State private var schedules: [LiveSchedule] = []
+    @State private var schedules: [TelekavaEntry] = []
+    @State private var programme: Programme?
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let date = player.currentItem?.currentDate() ?? context.date
-            let previous = schedules.last { $0.endTime <= date.timeIntervalSince1970 }
-            let current = schedules.first { $0.contains(date) }
-            let next = schedules.first { $0.startTime > date.timeIntervalSince1970 }
-            VStack(alignment: .leading, spacing: IoDesign.playerInfoRowSpacing) {
-                Text(channel.title).font(IoDesign.sectionTitle.weight(.bold))
-                if let previous {
-                    scheduleRow(previous, label: "Eelmine")
-                }
+            let day = TelekavaAPI.day(containing: date)
+            let current = schedules.first { $0.isCurrent(at: date) }
+            let contentID = current?.contentId
+
+            Group {
                 if let current {
-                    scheduleRow(current, label: "Praegu", isCurrent: true)
+                    let status = current.isCurrent(at: context.date) ? " · Praegu eetris" : ""
+                    ProgrammeInfoCard(title: current.title,
+                                      metadata: "\(current.timeRange) · \(channel.title)\(status)",
+                                      lead: current.lead,
+                                      programme: programme?.id == contentID ? programme : nil)
                 } else {
-                    Text("Saatekava pole saadaval")
-                }
-                if let next {
-                    scheduleRow(next, label: "Järgmine")
+                    ProgrammeInfoCard(title: channel.title, metadata: "Saatekava pole saadaval")
                 }
             }
-            .font(IoDesign.body)
-            .lineLimit(1)
-            .playerInfoCard()
-        }
-        .task(id: channel.id) {
-            while !Task.isCancelled {
-                if let result = try? await LiveAPI.schedules(channel), !Task.isCancelled {
-                    schedules = result.sorted { $0.startTime < $1.startTime }
+            .task(id: day) {
+                while !Task.isCancelled {
+                    await loadSchedule(for: day, at: date)
+                    try? await Task.sleep(for: .seconds(300))
                 }
-                try? await Task.sleep(for: .seconds(300))
+            }
+            .task(id: contentID) {
+                programme = nil
+                guard let contentID,
+                      let page = try? await OnDemandAPI.detail(contentID),
+                      !Task.isCancelled else { return }
+                programme = page.mainContent
             }
         }
     }
 
-    private func scheduleRow(_ schedule: LiveSchedule, label: String, isCurrent: Bool = false) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: IoDesign.playerInfoColumnSpacing) {
-            Image(systemName: isCurrent ? "circle.fill" : "circle")
-                .font(IoDesign.inlineIcon)
-                .foregroundStyle(isCurrent ? .primary : .secondary)
-                .frame(width: IoDesign.playerInfoMarkerWidth)
-                .accessibilityHidden(true)
-            Text(label)
-                .font(IoDesign.caption.weight(isCurrent ? .semibold : .regular))
-                .frame(width: IoDesign.playerInfoLabelWidth, alignment: .leading)
-            VStack(alignment: .leading, spacing: IoDesign.playerInfoTimeSpacing) {
-                Text(schedule.title)
-                    .font(isCurrent ? IoDesign.cardTitle : IoDesign.body)
-                Text(schedule.timeRange)
-                    .font(IoDesign.caption)
-                    .foregroundStyle(.secondary)
-            }
+    private func loadSchedule(for day: Date, at date: Date) async {
+        guard var entries = try? await TelekavaAPI.schedule(channel: channel, day: day) else { return }
+        if !entries.contains(where: { $0.isCurrent(at: date) }),
+           let overnight = try? await TelekavaAPI.schedule(channel: channel, day: TelekavaAPI.day(-1, from: day)) {
+            // ERR may list programmes after midnight under the previous broadcast day.
+            let ids = Set(entries.map(\.id))
+            entries += overnight.filter { $0.endTime > day.timeIntervalSince1970 && !ids.contains($0.id) }
         }
+        guard !Task.isCancelled else { return }
+        schedules = entries
     }
 }
 
@@ -71,7 +64,7 @@ struct LivePlayerScreen: View {
         ZStack {
             Color.black.ignoresSafeArea()
             if let player = playback.player {
-                NativePlayer(player: player, onDismiss: { dismiss() }, infoHeight: IoDesign.playerInfoLiveHeight) {
+                NativePlayer(player: player, onDismiss: { dismiss() }) {
                     LivePlayerInfo(channel: channel, player: player)
                 }
                 .ignoresSafeArea()
