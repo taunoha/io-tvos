@@ -11,6 +11,8 @@ struct ProgrammeCard: View {
     var body: some View {
         let saved = history.entry(for: programme.id)
         let subtitle = programme.cardSubtitle
+        let title = Text(programme.cardTitle(showsSeriesTitle: showsSeriesTitle))
+            .font(IoDesign.cardTitle)
 
         VStack(alignment: .leading, spacing: IoDesign.Space.medium) {
             ProgrammeArtwork(url: usesPortraitImage ? programme.posterURL : (programme.imageURL ?? saved?.programme.imageURL)) {
@@ -29,14 +31,28 @@ struct ProgrammeCard: View {
                 }
             }
             VStack(alignment: .leading, spacing: IoDesign.Space.xxSmall) {
-                // A lazy shelf takes its height from its first card.
-                Text(programme.cardTitle(showsSeriesTitle: showsSeriesTitle))
-                    .font(IoDesign.cardTitle).lineLimit(2, reservesSpace: true)
                 if showsSeriesTitle {
-                    Text(subtitle ?? " ")
+                    let episodeTitle = Text(subtitle ?? " ")
                         .font(IoDesign.metadata).foregroundStyle(.secondary)
                         .lineLimit(1, reservesSpace: true)
                         .accessibilityHidden(subtitle == nil)
+
+                    ZStack(alignment: .topLeading) {
+                        // Reserve the full block height for the lazy shelf.
+                        VStack(alignment: .leading, spacing: IoDesign.Space.xxSmall) {
+                            title.lineLimit(2, reservesSpace: true)
+                            episodeTitle
+                        }
+                        .hidden()
+                        .accessibilityHidden(true)
+
+                        VStack(alignment: .leading, spacing: IoDesign.Space.xxSmall) {
+                            title.lineLimit(2)
+                            episodeTitle
+                        }
+                    }
+                } else {
+                    title.lineLimit(2, reservesSpace: true)
                 }
                 if reservesProgressSpace {
                     ProgressView(value: saved?.progress ?? 0) {
