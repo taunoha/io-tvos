@@ -8,11 +8,11 @@ struct LiveChannelCard: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let current = schedules.first { $0.contains(context.date) }
-            VStack(alignment: .leading, spacing: 24) {
-                Text(channel.title).font(.system(size: 48, weight: .bold))
-                VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: IoDesign.Space.large) {
+                Text(channel.title).font(IoDesign.pageTitle)
+                VStack(alignment: .leading, spacing: IoDesign.Space.small) {
                     Text(current?.title ?? (loaded ? "Saatekava pole saadaval" : "Saatekava laadimine…"))
-                        .font(.system(size: 29, weight: .medium))
+                        .font(IoDesign.body.weight(.medium))
                         .lineLimit(2, reservesSpace: true)
                     Text(current?.timeRange ?? " ")
                         .font(IoDesign.metadata)
@@ -21,7 +21,7 @@ struct LiveChannelCard: View {
                 }
             }
             .frame(width: 370, alignment: .topLeading)
-            .padding(32)
+            .padding(IoDesign.Space.xLarge)
             .foregroundStyle(.white)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         }

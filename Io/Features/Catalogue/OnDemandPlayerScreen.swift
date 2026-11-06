@@ -28,28 +28,28 @@ struct OnDemandPlayerScreen: View {
             if let player = playback.player {
                 NativePlayer(player: player, onDismiss: { dismiss() }) {
                     VStack(alignment: .leading, spacing: IoDesign.playerInfoRowSpacing) {
-                        Text(programme.playbackTitle).font(.title2.bold())
+                        Text(programme.playbackTitle).font(IoDesign.sectionTitle.weight(.bold))
                         if let episodeTitle = programme.playbackSubtitle {
                             Text(episodeTitle).foregroundStyle(.secondary)
                         }
                     }
-                    .font(.callout)
+                    .font(IoDesign.caption)
                     .lineLimit(1)
                     .playerInfoCard()
                 }
                 .ignoresSafeArea()
             }
             if let error = playback.error {
-                VStack(spacing: 30) {
-                    Text(programme.heading).font(.largeTitle.bold())
-                    Text(error).font(.title3).multilineTextAlignment(.center).frame(maxWidth: 1100)
-                    HStack(spacing: 30) {
+                VStack(spacing: IoDesign.Space.xLarge) {
+                    Text(programme.heading).font(IoDesign.pageTitle)
+                    Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1100)
+                    HStack(spacing: IoDesign.Space.xLarge) {
                         Button("Proovi uuesti") { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }
                         Button("Tagasi saate juurde") { dismiss() }
                     }
                 }
             } else if playback.loading {
-                ProgressView("Laadin videot…").padding(40).background(.black.opacity(0.8), in: RoundedRectangle(cornerRadius: 20)).allowsHitTesting(false)
+                ProgressView("Laadin videot…").padding(IoDesign.Space.xLarge).background(.black.opacity(0.8), in: RoundedRectangle(cornerRadius: 20)).allowsHitTesting(false)
             }
         }
         .onAppear { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }

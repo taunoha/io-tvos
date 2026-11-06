@@ -13,7 +13,7 @@ private struct LivePlayerInfo: View {
             let current = schedules.first { $0.contains(date) }
             let next = schedules.first { $0.startTime > date.timeIntervalSince1970 }
             VStack(alignment: .leading, spacing: IoDesign.playerInfoRowSpacing) {
-                Text(channel.title).font(.title2.bold())
+                Text(channel.title).font(IoDesign.sectionTitle.weight(.bold))
                 if let previous {
                     scheduleRow(previous, label: "Eelmine")
                 }
@@ -26,7 +26,7 @@ private struct LivePlayerInfo: View {
                     scheduleRow(next, label: "Järgmine")
                 }
             }
-            .font(.callout)
+            .font(IoDesign.body)
             .lineLimit(1)
             .playerInfoCard()
         }
@@ -43,18 +43,18 @@ private struct LivePlayerInfo: View {
     private func scheduleRow(_ schedule: LiveSchedule, label: String, isCurrent: Bool = false) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: IoDesign.playerInfoColumnSpacing) {
             Image(systemName: isCurrent ? "circle.fill" : "circle")
-                .font(.caption2)
+                .font(IoDesign.inlineIcon)
                 .foregroundStyle(isCurrent ? .primary : .secondary)
                 .frame(width: IoDesign.playerInfoMarkerWidth)
                 .accessibilityHidden(true)
             Text(label)
-                .font(.caption.weight(isCurrent ? .semibold : .regular))
+                .font(IoDesign.caption.weight(isCurrent ? .semibold : .regular))
                 .frame(width: IoDesign.playerInfoLabelWidth, alignment: .leading)
             VStack(alignment: .leading, spacing: IoDesign.playerInfoTimeSpacing) {
                 Text(schedule.title)
                     .fontWeight(isCurrent ? .semibold : .regular)
                 Text(schedule.timeRange)
-                    .font(.caption)
+                    .font(IoDesign.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -77,21 +77,21 @@ struct LivePlayerScreen: View {
                 .ignoresSafeArea()
             }
             if let error = playback.errorMessage {
-                VStack(spacing: 28) {
-                    Text(channel.title).font(.largeTitle.bold())
-                    Text(error).font(.title3).multilineTextAlignment(.center).frame(maxWidth: 1000)
-                    HStack(spacing: 30) {
+                VStack(spacing: IoDesign.Space.xLarge) {
+                    Text(channel.title).font(IoDesign.pageTitle)
+                    Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1000)
+                    HStack(spacing: IoDesign.Space.xLarge) {
                         Button("Proovi uuesti") { playback.start(channel) }
                         Button("Tagasi kanalite juurde") { dismiss() }
                     }
                 }
             } else if playback.isLoading {
-                VStack(spacing: 24) {
+                VStack(spacing: IoDesign.Space.large) {
                     ProgressView()
-                    Text(channel.title).font(.title.bold())
+                    Text(channel.title).font(IoDesign.sectionTitle.weight(.bold))
                     Text(playback.message).foregroundStyle(.secondary)
                 }
-                .padding(40)
+                .padding(IoDesign.Space.xLarge)
                 .background(.black.opacity(0.8), in: RoundedRectangle(cornerRadius: 24))
                 .allowsHitTesting(false)
             }

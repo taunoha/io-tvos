@@ -4,7 +4,6 @@ struct LiveHomeView: View {
     let openProgramme: (Programme) -> Void
     @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(WatchHistory.self) private var history
-    private let sectionSpacing: CGFloat = 32
     @State private var selectedChannel: LiveChannel?
     @FocusState private var focusedChannelID: String?
     @State private var backgroundChannelID = LiveChannel.all.first?.id
@@ -14,9 +13,9 @@ struct LiveHomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 64) {
-                VStack(alignment: .leading, spacing: sectionSpacing) {
-                    Text("Io").font(.system(size: 68, weight: .bold))
+            VStack(alignment: .leading, spacing: IoDesign.Space.xxLarge) {
+                VStack(alignment: .leading, spacing: IoDesign.Space.xLarge) {
+                    Text("Io").font(IoDesign.pageTitle)
                     Text("Vaata otse").font(IoDesign.sectionTitle)
                     HStack(spacing: IoDesign.cardGap) {
                         ForEach(LiveChannel.all) { channel in

@@ -12,14 +12,14 @@ struct ProgrammeSearchView: View {
     private var query: String { phrase.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var requestKey: String { "\(query)|\(page)|\(refresh)" }
     var body: some View {
-        VStack(alignment: .leading, spacing: 32) {
+        VStack(alignment: .leading, spacing: IoDesign.Space.xLarge) {
             searchInput
                 .padding(.horizontal, IoDesign.contentInset)
                 .padding(.top, IoDesign.focusRoom)
 
             ScrollViewReader { scroll in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 32) {
+                    VStack(alignment: .leading, spacing: IoDesign.Space.xLarge) {
                         if query.isEmpty { Text("Sisesta saate või filmi nimi.").foregroundStyle(.secondary).padding(.horizontal, IoDesign.contentInset) }
                         ForEach(resultRows.indices, id: \.self) { index in
                             ProgrammeRow(
@@ -36,7 +36,7 @@ struct ProgrammeSearchView: View {
                                 loading = true
                                 page += 1
                             } label: {
-                                HStack(spacing: 12) {
+                                HStack(spacing: IoDesign.Space.medium) {
                                     Text("Laadi juurde")
                                     if loading {
                                         SearchLoadingSpinner()
@@ -86,9 +86,9 @@ struct ProgrammeSearchView: View {
     }
 
     private var searchInput: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(spacing: 24) {
-                HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: IoDesign.Space.large) {
+            HStack(spacing: IoDesign.Space.large) {
+                HStack(spacing: IoDesign.Space.medium) {
                     Image(systemName: "magnifyingglass")
                     Text(phrase.isEmpty ? "Otsi saadet või filmi" : phrase)
                         .foregroundStyle(phrase.isEmpty ? .secondary : .primary)
@@ -97,7 +97,7 @@ struct ProgrammeSearchView: View {
                     Spacer(minLength: 0)
                 }
                 .font(IoDesign.body)
-                .padding(18)
+                .padding(IoDesign.Space.large)
                 .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityLabel("Otsing: \(phrase.isEmpty ? "tühi" : phrase)")
 
@@ -112,13 +112,13 @@ struct ProgrammeSearchView: View {
             }
 
             // Ordinary buttons keep tvOS from opening its modal text editor.
-            VStack(spacing: 12) {
+            VStack(spacing: IoDesign.Space.medium) {
                 ForEach(["abcdefghijklmnopqrst", "uvwxyzõäöü0123456789"], id: \.self) { row in
-                    HStack(spacing: 12) {
+                    HStack(spacing: IoDesign.Space.medium) {
                         ForEach(Array(row), id: \.self) { character in
                             Button { phrase.append(String(character).lowercased()) } label: {
                                 Text(String(character))
-                                    .font(.system(size: 32, weight: .medium))
+                                    .font(IoDesign.body.weight(.medium))
                                     .frame(width: 68, height: 52)
                                     .foregroundStyle(focusedKey == String(character) ? Color.black : Color.white)
                                     .background(focusedKey == String(character) ? Color.white : Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))

@@ -1,35 +1,53 @@
 import SwiftUI
 
-// Shared typography and spacing for browsing views. Sizes are in tvOS points.
+// Adjacent Fibonacci steps approximate the golden ratio at whole tvOS points.
 enum IoDesign {
-    static let pageTitle = Font.system(size: 57, weight: .bold)
-    static let sectionTitle = Font.system(size: 38, weight: .semibold)
+    enum Space {
+        static let xxSmall: CGFloat = 3
+        static let xSmall: CGFloat = 5
+        static let small: CGFloat = 8
+        static let medium: CGFloat = 13
+        static let large: CGFloat = 21
+        static let xLarge: CGFloat = 34
+        static let xxLarge: CGFloat = 55
+        static let xxxLarge: CGFloat = 89
+    }
+
+    static let pageTitle = Font.system(size: 55, weight: .bold)
+    static let sectionTitle = Font.system(size: 34, weight: .semibold)
+    static let cardTitle = sectionTitle
+    static let body = Font.system(size: 34)
+    static let metadata = Font.system(size: 21, weight: .medium)
+    static let caption = Font.system(size: 21)
+    static let badge = Font.system(size: 13, weight: .bold)
+    static let inlineIcon = Font.system(size: 13, weight: .semibold)
+
+    // The denser three-column guide keeps its tuned type sizes.
     static let scheduleChannelTitle = Font.system(size: 40, weight: .bold)
     static let scheduleProgrammeTitle = Font.system(size: 33, weight: .medium)
     static let scheduleDayLabel = Font.system(size: 27, weight: .semibold)
     static let scheduleTimeLabel = Font.system(size: 27, weight: .medium).monospacedDigit()
     static let scheduleReplayHint = Font.system(size: 23, weight: .medium)
-    static let cardTitle = Font.system(size: 29, weight: .semibold)
-    static let body = Font.system(size: 29)
-    static let metadata = Font.system(size: 25, weight: .medium)
-    static let contentInset: CGFloat = 90
-    static let cardGap: CGFloat = 40
-    static let focusRoom: CGFloat = 24
-    // A row contributes another 24 pt below its cards: 24 + 40 = 64.
-    static let shelfGap: CGFloat = 40
+
+    static let contentInset = Space.xxxLarge
+    static let cardGap = Space.xLarge
+    static let focusRoom = Space.large
+    static let sectionHeadingGap = Space.small
+    // The row's focus room and the gap together form a 55 pt shelf separation.
+    static let shelfGap = Space.xLarge
 
     static let playerInfoWidth: CGFloat = 1200
     static let playerInfoHeight: CGFloat = 260
     static let playerInfoLiveHeight: CGFloat = 360
-    static let playerInfoHorizontalPadding: CGFloat = 32
-    static let playerInfoVerticalPadding: CGFloat = 20
-    static let playerInfoHorizontalInset: CGFloat = 48
+    static let playerInfoHorizontalPadding = Space.xLarge
+    static let playerInfoVerticalPadding = Space.large
+    static let playerInfoHorizontalInset = Space.xxLarge
     static let playerInfoCornerRadius: CGFloat = 24
-    static let playerInfoRowSpacing: CGFloat = 10
-    static let playerInfoColumnSpacing: CGFloat = 16
+    static let playerInfoRowSpacing = Space.small
+    static let playerInfoColumnSpacing = Space.medium
     static let playerInfoMarkerWidth: CGFloat = 32
     static let playerInfoLabelWidth: CGFloat = 160
-    static let playerInfoTimeSpacing: CGFloat = 2
+    static let playerInfoTimeSpacing = Space.xxSmall
 }
 
 private struct IoCustomFocusButtonStyle: ButtonStyle {

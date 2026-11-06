@@ -7,15 +7,13 @@ struct TelekavaView: View {
     }
 
     private enum Focus: Hashable {
-        case day(Date), row(Row), retry(String), favorite(Int)
+        case day(Date), row(Row), retry(String)
     }
 
     private struct MissedFavorite: Identifiable {
-        let programme: Programme
+        let id: Int
         let entry: TelekavaEntry
         let channel: LiveChannel
-
-        var id: Int { programme.id }
     }
 
     private enum ChannelSchedule {
@@ -43,6 +41,9 @@ struct TelekavaView: View {
     @State private var loadedDay: Date?
     @State private var schedules: [String: ChannelSchedule] = [:]
     @State private var selected: Row?
+    @State private var visibleRows: [String: Set<Int>] = [:]
+    @State private var upwardBoundary: Row?
+    @State private var pendingScheduleFocus: Date?
     @State private var retry = 0
     @State private var replay: Programme?
     @State private var playback: Playback?
@@ -59,11 +60,14 @@ struct TelekavaView: View {
             let now = context.date
             let replayID = selectedEntry?.replayID(at: now)
             let missed = missedFavorites(at: now)
-            VStack(alignment: .leading, spacing: 26) {
+            VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                 header
-                HStack(alignment: .top, spacing: 24) {
-                    ForEach(Array(LiveChannel.all.enumerated()), id: \.element.id) { index, channel in
-                        column(channel, accent: colors[index], now: now)
+                VStack(alignment: .leading, spacing: IoDesign.Space.large) {
+                    dayPicker
+                    HStack(alignment: .top, spacing: IoDesign.Space.large) {
+                        ForEach(Array(LiveChannel.all.enumerated()), id: \.element.id) { index, channel in
+                            column(channel, accent: colors[index], now: now)
+                        }
                     }
                 }
                 if !missed.isEmpty {
@@ -98,18 +102,25 @@ struct TelekavaView: View {
                 .ignoresSafeArea()
         }
         .defaultFocus($focus, selected.map(Focus.row) ?? .day(day))
-        .onChange(of: focus) { _, value in
-            if case .row(let row) = value { selected = row }
+        .onChange(of: focus) { previous, value in
+            if case .row(let row) = value {
+                if case .day = previous, let selected, row != selected, loadedDay == day {
+                    focus = .row(selected)
+                    return
+                }
+                selected = row
+            }
+            if case .day(let focusedDay) = value {
+                if case .row = previous, focusedDay != day { focus = .day(day) }
+                return
+            }
+            pendingScheduleFocus = nil
         }
         .task(id: LoadRequest(day: day, retry: retry)) {
             await load(day)
         }
         .fullScreenCover(item: $playback, onDismiss: {
-            if case .favorite(let id) = returnFocus, history.isCompleted(id) {
-                focus = selected.map(Focus.row)
-            } else {
-                focus = returnFocus
-            }
+            focus = returnFocus
         }) { playback in
             switch playback {
             case .live(let channel):
@@ -127,37 +138,45 @@ struct TelekavaView: View {
 
     private var header: some View {
         let dateTitle = day.formatted(dateFormat.weekday(.wide).day().month(.wide))
-        return HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Telekava").font(IoDesign.pageTitle).accessibilityAddTraits(.isHeader)
-                Text(dateTitle.prefix(1).uppercased() + dateTitle.dropFirst())
-                    .font(IoDesign.metadata)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            HStack(spacing: 12) {
-                ForEach(-1...3, id: \.self) { offset in
-                    let date = TelekavaAPI.day(offset, from: today)
-                    let focused = focus == .day(date)
-                    Button {
-                        day = date
-                    } label: {
-                        Text(dayLabel(offset, date: date))
-                            .font(IoDesign.scheduleDayLabel)
-                            .padding(.horizontal, 21).padding(.vertical, 10)
-                            .foregroundStyle(focused ? .black : .white)
-                            .background(focused ? .white : .white.opacity(day == date ? 0.18 : 0.08), in: Capsule())
-                            .overlay {
-                                Capsule().strokeBorder(.white.opacity(0.55), lineWidth: day == date && !focused ? 1 : 0)
-                            }
-                            .scaleEffect(focused && !reduceMotion ? 1.06 : 1)
-                    }
-                    .ioCustomButtonFocus()
-                    .focused($focus, equals: .day(date))
-                    .accessibilityAddTraits(day == date ? .isSelected : [])
+        return HStack(alignment: .firstTextBaseline, spacing: IoDesign.Space.large) {
+            Text("Telekava").font(IoDesign.pageTitle).accessibilityAddTraits(.isHeader)
+            Text(dateTitle.prefix(1).uppercased() + dateTitle.dropFirst())
+                .font(IoDesign.metadata)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var dayPicker: some View {
+        HStack(spacing: IoDesign.Space.medium) {
+            ForEach(-1...3, id: \.self) { offset in
+                let date = TelekavaAPI.day(offset, from: today)
+                let focused = focus == .day(date)
+                Button {
+                    pendingScheduleFocus = nil
+                    if day != date { upwardBoundary = nil }
+                    day = date
+                } label: {
+                    Text(dayLabel(offset, date: date))
+                        .font(IoDesign.scheduleDayLabel)
+                        .padding(.horizontal, IoDesign.Space.large).padding(.vertical, IoDesign.Space.small)
+                        .frame(maxWidth: .infinity)
+                        .foregroundStyle(focused ? .black : .white)
+                        .background(focused ? .white : .white.opacity(day == date ? 0.18 : 0.08), in: Capsule())
+                        .overlay {
+                            Capsule().strokeBorder(.white.opacity(0.55), lineWidth: day == date && !focused ? 1 : 0)
+                        }
+                        .scaleEffect(focused && !reduceMotion ? 1.06 : 1)
+                }
+                .ioCustomButtonFocus()
+                .focused($focus, equals: .day(date))
+                .accessibilityAddTraits(day == date ? .isSelected : [])
+                .onMoveCommand { direction in
+                    if direction == .down { focusSchedule() }
                 }
             }
         }
+        .focusSection()
     }
 
     private var dateFormat: Date.FormatStyle {
@@ -174,8 +193,8 @@ struct TelekavaView: View {
     }
 
     private func column(_ channel: LiveChannel, accent: Color, now: Date) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+            HStack(spacing: IoDesign.Space.medium) {
                 Circle().fill(accent).frame(width: 12, height: 12).accessibilityHidden(true)
                 Text(channel.title).font(IoDesign.scheduleChannelTitle).accessibilityAddTraits(.isHeader)
             }
@@ -183,9 +202,24 @@ struct TelekavaView: View {
             case .loaded(let entries) where !entries.isEmpty:
                 ScrollViewReader { proxy in
                     ScrollView {
-                        VStack(spacing: 10) {
+                        VStack(spacing: IoDesign.Space.small) {
                             ForEach(entries) { entry in
-                                row(entry, channel: channel, accent: accent, now: now).id(entry.id)
+                                row(entry, channel: channel, accent: accent, now: now)
+                                    .onGeometryChange(for: Bool.self) { geometry in
+                                        let space = NamedCoordinateSpace.scrollView(axis: .vertical)
+                                        guard let bounds = geometry.bounds(of: space) else { return false }
+                                        let rowFrame = geometry.frame(in: space)
+                                        let viewport = CGRect(origin: .zero, size: bounds.size)
+                                        return rowFrame.height > 0
+                                            && rowFrame.intersection(viewport).height >= rowFrame.height - 3
+                                    } action: { visible in
+                                        if visible {
+                                            visibleRows[channel.id, default: []].insert(entry.id)
+                                        } else {
+                                            visibleRows[channel.id]?.remove(entry.id)
+                                        }
+                                    }
+                                    .id(entry.id)
                             }
                         }
                     }
@@ -196,8 +230,9 @@ struct TelekavaView: View {
                         }
                     }
                     .onChange(of: focus) { _, value in
-                        if case .row(let row) = value, row.channelID == channel.id {
-                            proxy.scrollTo(row.entryID, anchor: .center)
+                        if case .row(let row) = value, row.channelID == channel.id,
+                           visibleRows[channel.id]?.contains(row.entryID) != true {
+                            proxy.scrollTo(row.entryID)
                         }
                     }
                 }
@@ -205,7 +240,7 @@ struct TelekavaView: View {
                 Text("Saatekava puudub").foregroundStyle(.secondary)
                     .frame(maxHeight: .infinity, alignment: .topLeading)
             case .failed:
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: IoDesign.Space.medium) {
                     Text("Kava laadimine ebaõnnestus").foregroundStyle(.secondary)
                     Button("Proovi uuesti") { retry += 1 }
                         .focused($focus, equals: .retry(channel.id))
@@ -230,44 +265,40 @@ struct TelekavaView: View {
                 present(item, returningTo: .row(row))
             }
         } label: {
-            HStack(spacing: 14) {
+            HStack(spacing: IoDesign.Space.medium) {
                 Text(entry.startLabel)
                     .font(IoDesign.scheduleTimeLabel)
                     .foregroundStyle(focused ? .black.opacity(0.65) : .white.opacity(0.65))
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 0) {
-                        Text(entry.title).lineLimit(1)
-                        if entry.isRepeat {
-                            Text("*").fixedSize().accessibilityHidden(true)
-                        }
-                    }
-                    .font(IoDesign.scheduleProgrammeTitle.weight(current ? .bold : .medium))
-                    if showsReplayHint {
-                        HStack(spacing: 6) {
-                            Image(systemName: "play.fill")
-                                .font(.system(size: 12, weight: .semibold))
-                            Text(replayHint)
-                        }
-                        .font(IoDesign.scheduleReplayHint)
-                        .foregroundStyle(.black.opacity(0.7))
-                        .lineLimit(1)
-                        .transition(.opacity)
+                HStack(spacing: 0) {
+                    Text(entry.title).lineLimit(1)
+                    if entry.isRepeat {
+                        Text("*").fixedSize().accessibilityHidden(true)
                     }
                 }
+                .font(IoDesign.scheduleProgrammeTitle.weight(current ? .bold : .medium))
                 Spacer(minLength: 0)
                 if current {
-                    Text("PRAEGU").font(.system(size: 14, weight: .bold)).tracking(0.8)
-                        .padding(.horizontal, 10).padding(.vertical, 6)
+                    Text("PRAEGU").font(IoDesign.badge).tracking(0.8)
+                        .padding(.horizontal, IoDesign.Space.small).padding(.vertical, IoDesign.Space.xSmall)
                         .background(focused ? .black.opacity(0.08) : accent.opacity(0.16), in: Capsule())
                         .foregroundStyle(focused ? .black : accent)
+                } else if showsReplayHint {
+                    HStack(spacing: IoDesign.Space.xSmall) {
+                        Image(systemName: "play.fill")
+                            .font(IoDesign.inlineIcon)
+                        Text(replayHint)
+                    }
+                    .font(IoDesign.scheduleReplayHint)
+                    .foregroundStyle(.black.opacity(0.7))
+                    .fixedSize()
+                    .accessibilityHidden(true)
                 }
             }
             .foregroundStyle(focused ? .black : .white)
-            .padding(.horizontal, 18)
-            .frame(height: showsReplayHint ? 94 : 66)
+            .padding(.horizontal, IoDesign.Space.large)
+            .frame(height: 66)
             .background(focused ? .white : .white.opacity(current ? 0.11 : 0.055),
                         in: RoundedRectangle(cornerRadius: 14))
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: showsReplayHint)
         }
         .ioCustomButtonFocus()
         .focused($focus, equals: .row(row))
@@ -291,7 +322,7 @@ struct TelekavaView: View {
             entries(for: channel.id).compactMap { entry -> MissedFavorite? in
                 guard let programme = entry.favoriteReplay(at: now, favorites: favorites.entries),
                       !history.isCompleted(programme.id) else { return nil }
-                return MissedFavorite(programme: programme, entry: entry, channel: channel)
+                return MissedFavorite(id: programme.id, entry: entry, channel: channel)
             }
         }
         var seen = Set<Int>()
@@ -300,48 +331,40 @@ struct TelekavaView: View {
     }
 
     private func missedFavoritesPanel(_ missed: [MissedFavorite]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
             Label("Maha magatud lemmikud", systemImage: "star.fill")
-                .font(.system(size: 21, weight: .semibold))
+                .font(IoDesign.metadata.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
             ScrollView(.horizontal) {
-                HStack(spacing: 12) {
+                HStack(spacing: IoDesign.Space.medium) {
                     ForEach(missed) { item in
-                        Button {
-                            present(.replay(item.programme), returningTo: .favorite(item.id))
-                        } label: {
-                            missedFavoriteLabel(item)
-                        }
-                        .ioCustomButtonFocus()
-                        .focused($focus, equals: .favorite(item.id))
-                        .accessibilityLabel("\(item.entry.title), \(item.channel.title), \(item.entry.startLabel), Vaata järele")
-                        .accessibilityIdentifier("telekava-favorite-\(item.id)")
+                        missedFavoriteLabel(item)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityIdentifier("telekava-favorite-\(item.id)")
                     }
                 }
             }
             .scrollIndicators(.hidden)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, IoDesign.Space.large)
         .frame(height: 146)
         .background(.white.opacity(0.065), in: RoundedRectangle(cornerRadius: 20))
-        .focusSection()
     }
 
     private func missedFavoriteLabel(_ item: MissedFavorite) -> some View {
-        let focused = focus == .favorite(item.id)
-        return VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: IoDesign.Space.xSmall) {
             Text(item.entry.title)
-                .font(.system(size: 22, weight: .semibold))
+                .font(IoDesign.metadata.weight(.semibold))
                 .lineLimit(1)
-            Label("\(item.channel.title) · \(item.entry.startLabel) · Vaata järele", systemImage: "play.fill")
-                .font(.system(size: 17, weight: .medium))
-                .foregroundStyle(focused ? .black.opacity(0.7) : .white.opacity(0.7))
+            Text("\(item.channel.title) · \(item.entry.startLabel)")
+                .font(IoDesign.metadata)
+                .foregroundStyle(.white.opacity(0.7))
         }
-        .foregroundStyle(focused ? .black : .white)
+        .foregroundStyle(.white)
         .frame(width: 338, alignment: .leading)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(focused ? .white : .white.opacity(0.09), in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, IoDesign.Space.medium)
+        .padding(.vertical, IoDesign.Space.small)
+        .background(.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func entries(for channelID: String) -> [TelekavaEntry] {
@@ -358,7 +381,23 @@ struct TelekavaView: View {
         return entries.first
     }
 
+    private func focusSchedule() {
+        guard loadedDay == day else {
+            pendingScheduleFocus = day
+            return
+        }
+        if let selected {
+            focus = .row(selected)
+        } else if let channel = LiveChannel.all.first(where: {
+            if case .failed = schedules[$0.id] { return true }
+            return false
+        }) {
+            focus = .retry(channel.id)
+        }
+    }
+
     private func move(_ direction: MoveCommandDirection, from row: Row, entry: TelekavaEntry) {
+        if direction != .up { upwardBoundary = nil }
         switch direction {
         case .left, .right:
             guard let index = LiveChannel.all.firstIndex(where: { $0.id == row.channelID }) else { return }
@@ -376,13 +415,23 @@ struct TelekavaView: View {
         case .up, .down:
             let programmes = entries(for: row.channelID)
             guard let index = programmes.firstIndex(where: { $0.id == row.entryID }) else { return }
+            if direction == .up {
+                // tvOS may scroll an earlier row into view as it moves focus.
+                // Keep the visible upper edge from the start of this upward movement.
+                if upwardBoundary?.channelID != row.channelID,
+                   let first = programmes.first(where: { visibleRows[row.channelID]?.contains($0.id) == true }) {
+                    upwardBoundary = Row(channelID: row.channelID, entryID: first.id)
+                }
+                let boundary = programmes.firstIndex { $0.id == upwardBoundary?.entryID } ?? 0
+                if index <= boundary {
+                    selected = row
+                    focus = .day(day)
+                    return
+                }
+            }
             let target = index + (direction == .up ? -1 : 1)
             if programmes.indices.contains(target) {
                 focus = .row(Row(channelID: row.channelID, entryID: programmes[target].id))
-            } else if direction == .up {
-                focus = .day(day)
-            } else if let favorite = missedFavorites(at: .now).first {
-                focus = .favorite(favorite.id)
             }
         @unknown default:
             break
@@ -442,7 +491,10 @@ struct TelekavaView: View {
         selected = channels.lazy.compactMap { channelID in
             anchor(in: entries(for: channelID), now: now).map { Row(channelID: channelID, entryID: $0.id) }
         }.first
-        if isInitialLoad, focus != nil, let selected {
+        if pendingScheduleFocus == requestedDay {
+            pendingScheduleFocus = nil
+            focusSchedule()
+        } else if isInitialLoad, focus != nil, let selected {
             focus = .row(selected)
         }
     }

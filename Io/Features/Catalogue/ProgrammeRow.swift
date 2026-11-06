@@ -41,7 +41,7 @@ struct ProgrammeRow: View {
         let progressIDs = Set(history.records.lazy.filter { $0.isInProgress }.map(\.id))
         let reservesProgressSpace = items.contains { progressIDs.contains($0.id) }
 
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
             Text(title)
                 .font(IoDesign.sectionTitle)
                 .padding(.horizontal, IoDesign.contentInset)

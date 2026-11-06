@@ -15,12 +15,12 @@ struct ProgrammeDetailView: View {
     init(programme: Programme) { self.programme = programme; _requestID = State(initialValue: programme.id) }
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 64) {
+            LazyVStack(alignment: .leading, spacing: IoDesign.Space.xxLarge) {
                 if loading { ProgressView("Laadin saate andmeid…").padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom) }
                 if let error { LoadFailureView(message: error) { refresh += 1 }.padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom) }
                 if let page, !loading {
-                    HStack(alignment: .top, spacing: 60) {
-                        VStack(alignment: .leading, spacing: 24) {
+                    HStack(alignment: .top, spacing: IoDesign.Space.xxLarge) {
+                        VStack(alignment: .leading, spacing: IoDesign.Space.large) {
                             Text(page.mainContent.rootContent?.heading ?? programme.heading).font(IoDesign.pageTitle)
                             if page.mainContent.heading != programme.heading { Text(page.mainContent.heading).font(IoDesign.sectionTitle) }
                             if !page.mainContent.episodeLabel.isEmpty { Text(page.mainContent.episodeLabel).font(IoDesign.metadata).foregroundStyle(.secondary) }
@@ -28,7 +28,7 @@ struct ProgrammeDetailView: View {
                             if programme.source == .lasteekraan && !page.mainContent.hasVideo {
                                 Text("Selle sisu video pole praegu kättesaadav.").font(IoDesign.body).foregroundStyle(.secondary)
                             } else if let saved = history.entry(for: page.mainContent.id) {
-                                HStack(spacing: 24) {
+                                HStack(spacing: IoDesign.Space.large) {
                                     Button { playing = PlaybackSelection(programme: page.mainContent, position: saved.position) } label: { Label("Jätka · " + saved.positionLabel, systemImage: "play.fill") }
                                     Button("Alusta algusest") {
                                         history.remove(page.mainContent.id)
@@ -57,7 +57,7 @@ struct ProgrammeDetailView: View {
                     }.padding(.horizontal, IoDesign.contentInset)
                     if page.seasons.count > 1 {
                         ScrollView(.horizontal) {
-                            LazyHStack(spacing: 24) {
+                            LazyHStack(spacing: IoDesign.Space.large) {
                                 ForEach(page.seasons) { season in
                                     Button(season.title) { requestID = season.id }
                                 }
