@@ -79,7 +79,7 @@ struct TelekavaView: View {
             }
             .padding(.horizontal, IoDesign.contentInset)
             .padding(.vertical, IoDesign.focusRoom)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .onChange(of: TelekavaAPI.day(containing: now)) { _, newToday in
                 if day == today || day < TelekavaAPI.day(-1, from: newToday) { day = newToday }
                 today = newToday
