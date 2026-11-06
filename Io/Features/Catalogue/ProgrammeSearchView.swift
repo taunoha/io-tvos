@@ -123,7 +123,7 @@ struct ProgrammeSearchView: View {
                                     .foregroundStyle(focusedKey == String(character) ? Color.black : Color.white)
                                     .background(focusedKey == String(character) ? Color.white : Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
                             }
-                            .buttonStyle(.plain)
+                            .ioCustomButtonFocus()
                             .focused($focusedKey, equals: String(character))
                         }
                     }

@@ -22,8 +22,8 @@ private struct IoTabController: UIViewControllerRepresentable {
         weak var selectedTab: UIViewController?
 
         func open(_ programme: Programme, in controller: UITabBarController) {
-            let index = programme.source == .lasteekraan ? 2 : 1
-            guard let tab = controller.viewControllers?[index] as? IoTabContentController else { return }
+            guard let tab = controller.viewControllers?.compactMap({ $0 as? IoTabContentController })
+                .first(where: { $0.catalogueSource == programme.source }) else { return }
             tab.openProgramme?(programme)
             selectedTab = tab
             controller.selectedViewController = tab
@@ -45,8 +45,9 @@ private struct IoTabController: UIViewControllerRepresentable {
                 guard let controller else { return }
                 coordinator?.open(programme, in: controller)
             }),
-            tab("Saated", image: "play.rectangle.on.rectangle", content: CatalogueView()),
-            tab("Lasteekraan", image: "sparkles.tv", content: CatalogueView(source: .lasteekraan)),
+            tab("Telekava", image: "calendar", content: TelekavaView()),
+            tab("Saated", image: "play.rectangle.on.rectangle", content: CatalogueView(), catalogueSource: .jupiter),
+            tab("Lasteekraan", image: "sparkles.tv", content: CatalogueView(source: .lasteekraan), catalogueSource: .lasteekraan),
             tab("Jätka", image: "clock.arrow.circlepath", content: ContinueWatchingView()),
             tab("Otsi", image: "magnifyingglass", content: ProgrammeSearchView(), resetsOnSelection: false)
         ]
@@ -58,7 +59,7 @@ private struct IoTabController: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: UITabBarController, context: Context) {}
 
     private func tab<Content: View>(_ title: String, image: String, content: Content,
-                                    resetsOnSelection: Bool = true) -> UIViewController {
+                                    catalogueSource: CatalogueSource? = nil, resetsOnSelection: Bool = true) -> UIViewController {
         func rootView(programme: Programme? = nil) -> some View {
             IoTabNavigation(content: content, programme: programme)
                 // Replacing the root explicitly resets local navigation and focus.
@@ -70,7 +71,7 @@ private struct IoTabController: UIViewControllerRepresentable {
         }
 
         let host = UIHostingController(rootView: rootView())
-        let tab = IoTabContentController(host: host, title: title, image: image)
+        let tab = IoTabContentController(host: host, title: title, image: image, catalogueSource: catalogueSource)
         if resetsOnSelection {
             tab.resetNavigation = { [weak host] in host?.rootView = rootView() }
         }
@@ -103,11 +104,13 @@ private struct IoTabNavigation<Content: View>: View {
 
 private final class IoTabContentController: UIViewController {
     private let host: UIViewController
+    let catalogueSource: CatalogueSource?
     var resetNavigation: (() -> Void)?
     var openProgramme: ((Programme) -> Void)?
 
-    init(host: UIViewController, title: String, image: String) {
+    init(host: UIViewController, title: String, image: String, catalogueSource: CatalogueSource?) {
         self.host = host
+        self.catalogueSource = catalogueSource
         super.init(nibName: nil, bundle: nil)
         tabBarItem = UITabBarItem(title: title, image: UIImage(systemName: image), selectedImage: nil)
     }

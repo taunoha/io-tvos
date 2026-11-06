@@ -35,6 +35,8 @@
 		8D91C68410B347C6A4F6D4C6 /* NativePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CECBACB35524CA8A70800AE /* NativePlayer.swift */; };
 		E00000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000002 /* Assets.xcassets */; };
 		F00000000000000000000004 /* RemoteFocusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003; };
+		5D37821738BD462FB3A96402 /* TelekavaAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D37821738BD462FB3A96401 /* TelekavaAPI.swift */; };
+		5D37821738BD462FB3A96404 /* TelekavaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D37821738BD462FB3A96403 /* TelekavaView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +70,8 @@
 		A00000000000000000000007 /* Io.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Io.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F00000000000000000000002 /* IoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = IoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F00000000000000000000003 /* RemoteFocusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFocusTests.swift; sourceTree = "<group>"; };
+		5D37821738BD462FB3A96401 /* TelekavaAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelekavaAPI.swift; sourceTree = "<group>"; };
+		5D37821738BD462FB3A96403 /* TelekavaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelekavaView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -125,6 +129,7 @@
 				EAB25588E0B74BA5A1BEBB58 /* Catalogue */,
 				5E2A35CCABC44E58BB216BFD /* ContinueWatching */,
 				D753BD37DA36455A811C8C79 /* Live */,
+				5D37821738BD462FB3A96400 /* Telekava */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -184,6 +189,15 @@
 			children = (F00000000000000000000003 /* RemoteFocusTests.swift */,);
 			name = UITests;
 			path = TESTS/UITests;
+			sourceTree = "<group>";
+		};
+		5D37821738BD462FB3A96400 /* Telekava */ = {
+			isa = PBXGroup;
+			children = (
+				5D37821738BD462FB3A96401 /* TelekavaAPI.swift */,
+				5D37821738BD462FB3A96403 /* TelekavaView.swift */,
+			);
+			path = Telekava;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -278,6 +292,8 @@
 				056ADC16A14B438A8635BC6F /* ContinueWatchingView.swift in Sources */,
 				62F30061F31D46E5B17BD847 /* WatchHistory.swift in Sources */,
 				16086E6B81FD45F39FB91675 /* LiveAPI.swift in Sources */,
+				5D37821738BD462FB3A96402 /* TelekavaAPI.swift in Sources */,
+				5D37821738BD462FB3A96404 /* TelekavaView.swift in Sources */,
 				2F289704A43D4991A3112307 /* LiveBackgroundStage.swift in Sources */,
 				AB19559845B5465BA0725AE8 /* LiveChannelCard.swift in Sources */,
 				66830BF6D2384D539E164B40 /* LiveHomeView.swift in Sources */,

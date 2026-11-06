@@ -4,6 +4,11 @@ import SwiftUI
 enum IoDesign {
     static let pageTitle = Font.system(size: 57, weight: .bold)
     static let sectionTitle = Font.system(size: 38, weight: .semibold)
+    static let scheduleChannelTitle = Font.system(size: 40, weight: .bold)
+    static let scheduleProgrammeTitle = Font.system(size: 33, weight: .medium)
+    static let scheduleDayLabel = Font.system(size: 27, weight: .semibold)
+    static let scheduleTimeLabel = Font.system(size: 27, weight: .medium).monospacedDigit()
+    static let scheduleReplayHint = Font.system(size: 23, weight: .medium)
     static let cardTitle = Font.system(size: 29, weight: .semibold)
     static let body = Font.system(size: 29)
     static let metadata = Font.system(size: 25, weight: .medium)
@@ -25,4 +30,19 @@ enum IoDesign {
     static let playerInfoMarkerWidth: CGFloat = 32
     static let playerInfoLabelWidth: CGFloat = 160
     static let playerInfoTimeSpacing: CGFloat = 2
+}
+
+private struct IoCustomFocusButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+    }
+}
+
+extension View {
+    /// Use when the button label draws its own focus state.
+    func ioCustomButtonFocus() -> some View {
+        buttonStyle(IoCustomFocusButtonStyle())
+            .focusEffectDisabled()
+            .hoverEffectDisabled()
+    }
 }

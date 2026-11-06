@@ -3,6 +3,7 @@ import Foundation
 struct LiveChannel: Identifiable {
     let id: String
     let title: String
+    static let lastWatchedKey = "io-last-live-channel"
     static let all = [
         LiveChannel(id: "etv", title: "ETV"),
         LiveChannel(id: "etv2", title: "ETV2"),

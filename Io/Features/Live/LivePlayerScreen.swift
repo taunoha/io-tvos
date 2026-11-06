@@ -64,6 +64,7 @@ private struct LivePlayerInfo: View {
 struct LivePlayerScreen: View {
     let channel: LiveChannel
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(LiveChannel.lastWatchedKey) private var lastChannelID = "etv"
     @StateObject private var playback = LivePlayback()
 
     var body: some View {
@@ -95,7 +96,10 @@ struct LivePlayerScreen: View {
                 .allowsHitTesting(false)
             }
         }
-        .onAppear { playback.start(channel) }
+        .onAppear {
+            lastChannelID = channel.id
+            playback.start(channel)
+        }
         .onDisappear { playback.stop() }
         .onExitCommand { dismiss() }
     }
