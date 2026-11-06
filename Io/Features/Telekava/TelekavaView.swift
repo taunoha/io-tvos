@@ -7,13 +7,7 @@ struct TelekavaView: View {
     }
 
     private enum Focus: Hashable {
-        case day(Date), row(Row), retry(String)
-    }
-
-    private struct MissedFavorite: Identifiable {
-        let id: Int
-        let entry: TelekavaEntry
-        let channel: LiveChannel
+        case day(Date), row(Row), retry(String), playbackAction
     }
 
     private enum ChannelSchedule {
@@ -32,7 +26,6 @@ struct TelekavaView: View {
     }
 
     @Environment(WatchHistory.self) private var history
-    @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(LiveChannel.lastWatchedKey) private var lastChannelID = "etv"
     @FocusState private var focus: Focus?
@@ -45,74 +38,80 @@ struct TelekavaView: View {
     @State private var navigationTime: TimeInterval?
     @State private var pendingRowFocus: Row?
 
-    private let windowDuration: TimeInterval = 90 * 60
+    private let windowDuration: TimeInterval = 3 * 60 * 60
     private let tickInterval: TimeInterval = 30 * 60
 
     private var windowEnd: TimeInterval { windowStart + windowDuration }
     @State private var pendingScheduleFocus: Date?
     @State private var retry = 0
-    @State private var replay: Programme?
+    @State private var catalogueDetail: Programme?
     @State private var playback: Playback?
     @State private var returnFocus: Focus?
 
-    private let colors: [Color] = [
-        Color(red: 0.43, green: 0.75, blue: 1),
-        Color(red: 0.55, green: 0.89, blue: 0.72),
-        Color(red: 0.79, green: 0.66, blue: 1)
-    ]
-
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 10)) { context in
+        TimelineView(.periodic(from: Date(timeIntervalSince1970: 0), by: 10)) { context in
             let now = context.date
-            let replayID = selectedEntry?.replayID(at: now)
-            let missed = missedFavorites(at: now)
-            VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
-                header
+            let contentID = selectedEntry?.contentId
+            ScrollView {
                 VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
+                    header(now: now)
                     dayPicker
                     guide(now: now)
-                    programmeDetail(now: now)
-                    if !missed.isEmpty {
-                        missedFavoritesPanel(missed)
+                    if let entry = selectedEntry,
+                       let channel = LiveChannel.all.first(where: { $0.id == selected?.channelID }) {
+                        programmeDetail(entry, channel: channel, now: now)
                     }
                 }
+                .padding(.horizontal, IoDesign.contentInset)
+                .padding(.vertical, IoDesign.focusRoom)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.horizontal, IoDesign.contentInset)
-            .padding(.vertical, IoDesign.focusRoom)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .scrollIndicators(.hidden)
             .onChange(of: TelekavaAPI.day(containing: now)) { _, newToday in
                 if day == today || day < TelekavaAPI.day(-1, from: newToday) { day = newToday }
                 today = newToday
             }
-            .task(id: replayID) {
-                replay = nil
-                guard let replayID else { return }
+            .task(id: contentID) {
+                catalogueDetail = nil
+                guard let contentID else { return }
                 do {
                     try await Task.sleep(for: .milliseconds(350))
-                    let page = try await OnDemandAPI.detail(replayID)
+                    let page = try await OnDemandAPI.detail(contentID)
                     try Task.checkCancellation()
-                    if page.mainContent.id == replayID, page.mainContent.hasVideo {
-                        replay = page.mainContent
+                    if page.mainContent.id == contentID {
+                        catalogueDetail = page.mainContent
                     }
                 } catch {
-                    // A replay is offered only after the catalogue confirms a video.
+                    // The schedule supplies the basic details when the catalogue is unavailable.
                 }
             }
         }
         .background {
-            RadialGradient(colors: [Color(red: 0.12, green: 0.20, blue: 0.34), Color(white: 0.06)],
-                           center: .topLeading, startRadius: 30, endRadius: 1100)
+            LinearGradient(colors: [Color(red: 0.09, green: 0.11, blue: 0.16),
+                                    Color(red: 0.035, green: 0.045, blue: 0.07)],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
         }
         .defaultFocus($focus, selected.map(Focus.row) ?? .day(day))
         .onChange(of: focus) { previous, value in
             if case .row(let row) = value {
-                if case .day = previous, let selected, row != selected, loadedDay == day {
-                    focus = .row(selected)
-                    return
+                if let selected, row != selected, loadedDay == day {
+                    switch previous {
+                    case .day, .playbackAction:
+                        focus = .row(selected)
+                        return
+                    default:
+                        break
+                    }
                 }
                 if row != selected, pendingRowFocus == nil,
                    let entry = entries(for: row.channelID).first(where: { $0.id == row.entryID }) {
+                    if case .row(let previousRow) = previous, previousRow.channelID != row.channelID,
+                       let reference = navigationTime,
+                       let target = programme(on: row.channelID, at: reference) {
+                        focusProgramme(target, channelID: row.channelID, reference: reference)
+                        return
+                    }
                     selected = row
                     navigationTime = entry.isCurrent(at: .now)
                         ? Date.now.timeIntervalSince1970 : max(entry.startTime, windowStart)
@@ -128,7 +127,13 @@ struct TelekavaView: View {
             await load(day)
         }
         .fullScreenCover(item: $playback, onDismiss: {
-            focus = returnFocus
+            if returnFocus == .playbackAction,
+               let entry = selectedEntry,
+               confirmedReplay(for: entry, at: .now) == nil {
+                focusSchedule()
+            } else {
+                focus = returnFocus
+            }
         }) { playback in
             switch playback {
             case .live(let channel):
@@ -144,15 +149,21 @@ struct TelekavaView: View {
         let retry: Int
     }
 
-    private var header: some View {
+    private func header(now: Date) -> some View {
         let dateTitle = day.formatted(dateFormat.weekday(.wide).day().month(.wide))
-        return HStack(alignment: .firstTextBaseline, spacing: IoDesign.Space.medium) {
-            Text("Telekava").font(IoDesign.pageTitle).accessibilityAddTraits(.isHeader)
-            Text(dateTitle.prefix(1).uppercased() + dateTitle.dropFirst())
-                .font(IoDesign.metadata)
-                .foregroundStyle(.secondary)
+        let time = TelekavaEntry.timeLabel(now.timeIntervalSince1970)
+        return HStack(alignment: .firstTextBaseline, spacing: IoDesign.Space.large) {
+            VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+                Text("Telekava").font(IoDesign.pageTitle).accessibilityAddTraits(.isHeader)
+                Text(dateTitle.prefix(1).uppercased() + dateTitle.dropFirst())
+                    .font(IoDesign.metadata)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text(time)
+                .font(IoDesign.sectionTitle.monospacedDigit())
+                .accessibilityLabel("Kell \(time)")
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var dayPicker: some View {
@@ -200,13 +211,16 @@ struct TelekavaView: View {
     }
 
     private func guide(now: Date) -> some View {
-        HStack(alignment: .top, spacing: IoDesign.Space.large) {
+        HStack(alignment: .top, spacing: IoDesign.sectionHeadingGap) {
             VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
                 Color.clear.frame(height: IoDesign.scheduleAxisHeight).accessibilityHidden(true)
                 ForEach(LiveChannel.all) { channel in
                     Text(channel.title)
-                        .font(IoDesign.cardTitle.weight(.bold))
+                        .font(IoDesign.scheduleCellTitle)
+                        .frame(maxWidth: .infinity)
                         .frame(height: IoDesign.scheduleRowHeight)
+                        .background(.white.opacity(0.075),
+                                    in: RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius))
                         .accessibilityAddTraits(.isHeader)
                 }
             }
@@ -217,8 +231,8 @@ struct TelekavaView: View {
                 VStack(spacing: IoDesign.sectionHeadingGap) {
                     timeAxis(width: width)
                     VStack(spacing: IoDesign.sectionHeadingGap) {
-                        ForEach(Array(LiveChannel.all.enumerated()), id: \.element.id) { index, channel in
-                            channelTrack(channel, accent: colors[index], now: now, width: width)
+                        ForEach(LiveChannel.all) { channel in
+                            channelTrack(channel, now: now, width: width)
                         }
                     }
                     .overlay {
@@ -226,17 +240,18 @@ struct TelekavaView: View {
                             .allowsHitTesting(false)
                             .accessibilityHidden(true)
                     }
-                    .overlay(alignment: .leading) {
-                        if loadedDay == day, day == today {
-                            Rectangle()
-                                .fill(.cyan)
-                                .frame(width: IoDesign.Space.xxSmall)
-                                .offset(x: position(of: now.timeIntervalSince1970, width: width))
-                                .allowsHitTesting(false)
-                                .accessibilityHidden(true)
-                        }
+                }
+                .overlay(alignment: .leading) {
+                    let x = position(of: now.timeIntervalSince1970, width: width)
+                    if loadedDay == day, day == today, x >= 0, x < width {
+                        Rectangle()
+                            .fill(.cyan)
+                            .frame(width: IoDesign.Space.xxSmall)
+                            .padding(.top, IoDesign.scheduleAxisHeight)
+                            .offset(x: x)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius))
                 }
                 .clipped()
             }
@@ -273,7 +288,7 @@ struct TelekavaView: View {
         let first = Int(ceil(windowStart / tickInterval))
         return ZStack(alignment: .leading) {
             if loadedDay == day {
-                ForEach((first - 3)..<(first + 6), id: \.self) { index in
+                ForEach(first..<(first + Int(windowDuration / tickInterval)), id: \.self) { index in
                     let tick = Double(index) * tickInterval
                     Text(TelekavaEntry.timeLabel(tick))
                         .font(IoDesign.scheduleTimeLabel)
@@ -287,7 +302,7 @@ struct TelekavaView: View {
         .accessibilityHidden(true)
     }
 
-    private func channelTrack(_ channel: LiveChannel, accent: Color, now: Date, width: CGFloat) -> some View {
+    private func channelTrack(_ channel: LiveChannel, now: Date, width: CGFloat) -> some View {
         ZStack(alignment: .leading) {
             switch loadedDay == day ? schedules[channel.id] : nil {
             case .loaded(let entries) where !entries.isEmpty:
@@ -298,8 +313,8 @@ struct TelekavaView: View {
                     let left = min(width, max(0, position(of: entry.startTime, width: width)))
                     let right = min(width, max(0, position(of: entry.endTime, width: width)))
                     let cellWidth = right - left
-                    programmeCell(entry, channel: channel, accent: accent, now: now,
-                                  width: cellWidth - min(IoDesign.Space.xxSmall, cellWidth / 4))
+                    programmeCell(entry, channel: channel, now: now,
+                                  width: cellWidth - min(IoDesign.Space.xSmall, cellWidth / 4))
                         .offset(x: left)
                         .disabled(cellWidth == 0)
                         .accessibilityHidden(cellWidth == 0)
@@ -323,7 +338,7 @@ struct TelekavaView: View {
         .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
     }
 
-    private func programmeCell(_ entry: TelekavaEntry, channel: LiveChannel, accent: Color,
+    private func programmeCell(_ entry: TelekavaEntry, channel: LiveChannel,
                                now: Date, width: CGFloat) -> some View {
         let row = Row(channelID: channel.id, entryID: entry.id)
         let focused = focus == .row(row)
@@ -333,19 +348,34 @@ struct TelekavaView: View {
                 present(item, returningTo: .row(row))
             }
         } label: {
-            Text(entry.title + (entry.isRepeat ? "*" : ""))
-                .lineLimit(1)
-                .font(IoDesign.cardTitle.weight(current ? .bold : .medium))
-                .foregroundStyle(focused ? .black : .white)
-                .padding(.horizontal, min(IoDesign.Space.medium, width / 4))
-                .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
-                .background(focused ? .white : current ? accent.opacity(0.22) : .white.opacity(0.08),
-                            in: RoundedRectangle(cornerRadius: IoDesign.Space.small))
-                .clipped()
+            VStack(alignment: .leading, spacing: IoDesign.Space.xxSmall) {
+                Text(entry.title + (entry.isRepeat ? "*" : ""))
+                    .lineLimit(1)
+                    .font(IoDesign.scheduleCellTitle)
+                Text(entry.timeRange)
+                    .lineLimit(1)
+                    .font(IoDesign.scheduleTimeLabel)
+                    .opacity(0.8)
+                if current {
+                    let elapsed = (now.timeIntervalSince1970 - entry.startTime) / (entry.endTime - entry.startTime)
+                    GeometryReader { geometry in
+                        Capsule().fill(focused ? .black.opacity(0.22) : .white.opacity(0.2))
+                        Capsule().fill(focused ? Color(red: 0, green: 0.52, blue: 0.60) : .cyan)
+                            .frame(width: geometry.size.width * elapsed)
+                    }
+                    .frame(height: IoDesign.Space.xSmall)
+                }
+            }
+            .foregroundStyle(focused ? .black : .white)
+            .padding(.horizontal, min(IoDesign.Space.medium, width / 4))
+            .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
+            .background(focused ? .white : .white.opacity(current ? 0.12 : 0.095),
+                        in: RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius))
+            .clipped()
         }
         .ioCustomButtonFocus()
         .focused($focus, equals: .row(row))
-        .accessibilityLabel("\(channel.title), \(entry.startLabel)–\(TelekavaEntry.timeLabel(entry.endTime)), \(entry.title)\(entry.isRepeat ? ", kordus" : "")\(current ? ", praegu" : "")")
+        .accessibilityLabel("\(channel.title), \(entry.timeRange), \(entry.title)\(entry.isRepeat ? ", kordus" : "")\(current ? ", praegu" : "")")
         .accessibilityHint(confirmedReplay(for: entry, at: now) != nil ? "Vaata järele" : "")
         .accessibilityIdentifier("telekava-\(channel.id)-\(entry.id)")
         .onMoveCommand { direction in
@@ -359,83 +389,47 @@ struct TelekavaView: View {
         }
     }
 
-    private func programmeDetail(now: Date) -> some View {
-        let detail: (title: String, metadata: String)
-        if let entry = selectedEntry, let channel = LiveChannel.all.first(where: { $0.id == selected?.channelID }) {
-            let time = "\(entry.startLabel)–\(TelekavaEntry.timeLabel(entry.endTime))"
-            let status = entry.isCurrent(at: now) ? " · Praegu eetris"
-                : confirmedReplay(for: entry, at: now) != nil ? " · Vaata järele" : ""
-            detail = (entry.title, "\(channel.title) · \(time)\(status)")
-        } else {
-            detail = ("", "")
+    private func programmeDetail(_ entry: TelekavaEntry, channel: LiveChannel, now: Date) -> some View {
+        let programme = catalogueDetail?.id == entry.contentId ? catalogueDetail : nil
+        let description = Programme.plainDescription(entry.lead)
+        let synopsis = description.isEmpty ? (programme?.descriptionText ?? "") : description
+        let status = entry.isCurrent(at: now) ? " · Praegu eetris" : ""
+        return HStack(spacing: IoDesign.Space.xLarge) {
+            ProgrammeArtwork(url: programme?.imageURL) {
+                ZStack {
+                    Color.white.opacity(0.08)
+                    Image(systemName: "tv").font(IoDesign.sectionTitle).foregroundStyle(.secondary)
+                }
+            }
+            .frame(width: IoDesign.scheduleArtworkWidth, height: IoDesign.scheduleArtworkHeight)
+            .clipShape(RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius))
+            .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+                Text(entry.title)
+                    .font(IoDesign.scheduleDetailTitle)
+                    .lineLimit(1)
+                    .accessibilityAddTraits(.isHeader)
+                Text("\(entry.timeRange) · \(channel.title)\(status)")
+                    .font(IoDesign.metadata)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                if !synopsis.isEmpty {
+                    Text(synopsis)
+                        .font(IoDesign.body)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(2)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        return VStack(alignment: .leading, spacing: IoDesign.Space.xSmall) {
-            Text(detail.title)
-                .font(IoDesign.cardTitle)
-                .lineLimit(1, reservesSpace: true)
-            Text(detail.metadata)
-                .font(IoDesign.metadata)
-                .foregroundStyle(.secondary)
-                .lineLimit(1, reservesSpace: true)
-        }
-        .accessibilityHidden(detail.title.isEmpty)
+        .padding(IoDesign.Space.large)
+        .background(.white.opacity(0.065), in: RoundedRectangle(cornerRadius: IoDesign.schedulePanelCornerRadius))
     }
 
     private var selectedEntry: TelekavaEntry? {
         guard loadedDay == day, let selected else { return nil }
         return entries(for: selected.channelID).first { $0.id == selected.entryID }
-    }
-
-    private func missedFavorites(at now: Date) -> [MissedFavorite] {
-        guard loadedDay == day, day == today || day == TelekavaAPI.day(-1, from: today),
-              !favorites.entries.isEmpty else { return [] }
-        let replays = LiveChannel.all.flatMap { channel in
-            entries(for: channel.id).compactMap { entry -> MissedFavorite? in
-                guard let programme = entry.favoriteReplay(at: now, favorites: favorites.entries),
-                      !history.isCompleted(programme.id) else { return nil }
-                return MissedFavorite(id: programme.id, entry: entry, channel: channel)
-            }
-        }
-        var seen = Set<Int>()
-        return replays.sorted { $0.entry.startTime > $1.entry.startTime }
-            .filter { seen.insert($0.id).inserted }
-    }
-
-    private func missedFavoritesPanel(_ missed: [MissedFavorite]) -> some View {
-        VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
-            Label("Maha magatud lemmikud", systemImage: "star.fill")
-                .font(IoDesign.body.weight(.semibold))
-                .accessibilityAddTraits(.isHeader)
-            ScrollView(.horizontal) {
-                HStack(spacing: IoDesign.Space.medium) {
-                    ForEach(missed) { item in
-                        missedFavoriteLabel(item)
-                            .accessibilityElement(children: .combine)
-                            .accessibilityIdentifier("telekava-favorite-\(item.id)")
-                    }
-                }
-            }
-            .scrollIndicators(.hidden)
-        }
-        .padding(.horizontal, IoDesign.Space.large)
-        .frame(height: 146)
-        .background(.white.opacity(0.065), in: RoundedRectangle(cornerRadius: IoDesign.schedulePanelCornerRadius))
-    }
-
-    private func missedFavoriteLabel(_ item: MissedFavorite) -> some View {
-        VStack(alignment: .leading, spacing: IoDesign.Space.xSmall) {
-            Text(item.entry.title)
-                .font(IoDesign.body.weight(.medium))
-                .lineLimit(1)
-            Text("\(item.channel.title) · \(item.entry.startLabel)")
-                .font(IoDesign.metadata)
-                .foregroundStyle(.white.opacity(0.7))
-        }
-        .foregroundStyle(.white)
-        .frame(width: 338, alignment: .leading)
-        .padding(.horizontal, IoDesign.Space.medium)
-        .padding(.vertical, IoDesign.Space.small)
-        .background(.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func entries(for channelID: String) -> [TelekavaEntry] {
@@ -494,9 +488,7 @@ struct TelekavaView: View {
         let reference = navigationTime ?? windowStart
         while LiveChannel.all.indices.contains(target) {
             let channel = LiveChannel.all[target]
-            let programmes = entries(for: channel.id)
-            if let entry = programmes.first(where: { $0.startTime <= reference && reference < $0.endTime })
-                ?? programmes.min(by: { distance(from: reference, to: $0) < distance(from: reference, to: $1) }) {
+            if let entry = programme(on: channel.id, at: reference) {
                 focusProgramme(entry, channelID: channel.id, reference: reference)
                 return
             }
@@ -506,7 +498,17 @@ struct TelekavaView: View {
             }
             target += step
         }
-        if direction == .up { focus = .day(day) }
+        if direction == .up {
+            focus = .day(day)
+        } else if let entry = selectedEntry, confirmedReplay(for: entry, at: .now) != nil {
+            focus = .playbackAction
+        }
+    }
+
+    private func programme(on channelID: String, at timestamp: TimeInterval) -> TelekavaEntry? {
+        let programmes = entries(for: channelID)
+        return programmes.first { $0.startTime <= timestamp && timestamp < $0.endTime }
+            ?? programmes.min { distance(from: timestamp, to: $0) < distance(from: timestamp, to: $1) }
     }
 
     private func distance(from timestamp: TimeInterval, to entry: TelekavaEntry) -> TimeInterval {
@@ -531,7 +533,7 @@ struct TelekavaView: View {
 
     private func placeWindow(around timestamp: TimeInterval, animated: Bool = false) {
         let earliest = LiveChannel.all.compactMap { entries(for: $0.id).first?.startTime }.min()
-        let start = floor((timestamp - tickInterval) / tickInterval) * tickInterval
+        let start = floor((timestamp - 2 * tickInterval) / tickInterval) * tickInterval
         let destination = max(start, floor((earliest ?? timestamp) / tickInterval) * tickInterval)
         let canSlide = animated && !reduceMotion && abs(destination - windowStart) <= windowDuration
         withAnimation(canSlide ? .easeInOut(duration: 0.24) : nil) {
@@ -545,8 +547,9 @@ struct TelekavaView: View {
     }
 
     private func confirmedReplay(for entry: TelekavaEntry, at date: Date) -> Programme? {
-        guard let replay, replay.id == entry.replayID(at: date) else { return nil }
-        return replay
+        guard let catalogueDetail, catalogueDetail.hasVideo,
+              catalogueDetail.id == entry.replayID(at: date) else { return nil }
+        return catalogueDetail
     }
 
     private func present(_ item: Playback, returningTo target: Focus?) {

@@ -73,6 +73,7 @@ struct TelekavaEntry: Decodable, Identifiable {
     }
 
     var startLabel: String { Self.timeLabel(startTime) }
+    var timeRange: String { "\(startLabel)–\(Self.timeLabel(endTime))" }
 
     func isCurrent(at date: Date) -> Bool {
         startTime <= date.timeIntervalSince1970 && date.timeIntervalSince1970 < endTime

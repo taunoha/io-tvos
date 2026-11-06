@@ -65,7 +65,9 @@ struct Programme: Decodable, Identifiable {
         }
         return imageURL
     }
-    var descriptionText: String {
+    var descriptionText: String { Self.plainDescription(lead) }
+
+    static func plainDescription(_ lead: String?) -> String {
         (lead ?? "").replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             .replacingOccurrences(of: "&quot;", with: "\"")
             .replacingOccurrences(of: "&amp;", with: "&")

@@ -24,9 +24,13 @@ enum IoDesign {
     static let badge = Font.system(size: minimumTextSize, weight: .bold)
     static let inlineIcon = Font.system(size: 13, weight: .semibold)
 
+    static let scheduleCellTitle = Font.system(size: 27, weight: .semibold)
+    static let scheduleDetailTitle = Font.system(size: 44, weight: .semibold)
+    static let scheduleArtworkHeight = Space.xxxLarge + Space.xLarge
+    static let scheduleArtworkWidth = scheduleArtworkHeight * 16 / 9
     static let scheduleTimeLabel = caption.monospacedDigit()
     static let scheduleChannelWidth = Space.xxxLarge + Space.xxLarge
-    static let scheduleRowHeight = 2.47 * Space.xLarge
+    static let scheduleRowHeight = Space.xxLarge + Space.xLarge
     static let scheduleAxisHeight = Space.xLarge
     static let scheduleEdgeShadowWidth = Space.xLarge
     static let scheduleGridCornerRadius = Space.medium
