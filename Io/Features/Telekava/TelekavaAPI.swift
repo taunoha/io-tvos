@@ -98,7 +98,7 @@ struct TelekavaEntry: Decodable, Identifiable {
                          catalogueSource: favorite.source)
     }
 
-    private static func timeLabel(_ timestamp: Double) -> String {
+    static func timeLabel(_ timestamp: Double) -> String {
         Date(timeIntervalSince1970: timestamp).formatted(
             Date.FormatStyle(locale: Locale(identifier: "et_EE"), timeZone: TelekavaAPI.timeZone)
                 .hour(.twoDigits(amPM: .omitted)).minute(.twoDigits)

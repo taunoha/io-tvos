@@ -24,12 +24,16 @@ enum IoDesign {
     static let badge = Font.system(size: minimumTextSize, weight: .bold)
     static let inlineIcon = Font.system(size: 13, weight: .semibold)
 
-    // The denser three-column guide keeps its tuned type sizes.
-    static let scheduleChannelTitle = Font.system(size: 40, weight: .bold)
+    static let scheduleChannelTitle = Font.system(size: 34, weight: .bold)
     static let scheduleProgrammeTitle = Font.system(size: 33, weight: .medium)
     static let scheduleDayLabel = Font.system(size: 27, weight: .semibold)
     static let scheduleTimeLabel = Font.system(size: 27, weight: .medium).monospacedDigit()
-    static let scheduleReplayHint = metadata
+    static let scheduleChannelWidth = Space.xxxLarge + Space.xxLarge
+    static let scheduleRowHeight = Space.xxLarge + Space.medium
+    static let scheduleAxisHeight = Space.xLarge
+    static let scheduleTickWidth = Space.xxxLarge
+    static let scheduleEdgeShadowWidth = Space.xxLarge
+    static let scheduleDetailHeight = Space.xxxLarge + Space.large
 
     static let contentInset = Space.xxxLarge
     static let cardGap = Space.xLarge
