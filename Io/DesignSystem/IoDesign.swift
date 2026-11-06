@@ -31,9 +31,10 @@ enum IoDesign {
     static let scheduleChannelWidth = Space.xxxLarge + Space.xxLarge
     static let scheduleRowHeight = Space.xxLarge + Space.medium
     static let scheduleAxisHeight = Space.xLarge
-    static let scheduleTickWidth = Space.xxxLarge
     static let scheduleEdgeShadowWidth = Space.xxLarge
-    static let scheduleDetailHeight = Space.xxxLarge + Space.large
+    static let scheduleGridCornerRadius = Space.medium
+    static let schedulePanelCornerRadius: CGFloat = 20
+    static let scheduleSectionGap = Space.xxLarge + Space.medium
 
     static let contentInset = Space.xxxLarge
     static let cardGap = Space.xLarge
