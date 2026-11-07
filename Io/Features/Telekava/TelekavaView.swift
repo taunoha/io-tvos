@@ -237,6 +237,7 @@ struct TelekavaView: View {
                     }
                     .overlay {
                         guideEdgeShadows
+                            .mask { guideCardMask(width: width) }
                             .allowsHitTesting(false)
                             .accessibilityHidden(true)
                     }
@@ -280,6 +281,38 @@ struct TelekavaView: View {
             .frame(width: IoDesign.scheduleEdgeShadowWidth)
     }
 
+    private func guideCardMask(width: CGFloat) -> some View {
+        VStack(spacing: IoDesign.sectionHeadingGap) {
+            ForEach(LiveChannel.all) { channel in
+                ZStack(alignment: .leading) {
+                    ForEach(trackEntries(for: channel.id)) { entry in
+                        let frame = programmeFrame(entry, trackWidth: width)
+                        RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius)
+                            .frame(width: frame.width, height: frame.height)
+                            .offset(x: frame.minX)
+                    }
+                }
+                .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
+            }
+        }
+    }
+
+    private func trackEntries(for channelID: String) -> [TelekavaEntry] {
+        guard loadedDay == day else { return [] }
+        // Keep nearby cells mounted so they can slide in and out of the viewport.
+        return entries(for: channelID).filter {
+            $0.endTime > windowStart - windowDuration && $0.startTime < windowEnd + windowDuration
+        }
+    }
+
+    private func programmeFrame(_ entry: TelekavaEntry, trackWidth: CGFloat) -> CGRect {
+        let left = min(trackWidth, max(0, position(of: entry.startTime, width: trackWidth)))
+        let right = min(trackWidth, max(0, position(of: entry.endTime, width: trackWidth)))
+        let visibleWidth = right - left
+        return CGRect(x: left, y: 0, width: visibleWidth - min(IoDesign.Space.xSmall, visibleWidth / 4),
+                      height: IoDesign.scheduleRowHeight)
+    }
+
     private func position(of timestamp: TimeInterval, width: CGFloat) -> CGFloat {
         width * (timestamp - windowStart) / windowDuration
     }
@@ -306,18 +339,12 @@ struct TelekavaView: View {
         ZStack(alignment: .leading) {
             switch loadedDay == day ? schedules[channel.id] : nil {
             case .loaded(let entries) where !entries.isEmpty:
-                // Keep nearby cells mounted so they can slide in and out of the viewport.
-                ForEach(entries.filter {
-                    $0.endTime > windowStart - windowDuration && $0.startTime < windowEnd + windowDuration
-                }) { entry in
-                    let left = min(width, max(0, position(of: entry.startTime, width: width)))
-                    let right = min(width, max(0, position(of: entry.endTime, width: width)))
-                    let cellWidth = right - left
-                    programmeCell(entry, channel: channel, now: now,
-                                  width: cellWidth - min(IoDesign.Space.xSmall, cellWidth / 4))
-                        .offset(x: left)
-                        .disabled(cellWidth == 0)
-                        .accessibilityHidden(cellWidth == 0)
+                ForEach(trackEntries(for: channel.id)) { entry in
+                    let frame = programmeFrame(entry, trackWidth: width)
+                    programmeCell(entry, channel: channel, now: now, width: frame.width)
+                        .offset(x: frame.minX)
+                        .disabled(frame.width == 0)
+                        .accessibilityHidden(frame.width == 0)
                 }
             case .loaded:
                 Text("Saatekava puudub").font(IoDesign.metadata).foregroundStyle(.secondary)
