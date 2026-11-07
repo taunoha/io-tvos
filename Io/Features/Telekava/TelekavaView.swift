@@ -86,6 +86,7 @@ struct TelekavaView: View {
                 }
             }
         }
+        .ignoresSafeArea(.container, edges: .horizontal)
         .background {
             LinearGradient(colors: [Color(red: 0.09, green: 0.11, blue: 0.16),
                                     Color(red: 0.035, green: 0.045, blue: 0.07)],
