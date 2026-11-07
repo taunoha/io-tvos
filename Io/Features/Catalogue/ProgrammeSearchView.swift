@@ -1,87 +1,112 @@
 import SwiftUI
 
 struct ProgrammeSearchView: View {
+    private struct Request: Equatable {
+        let query: String
+        let page: Int
+        private let id = UUID()
+    }
+
     @FocusState private var focusedKey: String?
     @State private var phrase = ""
-    @State private var resultRows: [[Programme]] = []
-    @State private var page = 1
-    @State private var hasMore = false
-    @State private var loading = false
-    @State private var error: String?
-    @State private var refresh = 0
+    @State private var results: [Programme] = []
+    @State private var seenIDs: Set<Int> = []
+    @State private var nextPage: Int?
+    @State private var request: Request?
+    @State private var failedPage: Int?
+
     private var query: String { phrase.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var requestKey: String { "\(query)|\(page)|\(refresh)" }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: IoDesign.Space.xLarge) {
+        VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
             searchInput
                 .padding(.horizontal, IoDesign.contentInset)
                 .padding(.top, IoDesign.focusRoom)
 
-            ScrollViewReader { scroll in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: IoDesign.Space.xLarge) {
-                        if query.isEmpty { Text("Sisesta saate või filmi nimi.").foregroundStyle(.secondary).padding(.horizontal, IoDesign.contentInset) }
-                        ForEach(resultRows.indices, id: \.self) { index in
-                            ProgrammeRow(
-                                title: index == 0 ? "Otsingutulemused" : "Otsingutulemused · \(index + 1)",
-                                items: resultRows[index]
-                            )
-                        }
-                        if loading && page == 1 { ProgressView("Otsin…").padding(.horizontal, IoDesign.contentInset) }
-                        if let error { LoadFailureView(message: error) { refresh += 1 }.padding(.horizontal, IoDesign.contentInset) }
-                        if !loading && error == nil && !query.isEmpty && resultRows.isEmpty { Text("Tulemusi ei leitud.").padding(.horizontal, IoDesign.contentInset) }
-                        if hasMore {
-                            Button {
-                                guard !loading else { return }
-                                loading = true
-                                page += 1
-                            } label: {
-                                HStack(spacing: IoDesign.Space.medium) {
-                                    Text("Laadi juurde")
-                                    if loading {
-                                        SearchLoadingSpinner()
-                                            .accessibilityHidden(true)
-                                    }
+            ScrollView {
+                VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
+                    if !results.isEmpty {
+                        ProgrammeRow(title: "Otsingutulemused", items: results, wrapsCards: true)
+                            .overlay(alignment: .bottom) {
+                                if let nextPage {
+                                    paginationTrigger(for: nextPage)
                                 }
                             }
-                            .accessibilityValue(loading ? "Laadin" : "")
-                            .padding(.horizontal, IoDesign.contentInset)
-                        }
-                        Color.clear.frame(height: 1).id("searchResultsEnd")
-                    }.padding(.vertical, IoDesign.focusRoom)
-                }
-                .onChange(of: loading) { wasLoading, isLoading in
-                    if wasLoading && !isLoading && page > 1 {
-                        scroll.scrollTo("searchResultsEnd", anchor: .bottom)
                     }
+                    searchStatus
+                        .padding(.horizontal, IoDesign.contentInset)
                 }
+                .padding(.vertical, IoDesign.focusRoom)
             }
+            .id(query)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            // Keep shelves and their focus effects inside the results viewport.
+            // Keep cards and their focus effects inside the results viewport.
             .clipped()
             .ignoresSafeArea(.container, edges: .bottom)
         }
-        .onChange(of: phrase) { _, _ in
-            page = 1; resultRows = []; hasMore = false; error = nil
-            loading = !query.isEmpty
-        }
         .ignoresSafeArea(.container, edges: .horizontal)
-        .task(id: requestKey) {
-            let currentQuery = query
-            let currentPage = page
-            guard !currentQuery.isEmpty else { loading = false; return }
-            loading = true; error = nil
-            do {
+        .onChange(of: query) { _, query in
+            results = []
+            seenIDs = []
+            nextPage = nil
+            failedPage = nil
+            request = query.isEmpty ? nil : Request(query: query, page: 1)
+        }
+        .task(id: request) { [request] in
+            if let request {
+                await load(request)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var searchStatus: some View {
+        if query.isEmpty {
+            Text("Sisesta saate või filmi nimi.").foregroundStyle(.secondary)
+        } else if let failedPage {
+            LoadFailureView(message: "Otsing ebaõnnestus. Proovi uuesti.") {
+                request = Request(query: query, page: failedPage)
+                self.failedPage = nil
+            }
+        } else if let request {
+            ProgressView(request.page == 1 ? "Otsin…" : "Laadin tulemusi…")
+        } else if results.isEmpty {
+            Text("Tulemusi ei leitud.")
+        }
+    }
+
+    private func paginationTrigger(for page: Int) -> some View {
+        // Start loading while the final row is still coming into view.
+        Color.clear
+            .frame(height: IoDesign.landscapeCardWidth)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+            .onScrollVisibilityChange(threshold: 0.1) { visible in
+                guard visible, nextPage == page, request == nil, failedPage == nil else { return }
+                request = Request(query: query, page: page)
+            }
+            .id(page)
+    }
+
+    private func load(_ current: Request) async {
+        do {
+            if current.page == 1 {
                 try await Task.sleep(for: .milliseconds(450))
-                let batch = try await OnDemandAPI.search(currentQuery, page: currentPage)
-                try Task.checkCancellation()
-                guard currentQuery == query, currentPage == page else { return }
-                var seen = Set(resultRows.flatMap { $0 }.map(\.id))
-                let newResults = batch.filter { seen.insert($0.id).inserted }
-                if !newResults.isEmpty { resultRows.append(newResults) }
-                hasMore = batch.count == 24; loading = false
-            } catch is CancellationError { }
-            catch { if !Task.isCancelled { self.error = "Otsing ebaõnnestus. Proovi uuesti."; loading = false } }
+            }
+            let batch = try await OnDemandAPI.search(current.query, page: current.page)
+            try Task.checkCancellation()
+            guard request == current, query == current.query else { return }
+
+            var seen = seenIDs
+            let additions = batch.programmes.filter { seen.insert($0.id).inserted }
+            seenIDs = seen
+            results.append(contentsOf: additions)
+            nextPage = batch.hasMore ? current.page + 1 : nil
+            request = nil
+        } catch {
+            guard !Task.isCancelled, request == current, query == current.query else { return }
+            failedPage = current.page
+            request = nil
         }
     }
 
@@ -131,21 +156,5 @@ struct ProgrammeSearchView: View {
             }
         }
         .focusSection()
-    }
-}
-
-private struct SearchLoadingSpinner: View {
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30)) { context in
-            let progress = context.date.timeIntervalSinceReferenceDate
-                .truncatingRemainder(dividingBy: 0.8) / 0.8
-            Circle()
-                .trim(from: 0, to: 0.75)
-                .stroke(.foreground, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                .rotationEffect(.degrees(progress * 360))
-        }
-        .frame(width: 22, height: 22)
-        // Button focus/press transactions must not interpolate clock updates.
-        .transaction { $0.animation = nil }
     }
 }

@@ -45,9 +45,18 @@ enum OnDemandAPI {
                 programmes: items, usesPortraitCards: row.highTimeline == true)
         }
     }
+    struct SearchPage {
+        let programmes: [Programme]
+        let hasMore: Bool
+    }
     private struct SearchResult: Decodable {
         let video: Results?
-        struct Results: Decodable { let contents: [Programme]? }
+        struct Results: Decodable {
+            let contents: [Programme]?
+            let totalFound: Int?
+            let page: Int?
+            let perPage: Int?
+        }
     }
     private struct Region: Decodable { let inEstonia: Bool }
 
@@ -76,11 +85,18 @@ enum OnDemandAPI {
         return response.data.from(source)
     }
 
-    static func search(_ phrase: String, page: Int) async throws -> [Programme] {
-        let options: [String: Any] = ["phrase": phrase, "page": page, "limit": 24, "searchTypes": ["video"]]
+    static func search(_ phrase: String, page: Int) async throws -> SearchPage {
+        let limit = 24
+        let options: [String: Any] = ["phrase": phrase, "page": page, "limit": limit, "searchTypes": ["video"]]
         let json = String(decoding: try JSONSerialization.data(withJSONObject: options), as: UTF8.self)
         let response: SearchResult = try await get("/api/search/getVodContents2/", [URLQueryItem(name: "type", value: "video"), URLQueryItem(name: "options", value: json)])
-        return response.video?.contents ?? []
+        guard let video = response.video, let programmes = video.contents, !programmes.isEmpty,
+              video.page == nil || video.page == page else {
+            return SearchPage(programmes: [], hasMore: false)
+        }
+        let pageSize = video.perPage.flatMap { $0 > 0 ? $0 : nil } ?? limit
+        let hasMore = video.totalFound.map { $0 > 0 && ($0 - 1) / pageSize >= page } ?? (programmes.count >= pageSize)
+        return SearchPage(programmes: programmes, hasMore: hasMore)
     }
 
     static func playbackSource(_ id: Int, source: CatalogueSource = .jupiter) async throws -> PlaybackSource {

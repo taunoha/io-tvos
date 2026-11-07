@@ -22,6 +22,7 @@ enum IoDesign {
     static let metadata = Font.system(size: minimumTextSize, weight: .medium)
     static let caption = Font.system(size: minimumTextSize)
     static let badge = Font.system(size: minimumTextSize, weight: .bold)
+    static let tabIconSize: CGFloat = 25
 
     static let scheduleCellTitle = Font.system(size: 27, weight: .semibold)
     static let scheduleDetailTitle = Font.system(size: 44, weight: .semibold)

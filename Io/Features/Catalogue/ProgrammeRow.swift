@@ -40,7 +40,7 @@ struct ProgrammeRow: View {
 
     var body: some View {
         let progressIDs = Set(history.records.lazy.filter { $0.isInProgress }.map(\.id))
-        let reservesProgressSpace = items.contains { progressIDs.contains($0.id) }
+        let reservesProgressSpace = !progressIDs.isEmpty && items.contains { progressIDs.contains($0.id) }
 
         VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
             Text(title)
@@ -72,7 +72,7 @@ struct ProgrammeRow: View {
     }
 
     private func cards(reservesProgressSpace: Bool) -> some View {
-        ForEach(items.map(ProgrammeRowKey.init)) { key in
+        ForEach(items.lazy.map(ProgrammeRowKey.init)) { key in
             let programme = key.programme
             Group {
                 if let playEpisode, programme.source != .lasteekraan || programme.hasVideo {

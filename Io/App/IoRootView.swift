@@ -40,6 +40,10 @@ private struct IoTabController: UIViewControllerRepresentable {
         let controller = UITabBarController()
         controller.view.tintColor = .white
         let coordinator = context.coordinator
+        let searchIcon = UIImage(
+            systemName: "magnifyingglass",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: IoDesign.tabIconSize, weight: .semibold)
+        )
         controller.viewControllers = [
             tab("Otse", content: LiveHomeView { [weak controller, weak coordinator] programme in
                 guard let controller else { return }
@@ -49,7 +53,7 @@ private struct IoTabController: UIViewControllerRepresentable {
             tab("Saated", content: CatalogueView(), catalogueSource: .jupiter),
             tab("Lasteekraan", content: CatalogueView(source: .lasteekraan), catalogueSource: .lasteekraan),
             tab("Jätka", content: ContinueWatchingView()),
-            tab("Otsi", content: ProgrammeSearchView(), resetsOnSelection: false)
+            tab("Otsi", content: ProgrammeSearchView(), icon: searchIcon, resetsOnSelection: false)
         ]
         context.coordinator.selectedTab = controller.selectedViewController
         controller.delegate = context.coordinator
@@ -58,7 +62,7 @@ private struct IoTabController: UIViewControllerRepresentable {
 
     func updateUIViewController(_ controller: UITabBarController, context: Context) {}
 
-    private func tab<Content: View>(_ title: String, content: Content,
+    private func tab<Content: View>(_ title: String, content: Content, icon: UIImage? = nil,
                                     catalogueSource: CatalogueSource? = nil, resetsOnSelection: Bool = true) -> UIViewController {
         func rootView(programme: Programme? = nil) -> some View {
             IoTabNavigation(content: content, programme: programme)
@@ -72,7 +76,9 @@ private struct IoTabController: UIViewControllerRepresentable {
         }
 
         let host = UIHostingController(rootView: rootView())
-        let tab = IoTabContentController(host: host, title: title, catalogueSource: catalogueSource)
+        let item = UITabBarItem(title: icon == nil ? title : nil, image: icon, selectedImage: nil)
+        item.accessibilityLabel = title
+        let tab = IoTabContentController(host: host, item: item, catalogueSource: catalogueSource)
         if resetsOnSelection {
             tab.resetNavigation = { [weak host] in host?.rootView = rootView() }
         }
@@ -109,11 +115,11 @@ private final class IoTabContentController: UIViewController {
     var resetNavigation: (() -> Void)?
     var openProgramme: ((Programme) -> Void)?
 
-    init(host: UIViewController, title: String, catalogueSource: CatalogueSource?) {
+    init(host: UIViewController, item: UITabBarItem, catalogueSource: CatalogueSource?) {
         self.host = host
         self.catalogueSource = catalogueSource
         super.init(nibName: nil, bundle: nil)
-        tabBarItem = UITabBarItem(title: title, image: nil, selectedImage: nil)
+        tabBarItem = item
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
