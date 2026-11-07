@@ -369,7 +369,9 @@ struct TelekavaView: View {
                                now: Date, width: CGFloat) -> some View {
         let row = Row(channelID: channel.id, entryID: entry.id)
         let focused = focus == .row(row)
+        let isSelected = selected == row
         let current = entry.isCurrent(at: now)
+        let shape = RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius)
         return Button {
             if let item = playback(for: entry, channel: channel, now: .now) {
                 present(item, returningTo: .row(row))
@@ -396,12 +398,17 @@ struct TelekavaView: View {
             .foregroundStyle(focused ? .black : .white)
             .padding(.horizontal, min(IoDesign.Space.medium, width / 4))
             .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
-            .background(focused ? .white : .white.opacity(current ? 0.12 : 0.095),
-                        in: RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius))
+            .background(focused ? .white : .white.opacity(current ? 0.12 : 0.095), in: shape)
+            .overlay {
+                if isSelected && !focused {
+                    shape.strokeBorder(.white.opacity(0.75), lineWidth: IoDesign.Space.xxSmall)
+                }
+            }
             .clipped()
         }
         .ioCustomButtonFocus()
         .focused($focus, equals: .row(row))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityLabel("\(channel.title), \(entry.timeRange), \(entry.title)\(entry.isRepeat ? ", kordus" : "")\(current ? ", praegu" : "")")
         .accessibilityHint(confirmedReplay(for: entry, at: now) != nil ? "Vaata järele" : "")
         .accessibilityIdentifier("telekava-\(channel.id)-\(entry.id)")
