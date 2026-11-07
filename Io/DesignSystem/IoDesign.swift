@@ -36,6 +36,8 @@ enum IoDesign {
     static let schedulePanelCornerRadius: CGFloat = 20
 
     static let contentInset = Space.xxxLarge
+    static let landscapeCardWidth: CGFloat = 360
+    static let portraitCardWidth: CGFloat = 280
     static let cardGap = Space.xLarge
     static let focusRoom = Space.large
     static let sectionHeadingGap = Space.small

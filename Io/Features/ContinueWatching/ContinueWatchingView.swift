@@ -9,7 +9,7 @@ struct ContinueWatchingView: View {
                 if history.inProgress.isEmpty {
                     Text("Poolelijäänud saated ilmuvad siia automaatselt.").font(IoDesign.body).foregroundStyle(.secondary).padding(.horizontal, IoDesign.contentInset)
                 } else {
-                    ProgrammeRow(title: "Sinu poolelijäänud saated", items: history.inProgress.map(\.programme), allowsRemovingProgress: true)
+                    ProgrammeRow(title: "Sinu poolelijäänud saated", items: history.inProgress.map(\.programme), allowsRemovingProgress: true, wrapsCards: true)
                 }
             }.padding(.vertical, IoDesign.focusRoom)
         }

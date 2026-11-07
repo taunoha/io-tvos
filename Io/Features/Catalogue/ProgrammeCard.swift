@@ -7,7 +7,7 @@ struct ProgrammeCard: View {
     var showsSeriesTitle = true
     var reservesProgressSpace = false
     var playsDirectly = false
-    private var cardWidth: CGFloat { usesPortraitImage ? 280 : 360 }
+    private var cardWidth: CGFloat { usesPortraitImage ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth }
     var body: some View {
         let saved = history.entry(for: programme.id)
         let subtitle = programme.cardSubtitle

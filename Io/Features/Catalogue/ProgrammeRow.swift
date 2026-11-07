@@ -22,6 +22,7 @@ struct ProgrammeRow: View {
     let items: [Programme]
     var usesPortraitCards = false
     var allowsRemovingProgress = false
+    var wrapsCards = false
     var showsSeriesTitle = true
     var restoredFocusID: Int? = nil
     var openProgramme: ((Programme) -> Void)? = nil
@@ -45,41 +46,57 @@ struct ProgrammeRow: View {
             Text(title)
                 .font(IoDesign.sectionTitle)
                 .padding(.horizontal, IoDesign.contentInset)
-            ScrollView(.horizontal) {
-                LazyHStack(alignment: .top, spacing: IoDesign.cardGap) {
-                    ForEach(items.map(ProgrammeRowKey.init)) { key in
-                        let programme = key.programme
-                        Group {
-                            if let playEpisode, programme.source != .lasteekraan || programme.hasVideo {
-                                Button { playEpisode(programme) } label: {
-                                    ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, playsDirectly: true)
-                                }
-                            } else if let openProgramme {
-                                Button { openProgramme(programme) } label: {
-                                    ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace)
-                                }
-                            } else {
-                                NavigationLink { ProgrammeDetailView(programme: programme) } label: {
-                                    ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace)
-                                }
-                            }
-                        }
-                            .buttonStyle(.card)
-                            .focused($focusedProgramme, equals: key)
-                            .contextMenu {
-                                if allowsRemovingProgress {
-                                    Button("Eemalda jätkamisest", systemImage: "trash", role: .destructive) {
-                                        removeProgress(for: programme.id)
-                                    }
-                                }
-                            }
+            if wrapsCards {
+                let cardWidth = usesPortraitCards ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth
+                let column = GridItem(.adaptive(minimum: cardWidth, maximum: cardWidth), spacing: IoDesign.cardGap)
+                LazyVGrid(columns: [column], alignment: .leading, spacing: IoDesign.cardGap) {
+                    cards(reservesProgressSpace: reservesProgressSpace)
+                }
+                .padding(.horizontal, IoDesign.contentInset)
+                .padding(.top, IoDesign.focusRoom)
+            } else {
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top, spacing: IoDesign.cardGap) {
+                        cards(reservesProgressSpace: reservesProgressSpace)
                     }
-                }.padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom)
+                    .padding(.horizontal, IoDesign.contentInset)
+                    .padding(.vertical, IoDesign.focusRoom)
+                }
+                // Focused tvOS cards cast shadows beyond the shelf bounds.
+                .scrollClipDisabled()
             }
-            // Focused tvOS cards cast shadows beyond the shelf bounds.
-            .scrollClipDisabled()
-            .onChange(of: restoredFocusID) { _, id in
-                focusedProgramme = items.first { $0.id == id }.map(ProgrammeRowKey.init)
+        }
+        .onChange(of: restoredFocusID) { _, id in
+            focusedProgramme = items.first { $0.id == id }.map(ProgrammeRowKey.init)
+        }
+    }
+
+    private func cards(reservesProgressSpace: Bool) -> some View {
+        ForEach(items.map(ProgrammeRowKey.init)) { key in
+            let programme = key.programme
+            Group {
+                if let playEpisode, programme.source != .lasteekraan || programme.hasVideo {
+                    Button { playEpisode(programme) } label: {
+                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, playsDirectly: true)
+                    }
+                } else if let openProgramme {
+                    Button { openProgramme(programme) } label: {
+                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace)
+                    }
+                } else {
+                    NavigationLink { ProgrammeDetailView(programme: programme) } label: {
+                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace)
+                    }
+                }
+            }
+            .buttonStyle(.card)
+            .focused($focusedProgramme, equals: key)
+            .contextMenu {
+                if allowsRemovingProgress {
+                    Button("Eemalda jätkamisest", systemImage: "trash", role: .destructive) {
+                        removeProgress(for: programme.id)
+                    }
+                }
             }
         }
     }
