@@ -19,7 +19,13 @@ struct WatchEntry: Codable, Identifiable {
 
     var isInProgress: Bool { !completed && position >= 10 }
     var progress: Double { duration > 0 ? min(1, max(0, position / duration)) : 0 }
-    var remainingLabel: String { "Jäänud \(max(1, Int(ceil((duration - position) / 60)))) min" }
+    var remainingLabel: String {
+        let totalMinutes = max(1, Int(ceil((duration - position) / 60)))
+        let (hours, minutes) = totalMinutes.quotientAndRemainder(dividingBy: 60)
+        guard hours > 0 else { return "Jäänud \(minutes)m" }
+        let paddedMinutes = minutes < 10 ? "0\(minutes)" : "\(minutes)"
+        return "Jäänud \(hours)h \(paddedMinutes)m"
+    }
     var positionLabel: String {
         let seconds = Int(position)
         return String(format: "%d:%02d", seconds / 60, seconds % 60)

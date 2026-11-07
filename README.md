@@ -8,7 +8,7 @@ Io is an independent Apple TV app for watching ERR Jupiter.
 - **Telekava** shows the schedule for all three channels, highlights what’s on now and opens live or on-demand playback where available.
 - **Saated** browses the Jupiter catalogue
 - **Lasteekraan** browses ERR’s children’s catalogue
-- **Jätka** lets you resume unfinished programmes from your saved position. Viewing history and favourites are stored on the Apple TV.
+- **Jätka** lets you resume unfinished programmes from your saved position. Programme cards show the remaining time, for example `38m` or `2h 05m`. Viewing history and favourites are stored on the Apple TV.
 - **Otsi** searches Jupiter for programmes.
 
 ## Install on your Apple TV
