@@ -15,6 +15,7 @@ struct WatchEntry: Codable, Identifiable {
     var programmeType: String? = nil
     var episodeSubHeading: String? = nil
     var scheduleStart: Double? = nil
+    var artworkResolved: Bool? = nil
 
     var isInProgress: Bool { !completed && position >= 10 }
     var progress: Double { duration > 0 ? min(1, max(0, position / duration)) : 0 }
@@ -61,26 +62,33 @@ final class WatchHistory {
         guard position.isFinite, duration.isFinite, duration > 0, position >= 0 else { return }
         let position = min(position, duration)
         guard position >= 10 || ended else { return }
+        let saved = records.first { $0.id == programme.id }
+        let imageAddress = programme.imageURL?.absoluteString
         let entry = WatchEntry(id: programme.id, heading: String(programme.heading.prefix(240)),
             seriesHeading: programme.rootContent?.heading.map { String($0.prefix(240)) }, subtitle: String(programme.episodeLabel.prefix(240)),
-            imageAddress: programme.imageURL?.absoluteString ?? records.first(where: { $0.id == programme.id })?.imageAddress, position: position, duration: duration, updated: Date(),
+            imageAddress: imageAddress ?? saved?.imageAddress, position: position, duration: duration, updated: Date(),
             catalogueSource: programme.source, completed: ended || position / duration >= 0.95,
             programmeType: programme.type ?? "", episodeSubHeading: programme.subHeading.map { String($0.prefix(240)) },
-            scheduleStart: programme.scheduleStart)
+            scheduleStart: programme.scheduleStart, artworkResolved: imageAddress != nil ? true : saved?.artworkResolved)
         records.removeAll { $0.id == programme.id }
         records.insert(entry, at: 0)
         records = Array(records.prefix(100))
         persist()
     }
     func restoreImage(for id: Int) async {
-        guard let saved = entry(for: id), saved.programme.imageURL == nil else { return }
+        guard let saved = entry(for: id), saved.artworkResolved == nil else { return }
         do {
-            let detail = try await OnDemandAPI.detail(id, source: saved.catalogueSource ?? .jupiter)
+            let source = saved.catalogueSource ?? .jupiter
+            let detail = try await OnDemandAPI.detail(id, source: source)
             try Task.checkCancellation()
-            guard let imageURL = detail.mainContent.imageURL,
-                  let index = records.firstIndex(where: { $0.id == id }),
-                  records[index].programme.imageURL == nil else { return }
-            records[index].imageAddress = imageURL.absoluteString
+            let imageURL = detail.mainContent.imageURL
+            guard let index = records.firstIndex(where: {
+                $0.id == id && ($0.catalogueSource ?? .jupiter) == source && $0.artworkResolved == nil
+            }), imageURL != nil || records[index].imageAddress != nil else { return }
+            if let imageURL {
+                records[index].imageAddress = imageURL.absoluteString
+            }
+            records[index].artworkResolved = true
             persist()
         } catch {
             // Keep the saved position even when artwork is temporarily unavailable.

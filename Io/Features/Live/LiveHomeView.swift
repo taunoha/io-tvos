@@ -35,6 +35,7 @@ struct LiveHomeView: View {
 
                 if !favorites.entries.isEmpty {
                     ProgrammeRow(title: "Lemmikud", items: favorites.entries.map(\.programme), openProgramme: openProgramme)
+                        .task { await favorites.resolveLegacyArtwork() }
                 }
 
                 if !history.inProgress.isEmpty {

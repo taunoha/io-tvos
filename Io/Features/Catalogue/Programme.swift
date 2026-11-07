@@ -37,33 +37,13 @@ struct Programme: Decodable, Identifiable {
         let heading: String?
         var photos: [ProgrammePhoto]? = nil
         var horizontalPhotos: [ProgrammePhoto]? = nil
+        var verticalPhotos: [ProgrammePhoto]? = nil
     }
     var imageURL: URL? {
-        let candidates = (horizontalPhotos ?? []) + (photos ?? []) + (verticalPhotos ?? [])
-        for photo in candidates {
-            // Detail responses omit the catalogue's 17/34 crops.
-            // Prefer a landscape crop before falling back to other sizes.
-            for key in ["17", "61", "34", "26", "48", "2", "6", "8"] {
-                guard let address = photo.photoTypes?[key]?.url,
-                      let url = URL(string: address.hasPrefix("//") ? "https:" + address : address),
-                      ["https", "http"].contains(url.scheme?.lowercased() ?? ""),
-                      url.host != nil else { continue }
-                return url
-            }
-        }
-        return nil
+        ProgrammePhoto.preferredURL(horizontal: horizontalPhotos ?? [], general: photos ?? [], vertical: verticalPhotos ?? [])
     }
     var posterURL: URL? {
-        for photo in verticalPhotos ?? [] {
-            for key in ["80", "60"] {
-                guard let address = photo.photoTypes?[key]?.url,
-                      let url = URL(string: address.hasPrefix("//") ? "https:" + address : address),
-                      ["https", "http"].contains(url.scheme?.lowercased() ?? ""),
-                      url.host != nil else { continue }
-                return url
-            }
-        }
-        return imageURL
+        ProgrammePhoto.portraitURL(in: verticalPhotos ?? []) ?? imageURL
     }
     var descriptionText: String { Self.plainDescription(lead) }
 
@@ -111,6 +91,42 @@ struct Programme: Decodable, Identifiable {
 struct ProgrammePhoto: Decodable {
     let photoTypes: [String: Variant]?
     struct Variant: Decodable { let url: String }
+
+    static func preferredURL(horizontal: [Self], general: [Self], vertical: [Self]) -> URL? {
+        if let url = landscapeURL(in: horizontal) { return url }
+
+        // ERR can list a portrait source under both photos and verticalPhotos.
+        let verticalVariants = Set(vertical.flatMap(\.variantAddresses))
+        let otherPhotos = general.filter { verticalVariants.isDisjoint(with: $0.variantAddresses) }
+        return landscapeURL(in: otherPhotos) ?? portraitURL(in: vertical + general + horizontal)
+            ?? landscapeURL(in: general + vertical)
+    }
+
+    private var variantAddresses: [String] {
+        photoTypes?.values.map { $0.url.hasPrefix("//") ? "https:" + $0.url : $0.url } ?? []
+    }
+
+    private static func landscapeURL(in photos: [Self]) -> URL? {
+        // Detail responses omit the catalogue's 17/34 crops.
+        url(in: photos, keys: ["17", "61", "34", "26", "48", "2", "6", "8"])
+    }
+
+    static func portraitURL(in photos: [Self]) -> URL? {
+        url(in: photos, keys: ["80", "60"])
+    }
+
+    private static func url(in photos: [Self], keys: [String]) -> URL? {
+        for photo in photos {
+            for key in keys {
+                guard let address = photo.photoTypes?[key]?.url,
+                      let url = URL(string: address.hasPrefix("//") ? "https:" + address : address),
+                      ["https", "http"].contains(url.scheme?.lowercased() ?? ""),
+                      url.host != nil else { continue }
+                return url
+            }
+        }
+        return nil
+    }
 }
 
 struct ProgrammeMedia: Decodable {

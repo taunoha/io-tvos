@@ -15,7 +15,8 @@ struct ProgrammeCard: View {
             .font(IoDesign.cardTitle)
 
         VStack(alignment: .leading, spacing: IoDesign.Space.medium) {
-            ProgrammeArtwork(url: usesPortraitImage ? programme.posterURL : (programme.imageURL ?? saved?.programme.imageURL)) {
+            ProgrammeArtwork(url: usesPortraitImage ? programme.posterURL : (programme.imageURL ?? saved?.programme.imageURL),
+                usesPortraitFrame: usesPortraitImage) {
                 Rectangle().fill(.white.opacity(0.08)).overlay(Image(systemName: "play.rectangle").font(IoDesign.pageTitle).foregroundStyle(.secondary))
             }
             .frame(width: cardWidth, height: usesPortraitImage ? 420 : 203).clipped()
@@ -71,7 +72,7 @@ struct ProgrammeCard: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .task(id: programme.id) {
-            if programme.imageURL == nil {
+            if programme.imageURL == nil || reservesProgressSpace {
                 await history.restoreImage(for: programme.id)
             }
         }
