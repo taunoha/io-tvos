@@ -1,6 +1,6 @@
-# Io
-
 ![Io app on Apple TV](./io-screenshot.jpg)
+
+# Io
 
 Io is an independent Apple TV app for watching ERR Jupiter. It offers live ETV, ETV2 and ETV+, a TV guide, on-demand programmes, Lasteekraan, search and local viewing history.
 
