@@ -5,7 +5,7 @@
 Io is an independent Apple TV app for watching ERR Jupiter. It offers live ETV, ETV2 and ETV+, a TV guide, on-demand programmes, Lasteekraan, search and local viewing history.
 
 Open **Telekava** to browse the ERR schedule for all three channels side by side. The guide marks what’s on now and lets you start live playback or watch an available programme on demand.
-For today and yesterday, **Maha magatud lemmikud** offers catch-up for aired episodes of your favourite series that you haven’t finished watching in Io.
+On **Otse**, the **Lemmikud** shelf gives you quick access to programmes you’ve marked as favourites.
 
 ## Install on your Apple TV
 
