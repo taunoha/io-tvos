@@ -170,21 +170,12 @@ struct TelekavaView: View {
         HStack(spacing: IoDesign.Space.medium) {
             ForEach(-1...3, id: \.self) { offset in
                 let date = TelekavaAPI.day(offset, from: today)
-                let focused = focus == .day(date)
                 Button {
                     pendingScheduleFocus = nil
                     pendingRowFocus = nil
                     day = date
                 } label: {
-                    Text(dayLabel(offset, date: date))
-                        .font(IoDesign.body.weight(.semibold))
-                        .padding(.horizontal, IoDesign.Space.large).padding(.vertical, IoDesign.Space.small)
-                        .foregroundStyle(focused ? .black : .white)
-                        .background(focused ? .white : .white.opacity(day == date ? 0.18 : 0.08), in: Capsule())
-                        .overlay {
-                            Capsule().strokeBorder(.white.opacity(0.55), lineWidth: day == date && !focused ? 1 : 0)
-                        }
-                        .scaleEffect(focused && !reduceMotion ? 1.06 : 1)
+                    IoSelectionPillLabel(title: dayLabel(offset, date: date), isSelected: day == date, isFocused: focus == .day(date))
                 }
                 .ioCustomButtonFocus()
                 .focused($focus, equals: .day(date))

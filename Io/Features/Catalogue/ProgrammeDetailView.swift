@@ -1,24 +1,36 @@
 import SwiftUI
 
 struct ProgrammeDetailView: View {
+    private struct DetailRequest: Equatable {
+        var seasonID: Int?
+        var retry = 0
+    }
+
     @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(WatchHistory.self) private var history
     let programme: Programme
     @State private var page: ProgrammeDetail?
-    @State private var requestID: Int
-    @State private var refresh = 0
+    @State private var seasons: [ProgrammeDetail.SeasonChoice] = []
+    @State private var selectedSeasonID: Int?
+    @State private var request = DetailRequest()
     @State private var loading = true
     @State private var error: String?
     @State private var playing: PlaybackSelection?
     @State private var openedEpisodeID: Int?
     @State private var restoredEpisodeFocusID: Int?
-    init(programme: Programme) { self.programme = programme; _requestID = State(initialValue: programme.id) }
+    @FocusState private var focusedSeasonID: Int?
+
+    init(programme: Programme) {
+        self.programme = programme
+    }
+
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: IoDesign.shelfGap) {
-                if loading { ProgressView("Laadin saate andmeid…").padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom) }
-                if let error { LoadFailureView(message: error) { refresh += 1 }.padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom) }
-                if let page, !loading {
+                if page == nil {
+                    loadStatus
+                }
+                if let page {
                     HStack(alignment: .top, spacing: IoDesign.Space.xxLarge) {
                         VStack(alignment: .leading, spacing: IoDesign.Space.large) {
                             VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
@@ -57,18 +69,32 @@ struct ProgrammeDetailView: View {
                         ProgrammeArtwork(url: page.mainContent.imageURL) { Color.white.opacity(0.06) }
                             .frame(width: 600, height: 338).clipped().clipShape(RoundedRectangle(cornerRadius: 20))
                     }.padding(.horizontal, IoDesign.contentInset)
-                    if page.seasons.count > 1 {
+                    if seasons.count > 1 {
                         ScrollView(.horizontal) {
                             LazyHStack(spacing: IoDesign.Space.large) {
-                                ForEach(page.seasons) { season in
-                                    Button(season.title) { requestID = season.id }
+                                ForEach(seasons) { season in
+                                    let isSelected = season.id == selectedSeasonID
+                                    Button {
+                                        if request.seasonID == season.id {
+                                            if error != nil { request.retry += 1 }
+                                        } else if !isSelected || request.seasonID != nil {
+                                            request = DetailRequest(seasonID: season.id)
+                                        }
+                                    } label: {
+                                        IoSelectionPillLabel(title: season.title, isSelected: isSelected, isFocused: focusedSeasonID == season.id)
+                                    }
+                                    .ioCustomButtonFocus()
+                                    .focused($focusedSeasonID, equals: season.id)
+                                    .accessibilityAddTraits(isSelected ? .isSelected : [])
                                 }
                             }.padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom)
                         }
                         .scrollClipDisabled()
                     }
-                    if !page.episodes.isEmpty {
-                        ProgrammeRow(title: "Episoodid", items: page.episodes, showsSeriesTitle: false, restoredFocusID: restoredEpisodeFocusID, playEpisode: { episode in
+                    if error != nil { loadStatus }
+                    let episodes = page.episodes(for: selectedSeasonID)
+                    if loading || !episodes.isEmpty {
+                        ProgrammeRow(title: "Episoodid", items: episodes, showsSeriesTitle: false, isLoading: loading, restoredFocusID: restoredEpisodeFocusID, playEpisode: { episode in
                             restoredEpisodeFocusID = nil
                             openedEpisodeID = episode.id
                             playing = PlaybackSelection(programme: episode, position: history.entry(for: episode.id)?.position ?? 0)
@@ -79,11 +105,31 @@ struct ProgrammeDetailView: View {
         }
         .scrollClipDisabled()
         .ignoresSafeArea(.container, edges: .horizontal)
-        .task(id: "\(requestID)|\(refresh)") {
-            loading = true; error = nil
-            do { let result = try await OnDemandAPI.detail(requestID, source: programme.source); try Task.checkCancellation(); page = result; loading = false }
-            catch is CancellationError { }
-            catch { if !Task.isCancelled { self.error = "Saate andmeid ei saanud laadida. Proovi uuesti."; loading = false } }
+        .task(id: request) { [request] in
+            if page != nil, request.seasonID == nil || request.seasonID == selectedSeasonID {
+                loading = false
+                error = nil
+                return
+            }
+            loading = true
+            error = nil
+            do {
+                let result = try await OnDemandAPI.detail(request.seasonID ?? programme.id, source: programme.source)
+                try Task.checkCancellation()
+                guard request == self.request else { return }
+                // Keep the season buttons stable while detail responses replace the episode data.
+                if page == nil { seasons = result.seasons }
+                let seasonID = request.seasonID ?? result.currentSeasonID
+                if seasonID != selectedSeasonID { restoredEpisodeFocusID = nil }
+                selectedSeasonID = seasonID
+                page = result
+                loading = false
+            } catch {
+                guard !Task.isCancelled, request == self.request else { return }
+                self.error = page == nil ? "Saate andmeid ei saanud laadida. Proovi uuesti." :
+                    "Hooaja andmeid ei saanud laadida. Proovi uuesti."
+                loading = false
+            }
         }
         .fullScreenCover(item: $playing, onDismiss: {
             restoredEpisodeFocusID = openedEpisodeID
@@ -94,6 +140,19 @@ struct ProgrammeDetailView: View {
                 startPosition: selection.position,
                 history: history
             )
+        }
+    }
+
+    @ViewBuilder
+    private var loadStatus: some View {
+        if loading {
+            ProgressView("Laadin saate andmeid…")
+                .padding(.horizontal, IoDesign.contentInset)
+                .padding(.vertical, IoDesign.focusRoom)
+        } else if let error {
+            LoadFailureView(message: error) { request.retry += 1 }
+                .padding(.horizontal, IoDesign.contentInset)
+                .padding(.vertical, IoDesign.focusRoom)
         }
     }
 }

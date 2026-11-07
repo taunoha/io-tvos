@@ -19,7 +19,7 @@ struct ProgrammeCard: View {
                 usesPortraitFrame: usesPortraitImage) {
                 Rectangle().fill(.white.opacity(0.08)).overlay(Image(systemName: "play.rectangle").font(IoDesign.pageTitle).foregroundStyle(.secondary))
             }
-            .frame(width: cardWidth, height: usesPortraitImage ? 420 : 203).clipped()
+            .frame(width: cardWidth, height: usesPortraitImage ? 420 : IoDesign.landscapeCardArtworkHeight).clipped()
             .overlay(alignment: .bottomLeading) {
                 if playsDirectly {
                     Image(systemName: history.isCompleted(programme.id) ? "arrow.counterclockwise" : "play.fill")
@@ -69,12 +69,33 @@ struct ProgrammeCard: View {
             .frame(width: cardWidth - 2 * IoDesign.Space.large, alignment: .topLeading).padding(.horizontal, IoDesign.Space.large)
         }
         .frame(width: cardWidth).padding(.bottom, IoDesign.Space.large)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: IoDesign.cardCornerRadius))
+        .clipShape(RoundedRectangle(cornerRadius: IoDesign.cardCornerRadius))
         .task(id: programme.id) {
             if programme.imageURL == nil || reservesProgressSpace {
                 await history.restoreImage(for: programme.id)
             }
         }
+    }
+}
+
+struct ProgrammeCardSkeleton: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: IoDesign.Space.medium) {
+            Rectangle()
+                .fill(.white.opacity(0.20))
+                .frame(height: IoDesign.landscapeCardArtworkHeight)
+            Text("Episoodi pealkiri\nPealkiri")
+                .font(IoDesign.cardTitle)
+                .lineLimit(2, reservesSpace: true)
+                .redacted(reason: .placeholder)
+                .foregroundStyle(.white.opacity(0.25))
+                .padding(.horizontal, IoDesign.Space.large)
+        }
+        .frame(width: IoDesign.landscapeCardWidth, alignment: .leading)
+        .padding(.bottom, IoDesign.Space.large)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: IoDesign.cardCornerRadius))
+        .clipShape(RoundedRectangle(cornerRadius: IoDesign.cardCornerRadius))
+        .accessibilityHidden(true)
     }
 }

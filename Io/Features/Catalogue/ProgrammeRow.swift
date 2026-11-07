@@ -24,6 +24,7 @@ struct ProgrammeRow: View {
     var allowsRemovingProgress = false
     var wrapsCards = false
     var showsSeriesTitle = true
+    var isLoading = false
     var restoredFocusID: Int? = nil
     var openProgramme: ((Programme) -> Void)? = nil
     var playEpisode: ((Programme) -> Void)? = nil
@@ -46,6 +47,7 @@ struct ProgrammeRow: View {
             Text(title)
                 .font(IoDesign.sectionTitle)
                 .padding(.horizontal, IoDesign.contentInset)
+                .accessibilityValue(isLoading ? "Laadimisel" : "")
             if wrapsCards {
                 let cardWidth = usesPortraitCards ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth
                 let column = GridItem(.adaptive(minimum: cardWidth, maximum: cardWidth), spacing: IoDesign.cardGap)
@@ -57,13 +59,18 @@ struct ProgrammeRow: View {
             } else {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: IoDesign.cardGap) {
-                        cards(reservesProgressSpace: reservesProgressSpace)
+                        if isLoading {
+                            ForEach(0..<4) { _ in ProgrammeCardSkeleton() }
+                        } else {
+                            cards(reservesProgressSpace: reservesProgressSpace)
+                        }
                     }
                     .padding(.horizontal, IoDesign.contentInset)
                     .padding(.vertical, IoDesign.focusRoom)
                 }
                 // Focused tvOS cards cast shadows beyond the shelf bounds.
                 .scrollClipDisabled()
+                .id(isLoading)
             }
         }
         .onChange(of: restoredFocusID) { _, id in

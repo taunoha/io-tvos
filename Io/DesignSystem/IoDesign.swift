@@ -38,7 +38,9 @@ enum IoDesign {
 
     static let contentInset = Space.xxxLarge
     static let landscapeCardWidth: CGFloat = 360
+    static let landscapeCardArtworkHeight: CGFloat = 203
     static let portraitCardWidth: CGFloat = 280
+    static let cardCornerRadius: CGFloat = 20
     static let cardGap = Space.xLarge
     static let focusRoom = Space.large
     static let sectionHeadingGap = Space.small
@@ -48,6 +50,26 @@ enum IoDesign {
     static let playerInfoHeight: CGFloat = 260
     static let playerInfoHorizontalInset = Space.xxLarge
     static let playerInfoCornerRadius: CGFloat = 24
+}
+
+struct IoSelectionPillLabel: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let title: String
+    let isSelected: Bool
+    let isFocused: Bool
+
+    var body: some View {
+        Text(title)
+            .font(IoDesign.body.weight(.semibold))
+            .padding(.horizontal, IoDesign.Space.large)
+            .padding(.vertical, IoDesign.Space.small)
+            .foregroundStyle(isFocused ? .black : .white)
+            .background(isFocused ? .white : .white.opacity(isSelected ? 0.18 : 0.08), in: Capsule())
+            .overlay {
+                Capsule().strokeBorder(.white.opacity(0.55), lineWidth: isSelected && !isFocused ? 1 : 0)
+            }
+            .scaleEffect(isFocused && !reduceMotion ? 1.06 : 1)
+    }
 }
 
 private struct IoCustomFocusButtonStyle: ButtonStyle {

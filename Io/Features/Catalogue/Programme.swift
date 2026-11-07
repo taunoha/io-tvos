@@ -191,9 +191,20 @@ struct ProgrammeDetail: Decodable {
         var seen = Set<Int>()
         return flatten(seasonList?.items ?? []).filter { seen.insert($0.id).inserted }
     }
-    var episodes: [Programme] {
+    var currentSeasonID: Int? {
+        let seasons = seasons
+        return seasons.first { $0.id == mainContent.id }?.id
+            ?? seasons.first { $0.episodes.contains { $0.id == mainContent.id } }?.id
+    }
+
+    var episodes: [Programme] { episodes(for: nil) }
+
+    func episodes(for seasonID: Int?) -> [Programme] {
+        let seasons = seasons
+        let items = seasons.first { $0.id == seasonID }?.episodes
+            ?? seasons.flatMap(\.episodes)
         var seen = Set<Int>()
-        return seasons.flatMap(\.episodes).filter { seen.insert($0.id).inserted }
+        return items.filter { seen.insert($0.id).inserted }
     }
 }
 
