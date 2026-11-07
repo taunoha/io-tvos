@@ -40,6 +40,7 @@ private struct IoTabController: UIViewControllerRepresentable {
         let controller = UITabBarController()
         controller.view.tintColor = .white
         let coordinator = context.coordinator
+        let searchNavigation = ProgrammeSearchNavigation()
         let searchIcon = UIImage(
             systemName: "magnifyingglass",
             withConfiguration: UIImage.SymbolConfiguration(pointSize: IoDesign.tabIconSize, weight: .semibold)
@@ -53,7 +54,8 @@ private struct IoTabController: UIViewControllerRepresentable {
             tab("Saated", content: CatalogueView(), catalogueSource: .jupiter),
             tab("Lasteekraan", content: CatalogueView(source: .lasteekraan), catalogueSource: .lasteekraan),
             tab("Jätka", content: ContinueWatchingView()),
-            tab("Otsi", content: ProgrammeSearchView(), icon: searchIcon, resetsOnSelection: false)
+            tab("Otsi", content: ProgrammeSearchView(navigation: searchNavigation), icon: searchIcon,
+                resetNavigation: { searchNavigation.selectedProgrammeID = nil })
         ]
         context.coordinator.selectedTab = controller.selectedViewController
         controller.delegate = context.coordinator
@@ -63,7 +65,7 @@ private struct IoTabController: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: UITabBarController, context: Context) {}
 
     private func tab<Content: View>(_ title: String, content: Content, icon: UIImage? = nil,
-                                    catalogueSource: CatalogueSource? = nil, resetsOnSelection: Bool = true) -> UIViewController {
+                                    catalogueSource: CatalogueSource? = nil, resetNavigation: (() -> Void)? = nil) -> UIViewController {
         func rootView(programme: Programme? = nil) -> some View {
             IoTabNavigation(content: content, programme: programme)
                 // Replacing the root explicitly resets local navigation and focus.
@@ -79,9 +81,7 @@ private struct IoTabController: UIViewControllerRepresentable {
         let item = UITabBarItem(title: icon == nil ? title : nil, image: icon, selectedImage: nil)
         item.accessibilityLabel = title
         let tab = IoTabContentController(host: host, item: item, catalogueSource: catalogueSource)
-        if resetsOnSelection {
-            tab.resetNavigation = { [weak host] in host?.rootView = rootView() }
-        }
+        tab.resetNavigation = resetNavigation ?? { [weak host] in host?.rootView = rootView() }
         tab.openProgramme = { [weak host] programme in host?.rootView = rootView(programme: programme) }
         return tab
     }

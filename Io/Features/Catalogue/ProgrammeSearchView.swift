@@ -1,5 +1,10 @@
 import SwiftUI
 
+@Observable
+final class ProgrammeSearchNavigation {
+    var selectedProgrammeID: Int?
+}
+
 struct ProgrammeSearchView: View {
     private struct Request: Equatable {
         let query: String
@@ -7,6 +12,7 @@ struct ProgrammeSearchView: View {
         private let id = UUID()
     }
 
+    let navigation: ProgrammeSearchNavigation
     @FocusState private var focusedKey: String?
     @State private var phrase = ""
     @State private var results: [Programme] = []
@@ -18,6 +24,7 @@ struct ProgrammeSearchView: View {
     private var query: String { phrase.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     var body: some View {
+        @Bindable var navigation = navigation
         VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
             searchInput
                 .padding(.horizontal, IoDesign.contentInset)
@@ -26,7 +33,9 @@ struct ProgrammeSearchView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                     if !results.isEmpty {
-                        ProgrammeRow(title: "Otsingutulemused", items: results, wrapsCards: true)
+                        ProgrammeRow(title: "Otsingutulemused", items: results, wrapsCards: true, openProgramme: { programme in
+                            navigation.selectedProgrammeID = programme.id
+                        })
                             .overlay(alignment: .bottom) {
                                 if let nextPage {
                                     paginationTrigger(for: nextPage)
@@ -45,6 +54,11 @@ struct ProgrammeSearchView: View {
             .ignoresSafeArea(.container, edges: .bottom)
         }
         .ignoresSafeArea(.container, edges: .horizontal)
+        .navigationDestination(item: $navigation.selectedProgrammeID) { id in
+            if let programme = results.first(where: { $0.id == id }) {
+                ProgrammeDetailView(programme: programme)
+            }
+        }
         .onChange(of: query) { _, query in
             results = []
             seenIDs = []
