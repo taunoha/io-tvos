@@ -8,6 +8,7 @@ struct ProgrammeDetailView: View {
 
     @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(WatchHistory.self) private var history
+    @Environment(\.openProgrammeDetail) private var openProgramme
     let programme: Programme
     @State private var page: ProgrammeDetail?
     @State private var seasons: [ProgrammeDetail.SeasonChoice] = []
@@ -16,6 +17,7 @@ struct ProgrammeDetailView: View {
     @State private var loading = true
     @State private var error: String?
     @State private var playing: PlaybackSelection?
+    @State private var programmeToOpen: Programme?
     @State private var openedEpisodeID: Int?
     @State private var restoredEpisodeFocusID: Int?
     @FocusState private var focusedSeasonID: Int?
@@ -134,12 +136,20 @@ struct ProgrammeDetailView: View {
         .fullScreenCover(item: $playing, onDismiss: {
             restoredEpisodeFocusID = openedEpisodeID
             openedEpisodeID = nil
+            if let programmeToOpen {
+                self.programmeToOpen = nil
+                if programmeToOpen.id != programme.id || programmeToOpen.source != programme.source {
+                    openProgramme(programmeToOpen)
+                }
+            }
         }) { selection in
             OnDemandPlayerScreen(
                 programme: selection.programme,
                 startPosition: selection.position,
                 history: history
-            )
+            ) {
+                programmeToOpen = programme.type == "series" ? programme : selection.programme.playbackDetailProgramme
+            }
         }
     }
 

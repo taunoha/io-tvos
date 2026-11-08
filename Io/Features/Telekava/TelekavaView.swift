@@ -26,6 +26,7 @@ struct TelekavaView: View {
     }
 
     @Environment(WatchHistory.self) private var history
+    @Environment(\.openProgrammeDetail) private var openProgramme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(LiveChannel.lastWatchedKey) private var lastChannelID = "etv"
     @FocusState private var focus: Focus?
@@ -46,6 +47,7 @@ struct TelekavaView: View {
     @State private var retry = 0
     @State private var catalogueDetail: Programme?
     @State private var playback: Playback?
+    @State private var programmeToOpen: Programme?
     @State private var returnFocus: Focus?
 
     var body: some View {
@@ -128,7 +130,10 @@ struct TelekavaView: View {
             await load(day)
         }
         .fullScreenCover(item: $playback, onDismiss: {
-            if returnFocus == .playbackAction,
+            if let programmeToOpen {
+                self.programmeToOpen = nil
+                openProgramme(programmeToOpen)
+            } else if returnFocus == .playbackAction,
                let entry = selectedEntry,
                confirmedReplay(for: entry, at: .now) == nil {
                 focusSchedule()
@@ -138,9 +143,12 @@ struct TelekavaView: View {
         }) { playback in
             switch playback {
             case .live(let channel):
-                LivePlayerScreen(channel: channel)
+                LivePlayerScreen(channel: channel) { programmeToOpen = $0 }
             case .replay(let programme):
-                OnDemandPlayerScreen(programme: programme, startPosition: history.entry(for: programme.id)?.position ?? 0, history: history)
+                OnDemandPlayerScreen(programme: programme, startPosition: history.entry(for: programme.id)?.position ?? 0,
+                                     history: history) {
+                    programmeToOpen = programme.playbackDetailProgramme
+                }
             }
         }
     }

@@ -5,6 +5,7 @@ struct ProgrammeInfoCard: View {
     let metadata: String?
     var lead: String? = nil
     var programme: Programme? = nil
+    var onOpenProgramme: (() -> Void)? = nil
 
     var body: some View {
         let description = Programme.plainDescription(lead)
@@ -42,8 +43,20 @@ struct ProgrammeInfoCard: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            if let onOpenProgramme {
+                Button(action: onOpenProgramme) {
+                    Label("Saate info", systemImage: "info.circle")
+                        .font(IoDesign.body.weight(.semibold))
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.capsule)
+                .accessibilityIdentifier("player-programme-info")
+                .fixedSize()
+                .frame(height: IoDesign.scheduleArtworkHeight)
+            }
         }
-        .padding(IoDesign.Space.large)
+        .padding(IoDesign.programmeInfoContentInset)
         .glassEffect(in: .rect(cornerRadius: IoDesign.cardCornerRadius))
     }
 }

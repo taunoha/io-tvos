@@ -4,6 +4,7 @@ import AVKit
 private struct LivePlayerInfo: View {
     let channel: LiveChannel
     let player: AVPlayer
+    let onOpenProgramme: (Programme) -> Void
     @State private var schedules: [TelekavaEntry] = []
     @State private var programme: Programme?
 
@@ -17,10 +18,14 @@ private struct LivePlayerInfo: View {
             Group {
                 if let current {
                     let status = current.isCurrent(at: context.date) ? " · Praegu eetris" : ""
+                    let currentProgramme = programme?.id == contentID ? programme : nil
                     ProgrammeInfoCard(title: current.title,
                                       metadata: "\(current.timeRange) · \(channel.title)\(status)",
                                       lead: current.lead,
-                                      programme: programme?.id == contentID ? programme : nil)
+                                      programme: currentProgramme,
+                                      onOpenProgramme: currentProgramme.map { programme in
+                                          { onOpenProgramme(programme.playbackDetailProgramme) }
+                                      })
                 } else {
                     ProgrammeInfoCard(title: channel.title, metadata: "Saatekava pole saadaval")
                 }
@@ -56,6 +61,7 @@ private struct LivePlayerInfo: View {
 
 struct LivePlayerScreen: View {
     let channel: LiveChannel
+    let onOpenProgramme: (Programme) -> Void
     @Environment(\.dismiss) private var dismiss
     @AppStorage(LiveChannel.lastWatchedKey) private var lastChannelID = "etv"
     @StateObject private var playback = LivePlayback()
@@ -65,7 +71,10 @@ struct LivePlayerScreen: View {
             Color.black.ignoresSafeArea()
             if let player = playback.player {
                 NativePlayer(player: player, onDismiss: { dismiss() }) {
-                    LivePlayerInfo(channel: channel, player: player)
+                    LivePlayerInfo(channel: channel, player: player) { programme in
+                        onOpenProgramme(programme)
+                        dismiss()
+                    }
                 }
                 .ignoresSafeArea()
             }

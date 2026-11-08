@@ -47,6 +47,16 @@ struct Programme: Decodable, Identifiable {
     }
     var descriptionText: String { Self.plainDescription(lead) }
 
+    var playbackDetailProgramme: Programme {
+        guard type == "episode", let root = rootContent, let id = root.id, id > 0, id != self.id else {
+            return self
+        }
+        return Programme(id: id, heading: root.heading ?? heading, subHeading: nil, lead: nil,
+                         type: "series", scheduleStart: nil, photos: root.photos,
+                         horizontalPhotos: root.horizontalPhotos, verticalPhotos: root.verticalPhotos,
+                         medias: nil, rootContent: nil, catalogueSource: source)
+    }
+
     static func plainDescription(_ lead: String?) -> String {
         (lead ?? "").replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
             .replacingOccurrences(of: "&quot;", with: "\"")

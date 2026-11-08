@@ -45,6 +45,7 @@ enum IoDesign {
     static let focusRoom = Space.large
     static let sectionHeadingGap = Space.small
     static let shelfGap = Space.xLarge
+    static let programmeInfoContentInset = Space.large * 1.5
     static let programmeInfoDescriptionMaxWidth: CGFloat = 1050
 
     static let playerInfoWidth: CGFloat = 1200

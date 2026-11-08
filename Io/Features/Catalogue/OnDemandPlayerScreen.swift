@@ -11,14 +11,17 @@ struct OnDemandPlayerScreen: View {
     let programme: Programme
     let startPosition: Double
     let history: WatchHistory
+    let onOpenProgramme: () -> Void
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
     @StateObject private var playback: OnDemandPlayback
 
-    init(programme: Programme, startPosition: Double, history: WatchHistory) {
+    init(programme: Programme, startPosition: Double, history: WatchHistory,
+         onOpenProgramme: @escaping () -> Void) {
         self.programme = programme
         self.startPosition = startPosition
         self.history = history
+        self.onOpenProgramme = onOpenProgramme
         _playback = StateObject(wrappedValue: OnDemandPlayback(history: history))
     }
 
@@ -29,7 +32,11 @@ struct OnDemandPlayerScreen: View {
                 NativePlayer(player: player, onDismiss: { dismiss() }) {
                     ProgrammeInfoCard(title: programme.playbackTitle,
                                       metadata: programme.playbackSubtitle,
-                                      programme: programme)
+                                      programme: programme) {
+                        playback.saveProgress()
+                        onOpenProgramme()
+                        dismiss()
+                    }
                 }
                 .ignoresSafeArea()
             }

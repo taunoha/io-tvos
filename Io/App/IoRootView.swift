@@ -1,6 +1,17 @@
 import SwiftUI
 import UIKit
 
+private struct OpenProgrammeDetailKey: EnvironmentKey {
+    static let defaultValue: @MainActor (Programme) -> Void = { _ in }
+}
+
+extension EnvironmentValues {
+    var openProgrammeDetail: @MainActor (Programme) -> Void {
+        get { self[OpenProgrammeDetailKey.self] }
+        set { self[OpenProgrammeDetailKey.self] = newValue }
+    }
+}
+
 struct IoRootView: View {
     let history: WatchHistory
     let favorites: ProgrammeFavorites
@@ -40,16 +51,40 @@ private struct IoTabController: UIViewControllerRepresentable {
         let controller = UITabBarController()
         controller.view.tintColor = .white
         let coordinator = context.coordinator
+        func tab<Content: View>(_ title: String, content: Content, icon: UIImage? = nil,
+                                catalogueSource: CatalogueSource? = nil,
+                                resetNavigation: (() -> Void)? = nil) -> UIViewController {
+            func rootView(programme: Programme? = nil) -> some View {
+                IoTabNavigation(content: content, programme: programme)
+                    // Replacing the root explicitly resets local navigation and focus.
+                    .id(UUID())
+                    .font(IoDesign.body)
+                    .environment(history)
+                    .environment(favorites)
+                    .environment(\.openProgrammeDetail) { [weak controller, weak coordinator] programme in
+                        guard let controller else { return }
+                        coordinator?.open(programme, in: controller)
+                    }
+                    .tint(.white)
+                    .preferredColorScheme(.dark)
+            }
+
+            let host = UIHostingController(rootView: rootView())
+            let item = UITabBarItem(title: icon == nil ? title : nil, image: icon, selectedImage: nil)
+            item.accessibilityLabel = title
+            let tab = IoTabContentController(host: host, item: item, catalogueSource: catalogueSource)
+            tab.resetNavigation = resetNavigation ?? { [weak host] in host?.rootView = rootView() }
+            tab.openProgramme = { [weak host] programme in host?.rootView = rootView(programme: programme) }
+            return tab
+        }
+
         let searchNavigation = ProgrammeSearchNavigation()
         let searchIcon = UIImage(
             systemName: "magnifyingglass",
             withConfiguration: UIImage.SymbolConfiguration(pointSize: IoDesign.tabIconSize, weight: .semibold)
         )
         controller.viewControllers = [
-            tab("Otse", content: LiveHomeView { [weak controller, weak coordinator] programme in
-                guard let controller else { return }
-                coordinator?.open(programme, in: controller)
-            }),
+            tab("Otse", content: LiveHomeView()),
             tab("Telekava", content: TelekavaView()),
             tab("Saated", content: CatalogueView(), catalogueSource: .jupiter),
             tab("Lasteekraan", content: CatalogueView(source: .lasteekraan), catalogueSource: .lasteekraan),
@@ -63,28 +98,6 @@ private struct IoTabController: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ controller: UITabBarController, context: Context) {}
-
-    private func tab<Content: View>(_ title: String, content: Content, icon: UIImage? = nil,
-                                    catalogueSource: CatalogueSource? = nil, resetNavigation: (() -> Void)? = nil) -> UIViewController {
-        func rootView(programme: Programme? = nil) -> some View {
-            IoTabNavigation(content: content, programme: programme)
-                // Replacing the root explicitly resets local navigation and focus.
-                .id(UUID())
-                .font(IoDesign.body)
-                .environment(history)
-                .environment(favorites)
-                .tint(.white)
-                .preferredColorScheme(.dark)
-        }
-
-        let host = UIHostingController(rootView: rootView())
-        let item = UITabBarItem(title: icon == nil ? title : nil, image: icon, selectedImage: nil)
-        item.accessibilityLabel = title
-        let tab = IoTabContentController(host: host, item: item, catalogueSource: catalogueSource)
-        tab.resetNavigation = resetNavigation ?? { [weak host] in host?.rootView = rootView() }
-        tab.openProgramme = { [weak host] programme in host?.rootView = rootView(programme: programme) }
-        return tab
-    }
 }
 
 private struct IoTabNavigation<Content: View>: View {

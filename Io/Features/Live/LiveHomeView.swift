@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct LiveHomeView: View {
-    let openProgramme: (Programme) -> Void
+    @Environment(\.openProgrammeDetail) private var openProgramme
     @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(WatchHistory.self) private var history
     @State private var selectedChannel: LiveChannel?
+    @State private var programmeToOpen: Programme?
     @FocusState private var focusedChannelID: String?
     @State private var backgroundChannelID = LiveChannel.all.first?.id
     @Namespace private var channelFocusScope
@@ -79,9 +80,14 @@ struct LiveHomeView: View {
             .allowsHitTesting(false)
         }
         .fullScreenCover(item: $selectedChannel, onDismiss: {
-            focusedChannelID = backgroundChannelID
+            if let programmeToOpen {
+                self.programmeToOpen = nil
+                openProgramme(programmeToOpen)
+            } else {
+                focusedChannelID = backgroundChannelID
+            }
         }) { channel in
-            LivePlayerScreen(channel: channel)
+            LivePlayerScreen(channel: channel) { programmeToOpen = $0 }
         }
     }
 }
