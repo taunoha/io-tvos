@@ -22,10 +22,13 @@ private struct LivePlayerInfo: View {
                     ProgrammeInfoCard(title: current.title,
                                       metadata: "\(current.timeRange) · \(channel.title)\(status)",
                                       lead: current.lead,
-                                      programme: currentProgramme,
-                                      onOpenProgramme: currentProgramme.map { programme in
-                                          { onOpenProgramme(programme.playbackDetailProgramme) }
-                                      })
+                                      programme: currentProgramme) {
+                        if let currentProgramme {
+                            ProgrammeInfoButton {
+                                onOpenProgramme(currentProgramme.playbackDetailProgramme)
+                            }
+                        }
+                    }
                 } else {
                     ProgrammeInfoCard(title: channel.title, metadata: "Saatekava pole saadaval")
                 }

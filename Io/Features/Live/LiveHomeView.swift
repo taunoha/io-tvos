@@ -93,13 +93,6 @@ struct LiveHomeView: View {
         }) { channel in
             LivePlayerScreen(channel: channel) { programmeToOpen = $0 }
         }
-        .navigationDestination(isPresented: Binding(
-            get: { programmeDetail != nil },
-            set: { if !$0 { programmeDetail = nil } }
-        )) {
-            if let programmeDetail {
-                ProgrammeDetailView(programme: programmeDetail)
-            }
-        }
+        .programmeDetailDestination($programmeDetail)
     }
 }

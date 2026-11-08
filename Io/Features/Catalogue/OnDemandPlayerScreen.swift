@@ -33,9 +33,11 @@ struct OnDemandPlayerScreen: View {
                     ProgrammeInfoCard(title: programme.playbackTitle,
                                       metadata: programme.playbackSubtitle,
                                       programme: programme) {
-                        playback.saveProgress()
-                        onOpenProgramme()
-                        dismiss()
+                        ProgrammeInfoButton {
+                            playback.saveProgress()
+                            onOpenProgramme()
+                            dismiss()
+                        }
                     }
                 }
                 .ignoresSafeArea()

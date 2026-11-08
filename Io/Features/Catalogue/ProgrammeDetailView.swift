@@ -1,5 +1,18 @@
 import SwiftUI
 
+extension View {
+    func programmeDetailDestination(_ programme: Binding<Programme?>) -> some View {
+        navigationDestination(isPresented: Binding(
+            get: { programme.wrappedValue != nil },
+            set: { if !$0 { programme.wrappedValue = nil } }
+        )) {
+            if let detail = programme.wrappedValue {
+                ProgrammeDetailView(programme: detail)
+            }
+        }
+    }
+}
+
 struct ProgrammeDetailView: View {
     private struct DetailRequest: Equatable {
         var seasonID: Int?

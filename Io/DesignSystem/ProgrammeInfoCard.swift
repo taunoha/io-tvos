@@ -1,11 +1,20 @@
 import SwiftUI
 
-struct ProgrammeInfoCard: View {
+struct ProgrammeInfoCard<Action: View>: View {
     let title: String
     let metadata: String?
-    var lead: String? = nil
-    var programme: Programme? = nil
-    var onOpenProgramme: (() -> Void)? = nil
+    let lead: String?
+    let programme: Programme?
+    let action: Action
+
+    init(title: String, metadata: String?, lead: String? = nil, programme: Programme? = nil,
+         @ViewBuilder action: () -> Action = { EmptyView() }) {
+        self.title = title
+        self.metadata = metadata
+        self.lead = lead
+        self.programme = programme
+        self.action = action()
+    }
 
     var body: some View {
         let description = Programme.plainDescription(lead)
@@ -44,19 +53,26 @@ struct ProgrammeInfoCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            if let onOpenProgramme {
-                Button(action: onOpenProgramme) {
-                    Label("Saate info", systemImage: "info.circle")
-                        .font(IoDesign.body.weight(.semibold))
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.capsule)
-                .accessibilityIdentifier("player-programme-info")
-                .fixedSize()
-                .frame(height: IoDesign.scheduleArtworkHeight)
-            }
+            action
         }
         .padding(IoDesign.programmeInfoContentInset)
         .glassEffect(in: .rect(cornerRadius: IoDesign.cardCornerRadius))
+    }
+}
+
+struct ProgrammeInfoButton: View {
+    var accessibilityID = "player-programme-info"
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label("Saate info", systemImage: "info.circle")
+                .font(IoDesign.body.weight(.semibold))
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.capsule)
+        .accessibilityIdentifier(accessibilityID)
+        .fixedSize()
+        .frame(height: IoDesign.scheduleArtworkHeight)
     }
 }

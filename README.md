@@ -13,6 +13,10 @@ Io is an independent Apple TV app for watching ERR Jupiter.
 
 Open **Info** in the playback controls to see programme details during live or on-demand playback. In **Info** and **Telekava**, the card shows the title, up to two lines of description, and details such as the channel and airtime when available. On wide cards, the description uses a narrower column for shorter lines.
 
+When **Saate info** is available in the player, select it to close playback and open the programme’s detail page. If you started playback from **Otse** or **Telekava**, press Back on the detail page to return to that tab.
+
+In **Telekava**, the selected programme’s card also offers **Saate info** when a catalogue entry is available. Press Down from the bottom channel row to reach the card button, or hold Select on a programme to open **Saate info** from its menu.
+
 ## Install on your Apple TV
 
 You’ll need a Mac with Xcode and a compatible tvOS SDK, an Apple TV running tvOS 27.0 or later, and your own Apple Account. Playback requires an internet connection.

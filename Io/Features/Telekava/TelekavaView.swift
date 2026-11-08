@@ -7,7 +7,7 @@ struct TelekavaView: View {
     }
 
     private enum Focus: Hashable {
-        case day(Date), row(Row), retry(String), playbackAction
+        case day(Date), row(Row), retry(String), programmeInfo
     }
 
     private enum ChannelSchedule {
@@ -26,7 +26,6 @@ struct TelekavaView: View {
     }
 
     @Environment(WatchHistory.self) private var history
-    @Environment(\.openProgrammeDetail) private var openProgramme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(LiveChannel.lastWatchedKey) private var lastChannelID = "etv"
     @FocusState private var focus: Focus?
@@ -48,6 +47,7 @@ struct TelekavaView: View {
     @State private var catalogueDetail: Programme?
     @State private var playback: Playback?
     @State private var programmeToOpen: Programme?
+    @State private var detailProgramme: Programme?
     @State private var returnFocus: Focus?
 
     var body: some View {
@@ -74,6 +74,7 @@ struct TelekavaView: View {
                 today = newToday
             }
             .task(id: contentID) {
+                if let contentID, catalogueDetail?.id == contentID { return }
                 catalogueDetail = nil
                 guard let contentID else { return }
                 do {
@@ -100,7 +101,7 @@ struct TelekavaView: View {
             if case .row(let row) = value {
                 if let selected, row != selected, loadedDay == day {
                     switch previous {
-                    case .day, .playbackAction:
+                    case .day, .programmeInfo:
                         focus = .row(selected)
                         return
                     default:
@@ -131,12 +132,8 @@ struct TelekavaView: View {
         }
         .fullScreenCover(item: $playback, onDismiss: {
             if let programmeToOpen {
+                detailProgramme = programmeToOpen
                 self.programmeToOpen = nil
-                openProgramme(programmeToOpen)
-            } else if returnFocus == .playbackAction,
-               let entry = selectedEntry,
-               confirmedReplay(for: entry, at: .now) == nil {
-                focusSchedule()
             } else {
                 focus = returnFocus
             }
@@ -151,6 +148,7 @@ struct TelekavaView: View {
                 }
             }
         }
+        .programmeDetailDestination($detailProgramme)
     }
 
     private struct LoadRequest: Equatable {
@@ -415,6 +413,13 @@ struct TelekavaView: View {
         .onMoveCommand { direction in
             move(direction, from: row)
         }
+        .contextMenu {
+            if isSelected, let programme = catalogueProgramme(for: entry) {
+                Button("Saate info", systemImage: "info.circle") {
+                    detailProgramme = programme.playbackDetailProgramme
+                }
+            }
+        }
         .task(id: pendingRowFocus == row) {
             if pendingRowFocus == row {
                 focus = .row(row)
@@ -424,11 +429,25 @@ struct TelekavaView: View {
     }
 
     private func programmeDetail(_ entry: TelekavaEntry, channel: LiveChannel, now: Date) -> some View {
-        let programme = catalogueDetail?.id == entry.contentId ? catalogueDetail : nil
+        let programme = catalogueProgramme(for: entry)
         let status = entry.isCurrent(at: now) ? " · Praegu eetris" : ""
         return ProgrammeInfoCard(title: entry.title,
                                  metadata: "\(entry.timeRange) · \(channel.title)\(status)",
-                                 lead: entry.lead, programme: programme)
+                                 lead: entry.lead, programme: programme) {
+            if let programme {
+                ProgrammeInfoButton(accessibilityID: "telekava-programme-info") {
+                    detailProgramme = programme.playbackDetailProgramme
+                }
+                .focused($focus, equals: .programmeInfo)
+                .onMoveCommand { direction in
+                    if direction == .up { focusSchedule() }
+                }
+            }
+        }
+    }
+
+    private func catalogueProgramme(for entry: TelekavaEntry) -> Programme? {
+        catalogueDetail?.id == entry.contentId ? catalogueDetail : nil
     }
 
     private var selectedEntry: TelekavaEntry? {
@@ -504,8 +523,8 @@ struct TelekavaView: View {
         }
         if direction == .up {
             focus = .day(day)
-        } else if let entry = selectedEntry, confirmedReplay(for: entry, at: .now) != nil {
-            focus = .playbackAction
+        } else if let entry = selectedEntry, catalogueProgramme(for: entry) != nil {
+            focus = .programmeInfo
         }
     }
 
