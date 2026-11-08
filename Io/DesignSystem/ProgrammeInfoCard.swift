@@ -41,6 +41,7 @@ struct ProgrammeInfoCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(IoDesign.Space.large)
-        .background(.black.opacity(0.42), in: RoundedRectangle(cornerRadius: IoDesign.schedulePanelCornerRadius))
+        .glassEffect(in: .rect(cornerRadius: IoDesign.cardCornerRadius))
+
     }
 }
