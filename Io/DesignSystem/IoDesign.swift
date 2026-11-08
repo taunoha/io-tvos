@@ -45,10 +45,11 @@ enum IoDesign {
     static let focusRoom = Space.large
     static let sectionHeadingGap = Space.small
     static let shelfGap = Space.xLarge
+    static let programmeInfoDescriptionMaxWidth: CGFloat = 1050
 
     static let playerInfoWidth: CGFloat = 1200
     static let playerInfoHeight: CGFloat = 260
-    static let playerInfoHorizontalInset = Space.xxLarge
+    static let playerInfoHorizontalInset = Space.xLarge
     static let playerInfoCornerRadius: CGFloat = 24
 }
 

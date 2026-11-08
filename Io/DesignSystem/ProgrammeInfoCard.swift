@@ -9,7 +9,7 @@ struct ProgrammeInfoCard: View {
     var body: some View {
         let description = Programme.plainDescription(lead)
         let synopsis = description.isEmpty ? (programme?.descriptionText ?? "") : description
-        HStack(alignment: .top ,spacing: IoDesign.Space.xLarge) {
+        HStack(alignment: .top, spacing: IoDesign.Space.xLarge) {
             ProgrammeArtwork(url: programme?.imageURL) {
                 ZStack {
                     Color.white.opacity(0.08)
@@ -20,28 +20,30 @@ struct ProgrammeInfoCard: View {
             .clipShape(RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius))
             .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
-                Text(title)
-                    .font(IoDesign.scheduleDetailTitle)
-                    .lineLimit(1)
-                    .accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: IoDesign.Space.medium) {
+                VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+                    Text(title)
+                        .font(IoDesign.scheduleDetailTitle)
+                        .lineLimit(1)
+                        .accessibilityAddTraits(.isHeader)
+                    if !synopsis.isEmpty {
+                        Text(synopsis)
+                            .font(IoDesign.body)
+                            .foregroundStyle(.white.opacity(0.85))
+                            .lineLimit(2)
+                            .frame(maxWidth: IoDesign.programmeInfoDescriptionMaxWidth, alignment: .leading)
+                    }
+                }
                 if let metadata, !metadata.isEmpty {
                     Text(metadata)
                         .font(IoDesign.metadata)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
-                if !synopsis.isEmpty {
-                    Text(synopsis)
-                        .font(IoDesign.body)
-                        .foregroundStyle(.white.opacity(0.85))
-                        .lineLimit(2)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(IoDesign.Space.large)
         .glassEffect(in: .rect(cornerRadius: IoDesign.cardCornerRadius))
-
     }
 }

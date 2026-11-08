@@ -11,7 +11,7 @@ Io is an independent Apple TV app for watching ERR Jupiter.
 - **Jätka** lets you resume unfinished programmes from your saved position. Programme cards show the remaining time, for example `38m` or `2h 05m`. Viewing history and favourites are stored on the Apple TV.
 - **Otsi** searches Jupiter for programmes.
 
-Open **Info** in the playback controls to see programme details during live or on-demand playback.
+Open **Info** in the playback controls to see programme details during live or on-demand playback. In **Info** and **Telekava**, the card shows the title, up to two lines of description, and details such as the channel and airtime when available. On wide cards, the description uses a narrower column for shorter lines.
 
 ## Install on your Apple TV
 
