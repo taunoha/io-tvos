@@ -6,6 +6,7 @@ struct LiveHomeView: View {
     @Environment(WatchHistory.self) private var history
     @State private var selectedChannel: LiveChannel?
     @State private var programmeToOpen: Programme?
+    @State private var programmeDetail: Programme?
     @FocusState private var focusedChannelID: String?
     @State private var backgroundChannelID = LiveChannel.all.first?.id
     @Namespace private var channelFocusScope
@@ -50,6 +51,7 @@ struct LiveHomeView: View {
         .ignoresSafeArea(.container, edges: .horizontal)
         .focusScope(channelFocusScope)
         .onAppear {
+            guard programmeToOpen == nil, programmeDetail == nil else { return }
             focusedChannelID = backgroundChannelID
             resetFocus(in: channelFocusScope)
         }
@@ -63,7 +65,8 @@ struct LiveHomeView: View {
                     LinearGradient(colors: [Color(white: 0.12), .black], startPoint: .topLeading, endPoint: .bottomTrailing)
                     LiveBackgroundStage(channelID: backgroundChannelID,
                                         size: geometry.size,
-                                        isActive: selectedChannel == nil && scenePhase == .active)
+                                        isActive: selectedChannel == nil && programmeToOpen == nil
+                                            && programmeDetail == nil && scenePhase == .active)
                 }
                 // A stationary layer above all moving videos and below the browsing UI.
                 .overlay {
@@ -81,13 +84,22 @@ struct LiveHomeView: View {
         }
         .fullScreenCover(item: $selectedChannel, onDismiss: {
             if let programmeToOpen {
+                // Keep the destination in this tab while tvOS restores focus after dismissal.
+                programmeDetail = programmeToOpen
                 self.programmeToOpen = nil
-                openProgramme(programmeToOpen)
             } else {
                 focusedChannelID = backgroundChannelID
             }
         }) { channel in
             LivePlayerScreen(channel: channel) { programmeToOpen = $0 }
+        }
+        .navigationDestination(isPresented: Binding(
+            get: { programmeDetail != nil },
+            set: { if !$0 { programmeDetail = nil } }
+        )) {
+            if let programmeDetail {
+                ProgrammeDetailView(programme: programmeDetail)
+            }
         }
     }
 }
