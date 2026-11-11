@@ -32,6 +32,7 @@
 		B9F1744B8C4145CA81D6904C /* LivePlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985DC8A426324171909B84F3 /* LivePlayback.swift */; };
 		CD9427C88CC7429B8D32F39D /* LivePlaybackDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1670E5D6A046C58714882A /* LivePlaybackDiagnostics.swift */; };
 		A24C77B1A2B54856BBFD3835 /* LivePlayerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFF159F509A14B11952C9435 /* LivePlayerScreen.swift */; };
+		A85BF701807C4E7BA301D402 /* LiveProgrammeShelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85BF701807C4E7BA301D401 /* LiveProgrammeShelf.swift */; };
 		F88E62E47AB54D4283F07638 /* FairPlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA67144AC89543B3B85A87A7 /* FairPlay.swift */; };
 		8D91C68410B347C6A4F6D4C6 /* NativePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CECBACB35524CA8A70800AE /* NativePlayer.swift */; };
 		E00000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000002 /* Assets.xcassets */; };
@@ -66,6 +67,7 @@
 		985DC8A426324171909B84F3 /* LivePlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePlayback.swift; sourceTree = "<group>"; };
 		3A1670E5D6A046C58714882A /* LivePlaybackDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePlaybackDiagnostics.swift; sourceTree = "<group>"; };
 		AFF159F509A14B11952C9435 /* LivePlayerScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePlayerScreen.swift; sourceTree = "<group>"; };
+		A85BF701807C4E7BA301D401 /* LiveProgrammeShelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveProgrammeShelf.swift; sourceTree = "<group>"; };
 		DA67144AC89543B3B85A87A7 /* FairPlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FairPlay.swift; sourceTree = "<group>"; };
 		5CECBACB35524CA8A70800AE /* NativePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePlayer.swift; sourceTree = "<group>"; };
 		E00000000000000000000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				985DC8A426324171909B84F3 /* LivePlayback.swift */,
 				3A1670E5D6A046C58714882A /* LivePlaybackDiagnostics.swift */,
 				AFF159F509A14B11952C9435 /* LivePlayerScreen.swift */,
+				A85BF701807C4E7BA301D401 /* LiveProgrammeShelf.swift */,
 			);
 			path = Live;
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 				B9F1744B8C4145CA81D6904C /* LivePlayback.swift in Sources */,
 				CD9427C88CC7429B8D32F39D /* LivePlaybackDiagnostics.swift in Sources */,
 				A24C77B1A2B54856BBFD3835 /* LivePlayerScreen.swift in Sources */,
+				A85BF701807C4E7BA301D402 /* LiveProgrammeShelf.swift in Sources */,
 				F88E62E47AB54D4283F07638 /* FairPlay.swift in Sources */,
 				8D91C68410B347C6A4F6D4C6 /* NativePlayer.swift in Sources */,
 			);

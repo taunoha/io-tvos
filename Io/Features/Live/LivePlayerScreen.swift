@@ -3,62 +3,105 @@ import AVKit
 
 private struct LivePlayerInfo: View {
     let channel: LiveChannel
-    let player: AVPlayer
+    let current: TelekavaEntry?
+    let isOnAir: Bool
     let onOpenProgramme: (Programme) -> Void
-    @State private var schedules: [TelekavaEntry] = []
     @State private var programme: Programme?
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            let date = player.currentItem?.currentDate() ?? context.date
-            let day = TelekavaAPI.day(containing: date)
-            let current = schedules.first { $0.isCurrent(at: date) }
-            let contentID = current?.contentId
-
-            Group {
-                if let current {
-                    let status = current.isCurrent(at: context.date) ? " · Praegu eetris" : ""
-                    let currentProgramme = programme?.id == contentID ? programme : nil
-                    ProgrammeInfoCard(title: current.title,
-                                      metadata: "\(current.timeRange) · \(channel.title)\(status)",
-                                      lead: current.lead,
-                                      programme: currentProgramme) {
-                        if let currentProgramme {
-                            ProgrammeInfoButton {
-                                onOpenProgramme(currentProgramme.playbackDetailProgramme)
-                            }
+        Group {
+            if let current {
+                let status = isOnAir ? " · Praegu eetris" : ""
+                let currentProgramme = programme?.id == current.contentId ? programme : nil
+                ProgrammeInfoCard(title: current.title,
+                                  metadata: "\(current.timeRange) · \(channel.title)\(status)",
+                                  lead: current.lead,
+                                  programme: currentProgramme) {
+                    if let currentProgramme {
+                        ProgrammeInfoButton {
+                            onOpenProgramme(currentProgramme.playbackDetailProgramme)
                         }
                     }
-                } else {
-                    ProgrammeInfoCard(title: channel.title, metadata: "Saatekava pole saadaval")
                 }
+            } else {
+                ProgrammeInfoCard(title: channel.title, metadata: "Saatekava pole saadaval")
             }
-            .task(id: day) {
+        }
+        .task(id: current?.contentId) {
+            programme = nil
+            guard let contentID = current?.contentId,
+                  let page = try? await OnDemandAPI.detail(contentID), !Task.isCancelled else { return }
+            programme = page.mainContent
+        }
+    }
+}
+
+private struct LivePlayerWithSchedule: View {
+    let channel: LiveChannel
+    let player: AVPlayer
+    let onDismiss: () -> Void
+    let onOpenProgramme: (Programme) -> Void
+    @Environment(WatchHistory.self) private var history
+    @State private var schedules: [Date: [TelekavaEntry]] = [:]
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let window = LiveSeekWindow(player: player)
+            let date = player.currentItem?.currentDate() ?? context.date
+            let days = scheduleDays(from: min(window?.earliestDate ?? date, date), through: max(date, context.date))
+            let entries = scheduleEntries(for: days)
+            let current = entries.first { $0.isCurrent(at: date) }
+            let reachable = window.map { window in
+                entries.filter { window.seekTime(for: Date(timeIntervalSince1970: $0.startTime)) != nil }
+            } ?? []
+            let tab = programmeTab(entries: reachable, date: date)
+            NativePlayer(player: player, onDismiss: onDismiss, additionalTab: tab) {
+                LivePlayerInfo(channel: channel, current: current,
+                               isOnAir: current?.isCurrent(at: context.date) == true, onOpenProgramme: onOpenProgramme)
+            }
+            .task(id: days) {
                 while !Task.isCancelled {
-                    await loadSchedule(for: day, at: date)
+                    await refreshSchedule(for: days)
                     try? await Task.sleep(for: .seconds(300))
                 }
-            }
-            .task(id: contentID) {
-                programme = nil
-                guard let contentID,
-                      let page = try? await OnDemandAPI.detail(contentID),
-                      !Task.isCancelled else { return }
-                programme = page.mainContent
             }
         }
     }
 
-    private func loadSchedule(for day: Date, at date: Date) async {
-        guard var entries = try? await TelekavaAPI.schedule(channel: channel, day: day) else { return }
-        if !entries.contains(where: { $0.isCurrent(at: date) }),
-           let overnight = try? await TelekavaAPI.schedule(channel: channel, day: TelekavaAPI.day(-1, from: day)) {
-            // ERR may list programmes after midnight under the previous broadcast day.
-            let ids = Set(entries.map(\.id))
-            entries += overnight.filter { $0.endTime > day.timeIntervalSince1970 && !ids.contains($0.id) }
+    private func programmeTab(entries: [TelekavaEntry], date: Date) -> NativePlayerTab? {
+        guard !entries.isEmpty else { return nil }
+        return NativePlayerTab(title: "Saated", height: IoDesign.playerProgrammeShelfHeight) { onJump in
+            AnyView(LiveProgrammeShelf(entries: entries, viewingDate: date, player: player, onJump: onJump)
+                .environment(history))
         }
-        guard !Task.isCancelled else { return }
-        schedules = entries
+    }
+
+    private func scheduleDays(from start: Date, through end: Date) -> [Date] {
+        // ERR may list programmes after midnight under the previous broadcast day.
+        let first = TelekavaAPI.day(-1, from: TelekavaAPI.day(containing: start))
+        let last = TelekavaAPI.day(containing: end)
+        return Array(sequence(first: first) { day in
+            day < last ? TelekavaAPI.day(1, from: day) : nil
+        }.reversed())
+    }
+
+    private func scheduleEntries(for days: [Date]) -> [TelekavaEntry] {
+        var ids = Set<Int>()
+        return days.flatMap { schedules[$0] ?? [] }.filter { ids.insert($0.id).inserted }
+            .sorted { $0.startTime < $1.startTime }
+    }
+
+    private func refreshSchedule(for days: [Date]) async {
+        schedules = schedules.filter { days.contains($0.key) }
+        await withTaskGroup(of: (Date, [TelekavaEntry]?).self) { group in
+            for day in days {
+                group.addTask { (day, try? await TelekavaAPI.schedule(channel: channel, day: day)) }
+            }
+            for await (day, entries) in group {
+                guard !Task.isCancelled else { return }
+                if let entries { schedules[day] = entries }
+            }
+        }
     }
 }
 
@@ -73,11 +116,9 @@ struct LivePlayerScreen: View {
         ZStack {
             Color.black.ignoresSafeArea()
             if let player = playback.player {
-                NativePlayer(player: player, onDismiss: { dismiss() }) {
-                    LivePlayerInfo(channel: channel, player: player) { programme in
-                        onOpenProgramme(programme)
-                        dismiss()
-                    }
+                LivePlayerWithSchedule(channel: channel, player: player, onDismiss: { dismiss() }) { programme in
+                    onOpenProgramme(programme)
+                    dismiss()
                 }
                 .ignoresSafeArea()
             }

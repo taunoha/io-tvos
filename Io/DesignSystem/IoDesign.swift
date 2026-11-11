@@ -50,6 +50,7 @@ enum IoDesign {
 
     static let playerInfoWidth: CGFloat = 1200
     static let playerInfoHeight: CGFloat = 260
+    static let playerProgrammeShelfHeight = landscapeCardArtworkHeight + Space.xxxLarge * 2
     static let playerInfoHorizontalInset = Space.xLarge
     static let playerInfoCornerRadius: CGFloat = 24
 }
