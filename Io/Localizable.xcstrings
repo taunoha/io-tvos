@@ -1,0 +1,1257 @@
+{
+  "sourceLanguage" : "et",
+  "strings" : {
+    "action.programmeInfo" : {
+      "comment" : "Toiming avab valitud saate detailvaate.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saate info"
+          }
+        }
+      }
+    },
+    "action.removeProgress" : {
+      "comment" : "Toiming eemaldab saate poolelijäänud saadete hulgast.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eemalda jätkamisest"
+          }
+        }
+      }
+    },
+    "action.retry" : {
+      "comment" : "Nupp, mis kordab ebaõnnestunud laadimist või esitamist.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proovi uuesti"
+          }
+        }
+      }
+    },
+    "catalogue.empty" : {
+      "comment" : "Kataloogi avalehe olek.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saateid pole praegu kuvada."
+          }
+        }
+      }
+    },
+    "catalogue.episode.datedFallback" : {
+      "comment" : "Episoodikaardi pealkiri, kui episoodi nimi puudub. Kohatäide on eetrikuupäev.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episood · %@"
+          }
+        }
+      }
+    },
+    "catalogue.episode.fallback" : {
+      "comment" : "Episoodikaardi pealkiri, kui nimi ja eetrikuupäev puuduvad.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episood"
+          }
+        }
+      }
+    },
+    "catalogue.error.http" : {
+      "comment" : "Kohatäide on HTTP olekukood.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jupiteri andmeid ei saanud laadida (HTTP %lld)."
+          }
+        }
+      }
+    },
+    "catalogue.error.noMedia" : {
+      "comment" : "Jupiteri järelvaatamise teenuse veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selle saate video pole praegu kättesaadav."
+          }
+        }
+      }
+    },
+    "catalogue.error.protected" : {
+      "comment" : "Jupiteri järelvaatamise teenuse veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selle kaitstud saate vaatamine pole selles rakenduse versioonis veel toetatud."
+          }
+        }
+      }
+    },
+    "catalogue.error.regionRestricted" : {
+      "comment" : "Jupiteri järelvaatamise teenuse veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selle saate vaatamiseks on piirkonnapiirang. Väljaspool Eestit võib vaja olla ERR-i kontot, mida see rakenduse versioon veel ei toeta."
+          }
+        }
+      }
+    },
+    "catalogue.featuredFallback" : {
+      "comment" : "ERR-ist nimeta saadud kataloogiriiuli pealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esiletõstetud"
+          }
+        }
+      }
+    },
+    "catalogue.kidsTitle" : {
+      "comment" : "Kataloogi lehe pealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lasteekraan"
+          }
+        }
+      }
+    },
+    "catalogue.loadFailed" : {
+      "comment" : "Kataloogi avalehe olek.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saateid ei saanud laadida. Kontrolli ühendust ja proovi uuesti."
+          }
+        }
+      }
+    },
+    "catalogue.loading" : {
+      "comment" : "Kataloogi avalehe olek.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laadin saateid…"
+          }
+        }
+      }
+    },
+    "catalogue.season.fallback" : {
+      "comment" : "Hooaja valikunupu varutekst puuduva hooajanime korral.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episoodid"
+          }
+        }
+      }
+    },
+    "catalogue.shelf.loading" : {
+      "comment" : "Riiuli ajutise laadimiskaardi silt.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laadimisel"
+          }
+        }
+      }
+    },
+    "catalogue.title" : {
+      "comment" : "Kataloogi lehe pealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saated ja filmid"
+          }
+        }
+      }
+    },
+    "continueWatching.empty" : {
+      "comment" : "Jätka vaheleht.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poolelijäänud saated ilmuvad siia automaatselt."
+          }
+        }
+      }
+    },
+    "continueWatching.remaining" : {
+      "comment" : "Poolelijäänud saate kaardil kuvatav järelejäänud aeg. Kohatäide on vormindatud kestus.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jäänud %@"
+          }
+        }
+      }
+    },
+    "continueWatching.shelf" : {
+      "comment" : "Jätka vaheleht.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinu poolelijäänud saated"
+          }
+        }
+      }
+    },
+    "continueWatching.title" : {
+      "comment" : "Poolelijäänud saadete vahelehe lehepealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jätka vaatamist"
+          }
+        }
+      }
+    },
+    "detail.addFavorite" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lisa lemmikutesse"
+          }
+        }
+      }
+    },
+    "detail.episodes" : {
+      "comment" : "Saate detailvaate episoodide riiuli pealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episoodid"
+          }
+        }
+      }
+    },
+    "detail.loadFailed" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saate andmeid ei saanud laadida. Proovi uuesti."
+          }
+        }
+      }
+    },
+    "detail.loading" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laadin saate andmeid…"
+          }
+        }
+      }
+    },
+    "detail.play" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaata"
+          }
+        }
+      }
+    },
+    "detail.removeFavorite" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eemalda lemmikutest"
+          }
+        }
+      }
+    },
+    "detail.restart" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alusta algusest"
+          }
+        }
+      }
+    },
+    "detail.resume" : {
+      "comment" : "Järelvaatamise jätkamise nupp. Kohatäide on salvestatud vaatamiskoht.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jätka · %@"
+          }
+        }
+      }
+    },
+    "detail.seasonLoadFailed" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hooaja andmeid ei saanud laadida. Proovi uuesti."
+          }
+        }
+      }
+    },
+    "detail.unavailable" : {
+      "comment" : "Saate detailvaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selle sisu video pole praegu kättesaadav."
+          }
+        }
+      }
+    },
+    "Episoodi pealkiri\nPealkiri" : {
+
+    },
+    "guide.clock.accessibility" : {
+      "comment" : "VoiceOveri kellaaeg. Kohatäide on vormindatud kellaaeg.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kell %@"
+          }
+        }
+      }
+    },
+    "guide.empty" : {
+      "comment" : "Telekava leht ja päeva- või kanalivalik.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatekava puudub"
+          }
+        }
+      }
+    },
+    "guide.loadFailed" : {
+      "comment" : "Telekava leht ja päeva- või kanalivalik.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kava laadimine ebaõnnestus"
+          }
+        }
+      }
+    },
+    "guide.loading.accessibility" : {
+      "comment" : "VoiceOveri laadimisteade. Kohatäide on kanali nimi, näiteks ETV+.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laadin %@ kava"
+          }
+        }
+      }
+    },
+    "guide.programme.metadata" : {
+      "comment" : "Saate infokaart. Kohatäited on saate ajavahemik ja kanali nimi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "guide.programme.onAirMetadata" : {
+      "comment" : "Infokaart eetris olevale saatele. Kohatäited on saate ajavahemik ja kanali nimi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@ · Praegu eetris"
+          }
+        }
+      }
+    },
+    "guide.programmeFallback" : {
+      "comment" : "Saatekava kirje pealkiri, kui ERR ei anna nime.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saade"
+          }
+        }
+      }
+    },
+    "guide.replayHint" : {
+      "comment" : "VoiceOveri vihje Telekava reale, mille saadet saab järelvaadata.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaata järele"
+          }
+        }
+      }
+    },
+    "guide.row.current" : {
+      "comment" : "VoiceOveri saatekava rida. Kohatäited on kanal, saate ajavahemik ja pealkiri. Eetris olev saade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$@, praegu"
+          }
+        }
+      }
+    },
+    "guide.row.currentRepeat" : {
+      "comment" : "VoiceOveri saatekava rida. Kohatäited on kanal, saate ajavahemik ja pealkiri. Eetris olev kordussaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$@, kordus, praegu"
+          }
+        }
+      }
+    },
+    "guide.row.repeat" : {
+      "comment" : "VoiceOveri saatekava rida. Kohatäited on kanal, saate ajavahemik ja pealkiri. Kordussaade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$@, kordus"
+          }
+        }
+      }
+    },
+    "guide.row.standard" : {
+      "comment" : "VoiceOveri saatekava rida. Kohatäited on kanal, saate ajavahemik ja pealkiri. ",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "guide.title" : {
+      "comment" : "Telekava leht ja päeva- või kanalivalik.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telekava"
+          }
+        }
+      }
+    },
+    "guide.today" : {
+      "comment" : "Telekava leht ja päeva- või kanalivalik.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Täna"
+          }
+        }
+      }
+    },
+    "guide.tomorrow" : {
+      "comment" : "Telekava leht ja päeva- või kanalivalik.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homme"
+          }
+        }
+      }
+    },
+    "guide.yesterday" : {
+      "comment" : "Telekava leht ja päeva- või kanalivalik.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eile"
+          }
+        }
+      }
+    },
+    "live.guideLoading" : {
+      "comment" : "Otsekanali kaardi teade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatekava laadimine…"
+          }
+        }
+      }
+    },
+    "live.guideUnavailable" : {
+      "comment" : "Otsekanali saateinfo puudumise teade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatekava pole saadaval"
+          }
+        }
+      }
+    },
+    "live.home.channels" : {
+      "comment" : "Otse vahelehe riiuli pealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaata otse"
+          }
+        }
+      }
+    },
+    "live.home.continueShelf" : {
+      "comment" : "Otse vahelehel oleva poolelijäänud saadete riiuli pealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jätka vaatamist"
+          }
+        }
+      }
+    },
+    "live.home.favorites" : {
+      "comment" : "Otse vahelehe riiuli pealkiri.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lemmikud"
+          }
+        }
+      }
+    },
+    "live.programmeFallback" : {
+      "comment" : "Otsekanali saate pealkirja varutekst.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käimasolev saade"
+          }
+        }
+      }
+    },
+    "player.fairPlay.error.certificate" : {
+      "comment" : "Kaitstud video esitamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaitstud video sertifikaati ei saanud laadida."
+          }
+        }
+      }
+    },
+    "player.fairPlay.error.configuration" : {
+      "comment" : "Kaitstud video esitamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaitstud video litsentsiandmed puuduvad või pole toetatud."
+          }
+        }
+      }
+    },
+    "player.fairPlay.error.identifier" : {
+      "comment" : "Kaitstud video esitamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video kaitsevõtit ei saanud tuvastada."
+          }
+        }
+      }
+    },
+    "player.fairPlay.error.invalidResponse" : {
+      "comment" : "Kaitstud video esitamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videolitsentsi vastus ei olnud sobiv."
+          }
+        }
+      }
+    },
+    "player.fairPlay.error.license" : {
+      "comment" : "Kohatäide on HTTP olekukood.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Videolitsentsi ei saanud väljastada (HTTP %lld). Kontrolli sisu vaatamisõigust ja proovi uuesti."
+          }
+        }
+      }
+    },
+    "player.fairPlay.error.request" : {
+      "comment" : "Kohatäide on seadme veakood.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seade ei saanud kaitstud video võtmetaotlust luua (%lld)."
+          }
+        }
+      }
+    },
+    "player.fairPlay.error.simulator" : {
+      "comment" : "Kaitstud video esitamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaitstud videot ei saa simulaatoris esitada. Vaatamiseks kasuta päris Apple TV-d."
+          }
+        }
+      }
+    },
+    "player.infoTab" : {
+      "comment" : "AVKiti vaheleht mängitava saate infoga.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        }
+      }
+    },
+    "player.live.back" : {
+      "comment" : "Otsevaatamise mängija.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagasi kanalite juurde"
+          }
+        }
+      }
+    },
+    "player.live.buffering" : {
+      "comment" : "Otsevaatamise olek või veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puhverdan otsepilti…"
+          }
+        }
+      }
+    },
+    "player.live.error.http" : {
+      "comment" : "Kohatäide on HTTP olekukood.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jupiteri teenus vastas veaga HTTP %lld."
+          }
+        }
+      }
+    },
+    "player.live.error.invalidResponse" : {
+      "comment" : "Otsevaatamise esitusallika veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jupiteri esitusandmeid ei saanud lugeda."
+          }
+        }
+      }
+    },
+    "player.live.error.open" : {
+      "comment" : "Kohatäide on AVPlayeri veakood.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsevoogu ei saanud avada (veakood %lld). Põhjuseks võib olla võrgu- või sisupiirang."
+          }
+        }
+      }
+    },
+    "player.live.error.restricted" : {
+      "comment" : "Otsevaatamise esitusallika veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selle kanali vaatamisel on ligipääsupiirang."
+          }
+        }
+      }
+    },
+    "player.live.interrupted" : {
+      "comment" : "Otsevaatamise olek või veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otseesitus katkes. Kui saade on kaitstud, võib vaja olla täiendavat ligipääsu."
+          }
+        }
+      }
+    },
+    "player.live.jumpHint" : {
+      "comment" : "Mängija saatekava kaardi VoiceOveri vihje.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alustab saadet algusest"
+          }
+        }
+      }
+    },
+    "player.live.loading" : {
+      "comment" : "Otsevaatamise olek või veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laadin otsepilti…"
+          }
+        }
+      }
+    },
+    "player.live.programme.metadata" : {
+      "comment" : "Saate infokaart. Kohatäited on saate ajavahemik ja kanali nimi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "player.live.programme.onAirMetadata" : {
+      "comment" : "Infokaart eetris olevale saatele. Kohatäited on saate ajavahemik ja kanali nimi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@ · Praegu eetris"
+          }
+        }
+      }
+    },
+    "player.live.reconnecting" : {
+      "comment" : "Otsevaatamise olek või veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taastan ühendust…"
+          }
+        }
+      }
+    },
+    "player.live.requesting" : {
+      "comment" : "Otsevaatamise olek või veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küsin kanali esitusandmeid…"
+          }
+        }
+      }
+    },
+    "player.live.retrying" : {
+      "comment" : "Kohatäide on käimasoleva taaskatse järjekorranumber.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ühendus katkes. Proovin uuesti (%lld/2)…"
+          }
+        }
+      }
+    },
+    "player.live.schedule.watching" : {
+      "comment" : "Mängija riiuli aktiivne saade. Kohatäide on saate algusaeg.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Vaatad"
+          }
+        }
+      }
+    },
+    "player.live.scheduleTab" : {
+      "comment" : "AVKiti otsemängija vaheleht, kus saate valimine kerib saate algusaega.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saated"
+          }
+        }
+      }
+    },
+    "player.live.stalled" : {
+      "comment" : "Otsevaatamise olek või veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsepilt jäi seisma."
+          }
+        }
+      }
+    },
+    "player.live.timeout" : {
+      "comment" : "Otsevaatamise olek või veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsepildi laadimine võttis liiga kaua aega."
+          }
+        }
+      }
+    },
+    "player.onDemand.back" : {
+      "comment" : "Järelvaatamise mängija.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagasi saate juurde"
+          }
+        }
+      }
+    },
+    "player.onDemand.error.interrupted" : {
+      "comment" : "Järelvaatamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video esitus katkes. Proovi uuesti."
+          }
+        }
+      }
+    },
+    "player.onDemand.error.loadFailed" : {
+      "comment" : "Järelvaatamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video laadimine ebaõnnestus. Kontrolli ühendust ja proovi uuesti."
+          }
+        }
+      }
+    },
+    "player.onDemand.error.resumeFailed" : {
+      "comment" : "Järelvaatamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvestatud vaatamiskohta ei saanud avada. Saate juures saab valida ka algusest alustamise."
+          }
+        }
+      }
+    },
+    "player.onDemand.error.timeout" : {
+      "comment" : "Järelvaatamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video laadimine võttis liiga kaua aega. Proovi uuesti."
+          }
+        }
+      }
+    },
+    "player.onDemand.error.unplayable" : {
+      "comment" : "Järelvaatamise veateade.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seda videot ei saanud esitada. See võib olla aegunud või piiratud ligipääsuga."
+          }
+        }
+      }
+    },
+    "player.onDemand.loading" : {
+      "comment" : "Järelvaatamise mängija.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laadin videot…"
+          }
+        }
+      }
+    },
+    "search.clear" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tühjenda"
+          }
+        }
+      }
+    },
+    "search.deleteHint" : {
+      "comment" : "VoiceOveri silt nupule, mis kustutab otsingufraasi viimase märgi.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kustuta viimane märk"
+          }
+        }
+      }
+    },
+    "search.empty" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tulemusi ei leitud."
+          }
+        }
+      }
+    },
+    "search.failed" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsing ebaõnnestus. Proovi uuesti."
+          }
+        }
+      }
+    },
+    "search.loadingMore" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laadin tulemusi…"
+          }
+        }
+      }
+    },
+    "search.placeholder" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsi saadet või filmi"
+          }
+        }
+      }
+    },
+    "search.prompt" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sisesta saate või filmi nimi."
+          }
+        }
+      }
+    },
+    "search.query.accessibility" : {
+      "comment" : "VoiceOveri silt. Kohatäide on sisestatud otsingufraas.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsing: %@"
+          }
+        }
+      }
+    },
+    "search.query.emptyAccessibility" : {
+      "comment" : "VoiceOveri silt tühja otsinguvälja puhul.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsing: tühi"
+          }
+        }
+      }
+    },
+    "search.results" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsingutulemused"
+          }
+        }
+      }
+    },
+    "search.searching" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsin…"
+          }
+        }
+      }
+    },
+    "search.space" : {
+      "comment" : "Otsingu vaheleht, tulemused ja klaviatuuri toimingud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tühik"
+          }
+        }
+      }
+    },
+    "tab.catalogue" : {
+      "comment" : "Io põhivaheleht ERR Jupiteri saadete ja filmide sirvimiseks.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saated"
+          }
+        }
+      }
+    },
+    "tab.continueWatching" : {
+      "comment" : "Io põhivaheleht poolelijäänud saadete juurde naasmiseks.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jätka"
+          }
+        }
+      }
+    },
+    "tab.guide" : {
+      "comment" : "Io põhivaheleht telekanalite saatekava sirvimiseks.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telekava"
+          }
+        }
+      }
+    },
+    "tab.kids" : {
+      "comment" : "Io põhivaheleht ERR-i laste kataloogi sirvimiseks.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lasteekraan"
+          }
+        }
+      }
+    },
+    "tab.live" : {
+      "comment" : "Io põhivaheleht telekanalite otsevaatamiseks.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otse"
+          }
+        }
+      }
+    },
+    "tab.search" : {
+      "comment" : "Io põhivahelehe luubiikooni VoiceOveri silt. Avab saadete ja filmide otsingu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otsi"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

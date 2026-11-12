@@ -51,7 +51,7 @@ private struct IoTabController: UIViewControllerRepresentable {
         let controller = UITabBarController()
         controller.view.tintColor = .white
         let coordinator = context.coordinator
-        func tab<Content: View>(_ title: String, content: Content, icon: UIImage? = nil,
+        func tab<Content: View>(_ title: String, id: String, content: Content, icon: UIImage? = nil,
                                 catalogueSource: CatalogueSource? = nil,
                                 resetNavigation: (() -> Void)? = nil) -> UIViewController {
             func rootView(programme: Programme? = nil) -> some View {
@@ -72,6 +72,7 @@ private struct IoTabController: UIViewControllerRepresentable {
             let host = UIHostingController(rootView: rootView())
             let item = UITabBarItem(title: icon == nil ? title : nil, image: icon, selectedImage: nil)
             item.accessibilityLabel = title
+            item.accessibilityIdentifier = id
             let tab = IoTabContentController(host: host, item: item, catalogueSource: catalogueSource)
             tab.resetNavigation = resetNavigation ?? { [weak host] in host?.rootView = rootView() }
             tab.openProgramme = { [weak host] programme in host?.rootView = rootView(programme: programme) }
@@ -84,12 +85,12 @@ private struct IoTabController: UIViewControllerRepresentable {
             withConfiguration: UIImage.SymbolConfiguration(pointSize: IoDesign.tabIconSize, weight: .semibold)
         )
         controller.viewControllers = [
-            tab("Otse", content: LiveHomeView()),
-            tab("Telekava", content: TelekavaView()),
-            tab("Saated", content: CatalogueView(), catalogueSource: .jupiter),
-            tab("Lasteekraan", content: CatalogueView(source: .lasteekraan), catalogueSource: .lasteekraan),
-            tab("Jätka", content: ContinueWatchingView()),
-            tab("Otsi", content: ProgrammeSearchView(navigation: searchNavigation), icon: searchIcon,
+            tab(String(localized: "tab.live"), id: "tab-live", content: LiveHomeView()),
+            tab(String(localized: "tab.guide"), id: "tab-guide", content: TelekavaView()),
+            tab(String(localized: "tab.catalogue"), id: "tab-catalogue", content: CatalogueView(), catalogueSource: .jupiter),
+            tab(String(localized: "tab.kids"), id: "tab-kids", content: CatalogueView(source: .lasteekraan), catalogueSource: .lasteekraan),
+            tab(String(localized: "tab.continueWatching"), id: "tab-continueWatching", content: ContinueWatchingView()),
+            tab(String(localized: "tab.search"), id: "tab-search", content: ProgrammeSearchView(navigation: searchNavigation), icon: searchIcon,
                 resetNavigation: { searchNavigation.selectedProgrammeID = nil })
         ]
         context.coordinator.selectedTab = controller.selectedViewController

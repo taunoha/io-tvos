@@ -11,10 +11,12 @@ private struct LivePlayerInfo: View {
     var body: some View {
         Group {
             if let current {
-                let status = isOnAir ? " · Praegu eetris" : ""
+                let metadata = isOnAir
+                    ? String(localized: "player.live.programme.onAirMetadata", defaultValue: "\(current.timeRange) · \(channel.title) · Praegu eetris")
+                    : String(localized: "player.live.programme.metadata", defaultValue: "\(current.timeRange) · \(channel.title)")
                 let currentProgramme = programme?.id == current.contentId ? programme : nil
                 ProgrammeInfoCard(title: current.title,
-                                  metadata: "\(current.timeRange) · \(channel.title)\(status)",
+                                  metadata: metadata,
                                   lead: current.lead,
                                   programme: currentProgramme) {
                     if let currentProgramme {
@@ -24,7 +26,7 @@ private struct LivePlayerInfo: View {
                     }
                 }
             } else {
-                ProgrammeInfoCard(title: channel.title, metadata: "Saatekava pole saadaval")
+                ProgrammeInfoCard(title: channel.title, metadata: String(localized: "live.guideUnavailable"))
             }
         }
         .task(id: current?.contentId) {
@@ -70,7 +72,7 @@ private struct LivePlayerWithSchedule: View {
 
     private func programmeTab(entries: [TelekavaEntry], date: Date) -> NativePlayerTab? {
         guard !entries.isEmpty else { return nil }
-        return NativePlayerTab(title: "Saated", height: IoDesign.playerProgrammeShelfHeight) { onJump in
+        return NativePlayerTab(title: String(localized: "player.live.scheduleTab"), height: IoDesign.playerProgrammeShelfHeight) { onJump in
             AnyView(LiveProgrammeShelf(entries: entries, viewingDate: date, player: player, onJump: onJump)
                 .environment(history))
         }
@@ -129,8 +131,8 @@ struct LivePlayerScreen: View {
                         Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1000)
                     }
                     HStack(spacing: IoDesign.Space.xLarge) {
-                        Button("Proovi uuesti") { playback.start(channel) }
-                        Button("Tagasi kanalite juurde") { dismiss() }
+                        Button(String(localized: "action.retry")) { playback.start(channel) }
+                        Button(String(localized: "player.live.back")) { dismiss() }
                     }
                 }
             } else if playback.isLoading {

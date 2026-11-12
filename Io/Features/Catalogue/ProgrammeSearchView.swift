@@ -33,7 +33,7 @@ struct ProgrammeSearchView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                     if !results.isEmpty {
-                        ProgrammeRow(title: "Otsingutulemused", items: results, wrapsCards: true, openProgramme: { programme in
+                        ProgrammeRow(title: String(localized: "search.results"), items: results, wrapsCards: true, openProgramme: { programme in
                             navigation.selectedProgrammeID = programme.id
                         })
                             .overlay(alignment: .bottom) {
@@ -76,16 +76,16 @@ struct ProgrammeSearchView: View {
     @ViewBuilder
     private var searchStatus: some View {
         if query.isEmpty {
-            Text("Sisesta saate või filmi nimi.").foregroundStyle(.secondary)
+            Text(String(localized: "search.prompt")).foregroundStyle(.secondary)
         } else if let failedPage {
-            LoadFailureView(message: "Otsing ebaõnnestus. Proovi uuesti.") {
+            LoadFailureView(message: String(localized: "search.failed")) {
                 request = Request(query: query, page: failedPage)
                 self.failedPage = nil
             }
         } else if let request {
-            ProgressView(request.page == 1 ? "Otsin…" : "Laadin tulemusi…")
+            ProgressView(request.page == 1 ? String(localized: "search.searching") : String(localized: "search.loadingMore"))
         } else if results.isEmpty {
-            Text("Tulemusi ei leitud.")
+            Text(String(localized: "search.empty"))
         }
     }
 
@@ -129,7 +129,7 @@ struct ProgrammeSearchView: View {
             HStack(spacing: IoDesign.Space.large) {
                 HStack(spacing: IoDesign.Space.medium) {
                     Image(systemName: "magnifyingglass")
-                    Text(phrase.isEmpty ? "Otsi saadet või filmi" : phrase)
+                    Text(phrase.isEmpty ? String(localized: "search.placeholder") : phrase)
                         .foregroundStyle(phrase.isEmpty ? .secondary : .primary)
                         .lineLimit(1)
                         .truncationMode(.head)
@@ -138,16 +138,18 @@ struct ProgrammeSearchView: View {
                 .font(IoDesign.body)
                 .padding(IoDesign.Space.large)
                 .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
-                .accessibilityLabel("Otsing: \(phrase.isEmpty ? "tühi" : phrase)")
+                .accessibilityLabel(phrase.isEmpty
+                    ? String(localized: "search.query.emptyAccessibility")
+                    : String(localized: "search.query.accessibility", defaultValue: "Otsing: \(phrase)"))
 
-                Button("Tühik") { phrase.append(" ") }
+                Button(String(localized: "search.space")) { phrase.append(" ") }
                 Button {
                     if !phrase.isEmpty { phrase.removeLast() }
                 } label: {
                     Image(systemName: "delete.left")
                 }
-                .accessibilityLabel("Kustuta viimane märk")
-                Button("Tühjenda") { phrase = "" }
+                .accessibilityLabel(String(localized: "search.deleteHint"))
+                Button(String(localized: "search.clear")) { phrase = "" }
             }
 
             // Ordinary buttons keep tvOS from opening its modal text editor.

@@ -47,7 +47,7 @@ struct ProgrammeRow: View {
             Text(title)
                 .font(IoDesign.sectionTitle)
                 .padding(.horizontal, IoDesign.contentInset)
-                .accessibilityValue(isLoading ? "Laadimisel" : "")
+                .accessibilityValue(isLoading ? String(localized: "catalogue.shelf.loading") : "")
             if wrapsCards {
                 let cardWidth = usesPortraitCards ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth
                 let column = GridItem(.adaptive(minimum: cardWidth, maximum: cardWidth), spacing: IoDesign.cardGap)
@@ -100,7 +100,7 @@ struct ProgrammeRow: View {
             .focused($focusedProgramme, equals: key)
             .contextMenu {
                 if allowsRemovingProgress {
-                    Button("Eemalda jätkamisest", systemImage: "trash", role: .destructive) {
+                    Button(String(localized: "action.removeProgress"), systemImage: "trash", role: .destructive) {
                         removeProgress(for: programme.id)
                     }
                 }

@@ -62,7 +62,7 @@ struct TelekavaEntry: Decodable, Identifiable {
 
     var title: String {
         let heading = [programName, name].compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .first { !$0.isEmpty } ?? "Saade"
+            .first { !$0.isEmpty } ?? String(localized: "guide.programmeFallback")
         return heading.hasSuffix("*") ? heading.dropLast().trimmingCharacters(in: .whitespacesAndNewlines) : heading
     }
 
@@ -101,8 +101,8 @@ struct TelekavaEntry: Decodable, Identifiable {
 
     static func timeLabel(_ timestamp: Double) -> String {
         Date(timeIntervalSince1970: timestamp).formatted(
-            Date.FormatStyle(locale: Locale(identifier: "et_EE"), timeZone: TelekavaAPI.timeZone)
-                .hour(.twoDigits(amPM: .omitted)).minute(.twoDigits)
+            Date.FormatStyle(locale: .current, timeZone: TelekavaAPI.timeZone)
+                .hour(.twoDigits(amPM: .abbreviated)).minute(.twoDigits)
         )
     }
 }

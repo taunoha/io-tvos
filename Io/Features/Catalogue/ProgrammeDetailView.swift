@@ -55,27 +55,27 @@ struct ProgrammeDetailView: View {
                             }
                             Text(page.mainContent.descriptionText).font(IoDesign.body).lineLimit(6).foregroundStyle(.secondary)
                             if programme.source == .lasteekraan && !page.mainContent.hasVideo {
-                                Text("Selle sisu video pole praegu kättesaadav.").font(IoDesign.body).foregroundStyle(.secondary)
+                                Text(String(localized: "detail.unavailable")).font(IoDesign.body).foregroundStyle(.secondary)
                             } else if let saved = history.entry(for: page.mainContent.id) {
                                 HStack(spacing: IoDesign.Space.large) {
-                                    Button { playing = PlaybackSelection(programme: page.mainContent, position: saved.position) } label: { Label("Jätka · " + saved.positionLabel, systemImage: "play.fill") }
-                                    Button("Alusta algusest") {
+                                    Button { playing = PlaybackSelection(programme: page.mainContent, position: saved.position) } label: { Label(String(localized: "detail.resume", defaultValue: "Jätka · \(saved.positionLabel)"), systemImage: "play.fill") }
+                                    Button(String(localized: "detail.restart")) {
                                         history.remove(page.mainContent.id)
                                         playing = PlaybackSelection(programme: page.mainContent, position: 0)
                                     }
                                 }
                             } else {
-                                Button { playing = PlaybackSelection(programme: page.mainContent, position: 0) } label: { Label("Vaata", systemImage: "play.fill") }
+                                Button { playing = PlaybackSelection(programme: page.mainContent, position: 0) } label: { Label(String(localized: "detail.play"), systemImage: "play.fill") }
                             }
                             if let favorite = ProgrammeFavorite(programme: programme, mainContent: page.mainContent) {
                                 let isFavorite = favorites.contains(favorite)
-                                Button(isFavorite ? "Eemalda lemmikutest" : "Lisa lemmikutesse",
+                                Button(isFavorite ? String(localized: "detail.removeFavorite") : String(localized: "detail.addFavorite"),
                                        systemImage: isFavorite ? "star.fill" : "star") {
                                     favorites.toggle(favorite)
                                 }
                             }
                             if history.entry(for: page.mainContent.id) != nil {
-                                Button("Eemalda jätkamisest", systemImage: "trash") {
+                                Button(String(localized: "action.removeProgress"), systemImage: "trash") {
                                     history.remove(page.mainContent.id)
                                 }
                                 .font(IoDesign.metadata)
@@ -109,7 +109,7 @@ struct ProgrammeDetailView: View {
                     if error != nil { loadStatus }
                     let episodes = page.episodes(for: selectedSeasonID)
                     if loading || !episodes.isEmpty {
-                        ProgrammeRow(title: "Episoodid", items: episodes, showsSeriesTitle: false, isLoading: loading, restoredFocusID: restoredEpisodeFocusID, playEpisode: { episode in
+                        ProgrammeRow(title: String(localized: "detail.episodes"), items: episodes, showsSeriesTitle: false, isLoading: loading, restoredFocusID: restoredEpisodeFocusID, playEpisode: { episode in
                             restoredEpisodeFocusID = nil
                             openedEpisodeID = episode.id
                             playing = PlaybackSelection(programme: episode, position: history.entry(for: episode.id)?.position ?? 0)
@@ -141,8 +141,8 @@ struct ProgrammeDetailView: View {
                 loading = false
             } catch {
                 guard !Task.isCancelled, request == self.request else { return }
-                self.error = page == nil ? "Saate andmeid ei saanud laadida. Proovi uuesti." :
-                    "Hooaja andmeid ei saanud laadida. Proovi uuesti."
+                self.error = page == nil ? String(localized: "detail.loadFailed") :
+                    String(localized: "detail.seasonLoadFailed")
                 loading = false
             }
         }
@@ -169,7 +169,7 @@ struct ProgrammeDetailView: View {
     @ViewBuilder
     private var loadStatus: some View {
         if loading {
-            ProgressView("Laadin saate andmeid…")
+            ProgressView(String(localized: "detail.loading"))
                 .padding(.horizontal, IoDesign.contentInset)
                 .padding(.vertical, IoDesign.focusRoom)
         } else if let error {

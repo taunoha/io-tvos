@@ -24,13 +24,13 @@ enum FairPlayFailure: LocalizedError {
     case simulatorUnsupported, configuration, certificate, identifier, request(Int), license(Int), invalidResponse
     var errorDescription: String? {
         switch self {
-        case .simulatorUnsupported: return "Kaitstud videot ei saa simulaatoris esitada. Vaatamiseks kasuta päris Apple TV-d."
-        case .configuration: return "Kaitstud video litsentsiandmed puuduvad või pole toetatud."
-        case .certificate: return "Kaitstud video sertifikaati ei saanud laadida."
-        case .identifier: return "Video kaitsevõtit ei saanud tuvastada."
-        case .request(let code): return "Seade ei saanud kaitstud video võtmetaotlust luua (\(code))."
-        case .license(let code): return "Videolitsentsi ei saanud väljastada (HTTP \(code)). Kontrolli sisu vaatamisõigust ja proovi uuesti."
-        case .invalidResponse: return "Videolitsentsi vastus ei olnud sobiv."
+        case .simulatorUnsupported: return String(localized: "player.fairPlay.error.simulator")
+        case .configuration: return String(localized: "player.fairPlay.error.configuration")
+        case .certificate: return String(localized: "player.fairPlay.error.certificate")
+        case .identifier: return String(localized: "player.fairPlay.error.identifier")
+        case .request(let code): return String(localized: "player.fairPlay.error.request", defaultValue: "Seade ei saanud kaitstud video võtmetaotlust luua (\(code)).")
+        case .license(let code): return String(localized: "player.fairPlay.error.license", defaultValue: "Videolitsentsi ei saanud väljastada (HTTP \(code)). Kontrolli sisu vaatamisõigust ja proovi uuesti.")
+        case .invalidResponse: return String(localized: "player.fairPlay.error.invalidResponse")
         }
     }
 }

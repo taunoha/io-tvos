@@ -46,7 +46,7 @@ final class OnDemandPlayback: ObservableObject {
             } catch is CancellationError { }
             catch {
                 guard let self, self.generation == token, !Task.isCancelled else { return }
-                self.fail((error as? FairPlayFailure)?.localizedDescription ?? (error as? OnDemandError)?.localizedDescription ?? "Video laadimine ebaõnnestus. Kontrolli ühendust ja proovi uuesti.")
+                self.fail((error as? FairPlayFailure)?.localizedDescription ?? (error as? OnDemandError)?.localizedDescription ?? String(localized: "player.onDemand.error.loadFailed"))
             }
         }
     }
@@ -72,7 +72,7 @@ final class OnDemandPlayback: ObservableObject {
             let status = item.status
             Task { @MainActor [weak self] in
                 guard let self, self.generation == token else { return }
-                if status == .failed { self.fail("Seda videot ei saanud esitada. See võib olla aegunud või piiratud ligipääsuga.") }
+                if status == .failed { self.fail(String(localized: "player.onDemand.error.unplayable")) }
                 else if status == .readyToPlay, !self.initialSeekCompleted, !self.initialSeekStarted, let player = self.player {
                     self.initialSeekStarted = true
                     player.pause()
@@ -84,7 +84,7 @@ final class OnDemandPlayback: ObservableObject {
                             if finished {
                                 self.initialSeekCompleted = true
                                 self.player?.play()
-                            } else { self.fail("Salvestatud vaatamiskohta ei saanud avada. Saate juures saab valida ka algusest alustamise.") }
+                            } else { self.fail(String(localized: "player.onDemand.error.resumeFailed")) }
                         }
                     }
                 }
@@ -104,7 +104,7 @@ final class OnDemandPlayback: ObservableObject {
         failureObserver = NotificationCenter.default.addObserver(forName: AVPlayerItem.failedToPlayToEndTimeNotification, object: item, queue: .main) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self, self.generation == token else { return }
-                self.fail("Video esitus katkes. Proovi uuesti.")
+                self.fail(String(localized: "player.onDemand.error.interrupted"))
             }
         }
         progressObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 10, preferredTimescale: 600), queue: .main) { [weak self] _ in
@@ -142,7 +142,7 @@ final class OnDemandPlayback: ObservableObject {
         timeout = Task { [weak self] in
             do { try await Task.sleep(for: .seconds(30)) } catch { return }
             guard let self, self.generation == token, self.loading else { return }
-            self.fail("Video laadimine võttis liiga kaua aega. Proovi uuesti.")
+            self.fail(String(localized: "player.onDemand.error.timeout"))
         }
     }
     private func fail(_ message: String) { stop(); loading = false; error = message }

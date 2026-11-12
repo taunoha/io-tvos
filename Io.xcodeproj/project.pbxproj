@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E00000000000000000000004 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000005 /* Localizable.xcstrings */; };
 		6056CF38BCAC410CBFB58D07 /* IoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C636129FC54382AC6CFD38 /* IoApp.swift */; };
 		3FF95EC949464B1B99EDCC29 /* IoRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537EF61C46D946FB90D1562A /* IoRootView.swift */; };
 		1F533B7D07D841D18B772EF7 /* IoDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2444381B824460A82545F7 /* IoDesign.swift */; };
@@ -42,6 +43,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E00000000000000000000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		99C636129FC54382AC6CFD38 /* IoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IoApp.swift; sourceTree = "<group>"; };
 		537EF61C46D946FB90D1562A /* IoRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IoRootView.swift; sourceTree = "<group>"; };
 		6C2444381B824460A82545F7 /* IoDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IoDesign.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 			children = (
 				3D5EA38F8E234BC6AFB430E3 /* App */,
 				E00000000000000000000002 /* Assets.xcassets */,
+				E00000000000000000000005 /* Localizable.xcstrings */,
 				B9EB965E65974B2394E2745C /* DesignSystem */,
 				E4155D322F864E058C127EAC /* Features */,
 				9D318FD2302B4D1B980B3C08 /* Playback */,
@@ -249,10 +252,10 @@
 			};
 			buildConfigurationList = A00000000000000000000002 /* Build configuration list for PBXProject "Io" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = et;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
+				et,
 				Base,
 			);
 			mainGroup = A00000000000000000000003;
@@ -270,7 +273,10 @@
         E00000000000000000000003 /* Resources */ = {
             isa = PBXResourcesBuildPhase;
             buildActionMask = 2147483647;
-            files = (E00000000000000000000001,);
+            files = (
+                E00000000000000000000001 /* Assets.xcassets in Resources */,
+                E00000000000000000000004 /* Localizable.xcstrings in Resources */,
+            );
             runOnlyForDeploymentPostprocessing = 0;
         };
 /* End PBXResourcesBuildPhase section */

@@ -47,7 +47,7 @@ struct LiveProgrammeShelf: View {
                         LiveProgrammeCard(entry: entry, isPlaying: entry.isCurrent(at: viewingDate))
                     }
                     .buttonStyle(.card)
-                    .accessibilityHint("Alustab saadet algusest")
+                    .accessibilityHint(String(localized: "player.live.jumpHint"))
                 }
             }
             .padding(IoDesign.focusRoom)
@@ -82,7 +82,10 @@ private struct LiveProgrammeCard: View {
             photos: artworkProgramme?.photos, horizontalPhotos: artworkProgramme?.horizontalPhotos,
             verticalPhotos: artworkProgramme?.verticalPhotos, medias: nil, rootContent: nil
         )
-        ProgrammeCard(programme: programme, subtitleOverride: entry.startLabel + (isPlaying ? " · Vaatad" : ""))
+        let subtitle = isPlaying
+            ? String(localized: "player.live.schedule.watching", defaultValue: "\(entry.startLabel) · Vaatad")
+            : entry.startLabel
+        ProgrammeCard(programme: programme, subtitleOverride: subtitle)
             .task(id: entry.contentId) {
                 artworkProgramme = nil
                 guard let id = entry.contentId,

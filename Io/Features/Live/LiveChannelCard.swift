@@ -11,7 +11,7 @@ struct LiveChannelCard: View {
             VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
                 Text(channel.title).font(IoDesign.cardTitle)
                 VStack(alignment: .leading, spacing: IoDesign.Space.xxSmall) {
-                    Text(current?.title ?? (loaded ? "Saatekava pole saadaval" : "Saatekava laadimine…"))
+                    Text(current?.title ?? (loaded ? String(localized: "live.guideUnavailable") : String(localized: "live.guideLoading")))
                         .font(IoDesign.body.weight(.medium))
                         .lineLimit(2, reservesSpace: true)
                     Text(current?.timeRange ?? " ")

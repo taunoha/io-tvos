@@ -11,6 +11,10 @@ Io is an independent Apple TV app for watching ERR Jupiter.
 - **Jätka** lets you resume unfinished programmes from your saved position.
 - **Otsi** searches Jupiter for programmes.
 
+## Interface language
+
+Io’s interface is available in Estonian. To add a translation, open [Localizable.xcstrings](Io/Localizable.xcstrings) in Xcode and add the language. Each key identifies a specific UI context. ERR supplies programme titles and descriptions.
+
 ## Install on your Apple TV
 
 You’ll need a Mac with Xcode and a compatible tvOS SDK, an Apple TV running tvOS 27.0 or later, and your own Apple Account. Playback requires an internet connection.

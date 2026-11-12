@@ -23,7 +23,7 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
         controller.player = player
         controller.delegate = context.coordinator
         controller.showsPlaybackControls = true
-        controller.customInfoViewControllers = [PlayerInfoPanelController(title: "Info", content: info(), height: infoHeight)]
+        controller.customInfoViewControllers = [PlayerInfoPanelController(title: String(localized: "player.infoTab"), content: info(), height: infoHeight)]
         updatePanels(controller, coordinator: context.coordinator)
         return controller
     }

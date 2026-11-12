@@ -17,9 +17,9 @@ struct LiveHomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
                 VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
-                    Text("Io").font(IoDesign.pageTitle)
+                    Text(verbatim: "Io").font(IoDesign.pageTitle)
                     VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
-                        Text("Vaata otse").font(IoDesign.sectionTitle)
+                        Text(String(localized: "live.home.channels")).font(IoDesign.sectionTitle)
                         HStack(spacing: IoDesign.cardGap) {
                             ForEach(LiveChannel.all) { channel in
                                 Button { selectedChannel = channel } label: {
@@ -36,12 +36,12 @@ struct LiveHomeView: View {
                 .padding(.horizontal, IoDesign.contentInset)
 
                 if !favorites.entries.isEmpty {
-                    ProgrammeRow(title: "Lemmikud", items: favorites.entries.map(\.programme), openProgramme: openProgramme)
+                    ProgrammeRow(title: String(localized: "live.home.favorites"), items: favorites.entries.map(\.programme), openProgramme: openProgramme)
                         .task { await favorites.resolveLegacyArtwork() }
                 }
 
                 if !history.inProgress.isEmpty {
-                    ProgrammeRow(title: "Jätka vaatamist", items: history.inProgress.prefix(7).map(\.programme), allowsRemovingProgress: true, openProgramme: openProgramme)
+                    ProgrammeRow(title: String(localized: "live.home.continueShelf"), items: history.inProgress.prefix(7).map(\.programme), allowsRemovingProgress: true, openProgramme: openProgramme)
                 }
 
             }

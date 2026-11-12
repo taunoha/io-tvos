@@ -5,7 +5,7 @@ import OSLog
 @MainActor
 final class LivePlayback: ObservableObject {
     @Published private(set) var player: AVPlayer?
-    @Published private(set) var message = "Küsin kanali esitusandmeid…"
+    @Published private(set) var message = String(localized: "player.live.requesting")
     @Published private(set) var errorMessage: String?
     @Published private(set) var isLoading = true
     private var loadTask: Task<Void, Never>?
@@ -45,7 +45,7 @@ final class LivePlayback: ObservableObject {
         generation = token
         errorMessage = nil
         isLoading = true
-        message = retries == 0 ? "Küsin kanali esitusandmeid…" : "Taastan ühendust…"
+        message = retries == 0 ? String(localized: "player.live.requesting") : String(localized: "player.live.reconnecting")
         guard let channel else { return }
         diagnostic("load")
         logger.info("Loading channel \(channel.id, privacy: .public); retry \(self.retries)")
@@ -81,7 +81,7 @@ final class LivePlayback: ObservableObject {
         lastProgressAt = Date()
         lastMediaTime = nil
         lastProgrammeCheck = Date()
-        message = "Laadin otsepilti…"
+        message = String(localized: "player.live.loading")
         statusObservation = item.observe(\.status, options: [.new]) { [weak self] item, _ in
             let failed = item.status == .failed
             // Log only numeric codes; AVFoundation descriptions may contain signed URLs.
@@ -90,7 +90,7 @@ final class LivePlayback: ObservableObject {
                 guard let self, self.generation == token, failed else { return }
                 self.diagnostic("itemFailed", errorCode: code)
                 self.logger.error("AVPlayerItem failed; code \(code)")
-                self.fail("Otsevoogu ei saanud avada (veakood \(code)). Põhjuseks võib olla võrgu- või sisupiirang.", retryable: false)
+                self.fail(String(localized: "player.live.error.open", defaultValue: "Otsevoogu ei saanud avada (veakood \(code)). Põhjuseks võib olla võrgu- või sisupiirang."), retryable: false)
             }
         }
         controlObservation = player.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
@@ -105,7 +105,7 @@ final class LivePlayback: ObservableObject {
                 } else if status == .waitingToPlayAtSpecifiedRate {
                     if self.waitingSince == nil { self.waitingSince = Date() }
                     self.isLoading = true
-                    self.message = "Puhverdan otsepilti…"
+                    self.message = String(localized: "player.live.buffering")
                     self.diagnostic("waiting")
                 } else {
                     // A user pause must never trigger automatic recovery.
@@ -121,7 +121,7 @@ final class LivePlayback: ObservableObject {
             Task { @MainActor [weak self] in
                 guard let self, self.generation == token else { return }
                 self.diagnostic("failedToPlayToEnd", errorCode: code)
-                self.fail("Otseesitus katkes. Kui saade on kaitstud, võib vaja olla täiendavat ligipääsu.", retryable: false)
+                self.fail(String(localized: "player.live.interrupted"), retryable: false)
             }
         }
         #if DEBUG
@@ -161,7 +161,7 @@ final class LivePlayback: ObservableObject {
                 }
                 if let since = self.waitingSince, Date().timeIntervalSince(since) > 25 {
                     self.diagnostic("waitingTimeout")
-                    self.fail("Otsepildi laadimine võttis liiga kaua aega.", retryable: true)
+                    self.fail(String(localized: "player.live.timeout"), retryable: true)
                     return
                 }
                 if player.timeControlStatus == .playing {
@@ -169,7 +169,7 @@ final class LivePlayback: ObservableObject {
                     if time.isFinite, let previous = self.lastMediaTime, abs(time - previous) < 0.1 {
                         if Date().timeIntervalSince(self.lastProgressAt) > 25 {
                             self.diagnostic("progressTimeout")
-                            self.fail("Otsepilt jäi seisma.", retryable: true)
+                            self.fail(String(localized: "player.live.stalled"), retryable: true)
                             return
                         }
                     } else { self.lastProgressAt = Date() }
@@ -187,7 +187,7 @@ final class LivePlayback: ObservableObject {
         if retryable, retries < 2 {
             retries += 1
             isLoading = true
-            message = "Ühendus katkes. Proovin uuesti (\(retries)/2)…"
+            message = String(localized: "player.live.retrying", defaultValue: "Ühendus katkes. Proovin uuesti (\(retries)/2)…")
             let token = generation
             loadTask = Task { [weak self] in
                 do { try await Task.sleep(for: .seconds(2 * (self?.retries ?? 1))) } catch { return }

@@ -66,7 +66,7 @@ struct ProgrammeInfoButton: View {
 
     var body: some View {
         Button(action: action) {
-            Label("Saate info", systemImage: "info.circle")
+            Label(String(localized: "action.programmeInfo"), systemImage: "info.circle")
                 .font(IoDesign.body.weight(.semibold))
         }
         .buttonStyle(.glass)

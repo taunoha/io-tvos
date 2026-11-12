@@ -4,10 +4,10 @@ enum OnDemandError: LocalizedError {
     case service(Int), noMedia, protectedContent, regionRestricted
     var errorDescription: String? {
         switch self {
-        case .service(let status): return "Jupiteri andmeid ei saanud laadida (HTTP \(status))."
-        case .noMedia: return "Selle saate video pole praegu kättesaadav."
-        case .protectedContent: return "Selle kaitstud saate vaatamine pole selles rakenduse versioonis veel toetatud."
-        case .regionRestricted: return "Selle saate vaatamiseks on piirkonnapiirang. Väljaspool Eestit võib vaja olla ERR-i kontot, mida see rakenduse versioon veel ei toeta."
+        case .service(let status): return String(localized: "catalogue.error.http", defaultValue: "Jupiteri andmeid ei saanud laadida (HTTP \(status)).")
+        case .noMedia: return String(localized: "catalogue.error.noMedia")
+        case .protectedContent: return String(localized: "catalogue.error.protected")
+        case .regionRestricted: return String(localized: "catalogue.error.regionRestricted")
         }
     }
 }
@@ -41,7 +41,7 @@ enum OnDemandAPI {
                     && seen.insert($0.id).inserted
             }.map { $0.from(source) }
             guard !items.isEmpty else { return nil }
-            return ProgrammeShelf(id: index, title: (row.header?.isEmpty == false ? row.header! : "Esiletõstetud"),
+            return ProgrammeShelf(id: index, title: (row.header?.isEmpty == false ? row.header! : String(localized: "catalogue.featuredFallback")),
                 programmes: items, usesPortraitCards: row.highTimeline == true)
         }
     }

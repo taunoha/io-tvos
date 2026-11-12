@@ -49,12 +49,12 @@ struct OnDemandPlayerScreen: View {
                         Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1100)
                     }
                     HStack(spacing: IoDesign.Space.xLarge) {
-                        Button("Proovi uuesti") { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }
-                        Button("Tagasi saate juurde") { dismiss() }
+                        Button(String(localized: "action.retry")) { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }
+                        Button(String(localized: "player.onDemand.back")) { dismiss() }
                     }
                 }
             } else if playback.loading {
-                ProgressView("Laadin videot…").padding(IoDesign.Space.xLarge).background(.black.opacity(0.8), in: RoundedRectangle(cornerRadius: 20)).allowsHitTesting(false)
+                ProgressView(String(localized: "player.onDemand.loading")).padding(IoDesign.Space.xLarge).background(.black.opacity(0.8), in: RoundedRectangle(cornerRadius: 20)).allowsHitTesting(false)
             }
         }
         .onAppear { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }

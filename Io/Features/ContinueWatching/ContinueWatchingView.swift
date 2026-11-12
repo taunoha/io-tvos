@@ -5,11 +5,11 @@ struct ContinueWatchingView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
-                Text("Jätka vaatamist").font(IoDesign.pageTitle).padding(.horizontal, IoDesign.contentInset)
+                Text(String(localized: "continueWatching.title")).font(IoDesign.pageTitle).padding(.horizontal, IoDesign.contentInset)
                 if history.inProgress.isEmpty {
-                    Text("Poolelijäänud saated ilmuvad siia automaatselt.").font(IoDesign.body).foregroundStyle(.secondary).padding(.horizontal, IoDesign.contentInset)
+                    Text(String(localized: "continueWatching.empty")).font(IoDesign.body).foregroundStyle(.secondary).padding(.horizontal, IoDesign.contentInset)
                 } else {
-                    ProgrammeRow(title: "Sinu poolelijäänud saated", items: history.inProgress.map(\.programme), allowsRemovingProgress: true, wrapsCards: true)
+                    ProgrammeRow(title: String(localized: "continueWatching.shelf"), items: history.inProgress.map(\.programme), allowsRemovingProgress: true, wrapsCards: true)
                 }
             }.padding(.vertical, IoDesign.focusRoom)
         }

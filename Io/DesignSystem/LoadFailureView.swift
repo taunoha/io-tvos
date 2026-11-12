@@ -6,7 +6,7 @@ struct LoadFailureView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: IoDesign.Space.large) {
             Text(message).font(IoDesign.body)
-            Button("Proovi uuesti", action: retry)
+            Button(String(localized: "action.retry"), action: retry)
         }
     }
 }

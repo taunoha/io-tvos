@@ -19,7 +19,7 @@ struct LiveSchedule: Decodable {
     let heading: String?
 
     var title: String {
-        [name, heading].compactMap { $0 }.first { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } ?? "Käimasolev saade"
+        [name, heading].compactMap { $0 }.first { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } ?? String(localized: "live.programmeFallback")
     }
 
     func contains(_ date: Date) -> Bool {
@@ -27,11 +27,7 @@ struct LiveSchedule: Decodable {
     }
 
     var timeRange: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "et_EE")
-        formatter.timeZone = TimeZone(identifier: "Europe/Tallinn")
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: Date(timeIntervalSince1970: startTime)) + " – " + formatter.string(from: Date(timeIntervalSince1970: endTime))
+        TelekavaEntry.timeLabel(startTime) + " – " + TelekavaEntry.timeLabel(endTime)
     }
 }
 
@@ -111,9 +107,9 @@ enum PlaybackFailure: LocalizedError {
     case invalidResponse, restricted, http(Int)
     var errorDescription: String? {
         switch self {
-        case .invalidResponse: return "Jupiteri esitusandmeid ei saanud lugeda."
-        case .restricted: return "Selle kanali vaatamisel on ligipääsupiirang."
-        case .http(let code): return "Jupiteri teenus vastas veaga HTTP \(code)."
+        case .invalidResponse: return String(localized: "player.live.error.invalidResponse")
+        case .restricted: return String(localized: "player.live.error.restricted")
+        case .http(let code): return String(localized: "player.live.error.http", defaultValue: "Jupiteri teenus vastas veaga HTTP \(code).")
         }
     }
 }

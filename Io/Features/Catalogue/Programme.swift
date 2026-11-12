@@ -6,7 +6,7 @@ enum CatalogueSource: String, Codable {
     var domain: String { self == .lasteekraan ? "lasteekraan.err.ee" : "jupiter.err.ee" }
     var route: String { self == .lasteekraan ? "vaata-ja-kuula" : "video" }
     var rootID: Int { self == .lasteekraan ? 3592 : 3905 }
-    var title: String { self == .lasteekraan ? "Lasteekraan" : "Saated ja filmid" }
+    var title: String { self == .lasteekraan ? String(localized: "catalogue.kidsTitle") : String(localized: "catalogue.title") }
 }
 
 struct Programme: Decodable, Identifiable {
@@ -63,18 +63,20 @@ struct Programme: Decodable, Identifiable {
             .replacingOccurrences(of: "&amp;", with: "&")
             .replacingOccurrences(of: "&nbsp;", with: " ")
     }
-    static let airDateFormat = Date.FormatStyle.dateTime.day().month().year().locale(Locale(identifier: "et_EE"))
+    static let legacyAirDateFormat = Date.FormatStyle.dateTime.day().month().year().locale(Locale(identifier: "et_EE"))
 
     private var airDateLabel: String? {
         guard let time = scheduleStart, time > 0 else { return nil }
-        return Date(timeIntervalSince1970: time).formatted(Self.airDateFormat)
+        return Date(timeIntervalSince1970: time).formatted(Self.legacyAirDateFormat.locale(.current))
     }
 
     func cardTitle(showsSeriesTitle: Bool) -> String {
         guard type == "episode" else { return heading }
         if showsSeriesTitle { return rootContent?.heading ?? heading }
         if let cardSubtitle { return cardSubtitle }
-        return airDateLabel.map { "Episood · " + $0 } ?? "Episood"
+        return airDateLabel.map { date in
+            String(localized: "catalogue.episode.datedFallback", defaultValue: "Episood · \(date)")
+        } ?? String(localized: "catalogue.episode.fallback")
     }
 
     var cardSubtitle: String? {
@@ -195,7 +197,7 @@ struct ProgrammeDetail: Decodable {
                 let title = [prefix, node.name ?? ""].filter { !$0.isEmpty }.joined(separator: " · ")
                 if let children = node.items, !children.isEmpty { return flatten(children, prefix: title) }
                 guard let id = node.firstContentId ?? node.contents?.first?.id else { return [] }
-                return [SeasonChoice(id: id, title: title.isEmpty ? "Episoodid" : title, episodes: node.contents ?? [])]
+                return [SeasonChoice(id: id, title: title.isEmpty ? String(localized: "catalogue.season.fallback") : title, episodes: node.contents ?? [])]
             }
         }
         var seen = Set<Int>()

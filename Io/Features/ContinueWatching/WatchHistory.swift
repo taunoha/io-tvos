@@ -21,10 +21,14 @@ struct WatchEntry: Codable, Identifiable {
     var progress: Double { duration > 0 ? min(1, max(0, position / duration)) : 0 }
     var remainingLabel: String {
         let totalMinutes = max(1, Int(ceil((duration - position) / 60)))
-        let (hours, minutes) = totalMinutes.quotientAndRemainder(dividingBy: 60)
-        guard hours > 0 else { return "Jäänud \(minutes)m" }
-        let paddedMinutes = minutes < 10 ? "0\(minutes)" : "\(minutes)"
-        return "Jäänud \(hours)h \(paddedMinutes)m"
+        let duration = Duration.seconds(totalMinutes * 60)
+        let style: Duration.UnitsFormatStyle = .units(
+            allowed: totalMinutes >= 60 ? [.hours, .minutes] : [.minutes],
+            width: .narrow,
+            zeroValueUnits: .show(length: totalMinutes >= 60 ? 2 : 1)
+        )
+        let time = duration.formatted(style)
+        return String(localized: "continueWatching.remaining", defaultValue: "Jäänud \(time)")
     }
     var positionLabel: String {
         let seconds = Int(position)
@@ -35,7 +39,7 @@ struct WatchEntry: Codable, Identifiable {
         // Older entries stored the air date and episode title together.
         let legacyParts = subtitle.components(separatedBy: " · ")
         let legacyDate = programmeType == nil
-            ? try? Date(legacyParts[0], strategy: Programme.airDateFormat.parseStrategy)
+            ? try? Date(legacyParts[0], strategy: Programme.legacyAirDateFormat.parseStrategy)
             : nil
         let legacyEpisodeTitle = legacyDate == nil ? subtitle : legacyParts.dropFirst().joined(separator: " · ")
         let type = programmeType ?? (seriesHeading != nil || !legacyEpisodeTitle.isEmpty ? "episode" : nil)

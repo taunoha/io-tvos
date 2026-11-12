@@ -161,15 +161,16 @@ struct TelekavaView: View {
         let time = TelekavaEntry.timeLabel(now.timeIntervalSince1970)
         return HStack(alignment: .firstTextBaseline, spacing: IoDesign.Space.large) {
             VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
-                Text("Telekava").font(IoDesign.pageTitle).accessibilityAddTraits(.isHeader)
-                Text(dateTitle.prefix(1).uppercased() + dateTitle.dropFirst())
+                Text(String(localized: "guide.title")).font(IoDesign.pageTitle).accessibilityAddTraits(.isHeader)
+                Text(String(dateTitle.prefix(1)).uppercased(with: dateFormat.locale) + dateTitle.dropFirst())
                     .font(IoDesign.metadata)
                     .foregroundStyle(.secondary)
             }
             Spacer()
             Text(time)
                 .font(IoDesign.sectionTitle.monospacedDigit())
-                .accessibilityLabel("Kell \(time)")
+                .accessibilityLabel(String(localized: "guide.clock.accessibility", defaultValue: "Kell \(time)"))
+                .accessibilityIdentifier("guide-clock")
         }
     }
 
@@ -187,6 +188,7 @@ struct TelekavaView: View {
                 .ioCustomButtonFocus()
                 .focused($focus, equals: .day(date))
                 .accessibilityAddTraits(day == date ? .isSelected : [])
+                .accessibilityIdentifier("guide-day-\(offset)")
                 .onMoveCommand { direction in
                     if direction == .down { focusSchedule() }
                 }
@@ -196,14 +198,14 @@ struct TelekavaView: View {
     }
 
     private var dateFormat: Date.FormatStyle {
-        Date.FormatStyle(locale: Locale(identifier: "et_EE"), timeZone: TelekavaAPI.timeZone)
+        Date.FormatStyle(locale: .current, timeZone: TelekavaAPI.timeZone)
     }
 
     private func dayLabel(_ offset: Int, date: Date) -> String {
         switch offset {
-        case -1: "Eile"
-        case 0: "Täna"
-        case 1: "Homme"
+        case -1: String(localized: "guide.yesterday")
+        case 0: String(localized: "guide.today")
+        case 1: String(localized: "guide.tomorrow")
         default: date.formatted(dateFormat.weekday(.abbreviated).day().month()).capitalized(with: dateFormat.locale)
         }
     }
@@ -345,11 +347,11 @@ struct TelekavaView: View {
                         .accessibilityHidden(frame.width == 0)
                 }
             case .loaded:
-                Text("Saatekava puudub").font(IoDesign.metadata).foregroundStyle(.secondary)
+                Text(String(localized: "guide.empty")).font(IoDesign.metadata).foregroundStyle(.secondary)
             case .failed:
                 HStack(spacing: IoDesign.Space.large) {
-                    Text("Kava laadimine ebaõnnestus").font(IoDesign.metadata).foregroundStyle(.secondary)
-                    Button("Proovi uuesti") { retry += 1 }
+                    Text(String(localized: "guide.loadFailed")).font(IoDesign.metadata).foregroundStyle(.secondary)
+                    Button(String(localized: "action.retry")) { retry += 1 }
                         .font(IoDesign.metadata)
                         .focused($focus, equals: .retry(channel.id))
                         .onMoveCommand { direction in
@@ -357,7 +359,7 @@ struct TelekavaView: View {
                         }
                 }
             case nil:
-                ProgressView().accessibilityLabel("Laadin \(channel.title) kava")
+                ProgressView().accessibilityLabel(String(localized: "guide.loading.accessibility", defaultValue: "Laadin \(channel.title) kava"))
             }
         }
         .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
@@ -407,15 +409,15 @@ struct TelekavaView: View {
         .ioCustomButtonFocus()
         .focused($focus, equals: .row(row))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityLabel("\(channel.title), \(entry.timeRange), \(entry.title)\(entry.isRepeat ? ", kordus" : "")\(current ? ", praegu" : "")")
-        .accessibilityHint(confirmedReplay(for: entry, at: now) != nil ? "Vaata järele" : "")
-        .accessibilityIdentifier("telekava-\(channel.id)-\(entry.id)")
+        .accessibilityLabel(scheduleAccessibilityLabel(entry, channel: channel, isCurrent: current))
+        .accessibilityHint(confirmedReplay(for: entry, at: now) != nil ? String(localized: "guide.replayHint") : "")
+        .accessibilityIdentifier(current ? "telekava-\(channel.id)-current-\(entry.id)" : "telekava-\(channel.id)-\(entry.id)")
         .onMoveCommand { direction in
             move(direction, from: row)
         }
         .contextMenu {
             if isSelected, let programme = catalogueProgramme(for: entry) {
-                Button("Saate info", systemImage: "info.circle") {
+                Button(String(localized: "action.programmeInfo"), systemImage: "info.circle") {
                     detailProgramme = programme.playbackDetailProgramme
                 }
             }
@@ -428,11 +430,26 @@ struct TelekavaView: View {
         }
     }
 
+    private func scheduleAccessibilityLabel(_ entry: TelekavaEntry, channel: LiveChannel, isCurrent: Bool) -> String {
+        switch (entry.isRepeat, isCurrent) {
+        case (true, true):
+            String(localized: "guide.row.currentRepeat", defaultValue: "\(channel.title), \(entry.timeRange), \(entry.title), kordus, praegu")
+        case (true, false):
+            String(localized: "guide.row.repeat", defaultValue: "\(channel.title), \(entry.timeRange), \(entry.title), kordus")
+        case (false, true):
+            String(localized: "guide.row.current", defaultValue: "\(channel.title), \(entry.timeRange), \(entry.title), praegu")
+        case (false, false):
+            String(localized: "guide.row.standard", defaultValue: "\(channel.title), \(entry.timeRange), \(entry.title)")
+        }
+    }
+
     private func programmeDetail(_ entry: TelekavaEntry, channel: LiveChannel, now: Date) -> some View {
         let programme = catalogueProgramme(for: entry)
-        let status = entry.isCurrent(at: now) ? " · Praegu eetris" : ""
+        let metadata = entry.isCurrent(at: now)
+            ? String(localized: "guide.programme.onAirMetadata", defaultValue: "\(entry.timeRange) · \(channel.title) · Praegu eetris")
+            : String(localized: "guide.programme.metadata", defaultValue: "\(entry.timeRange) · \(channel.title)")
         return ProgrammeInfoCard(title: entry.title,
-                                 metadata: "\(entry.timeRange) · \(channel.title)\(status)",
+                                 metadata: metadata,
                                  lead: entry.lead, programme: programme) {
             if let programme {
                 ProgrammeInfoButton(accessibilityID: "telekava-programme-info") {
