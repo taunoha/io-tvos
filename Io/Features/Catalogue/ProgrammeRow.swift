@@ -29,6 +29,7 @@ struct ProgrammeRow: View {
     var openProgramme: ((Programme) -> Void)? = nil
     var playEpisode: ((Programme) -> Void)? = nil
     @Environment(WatchHistory.self) private var history
+    @State private var columnCount = 1
     @FocusState private var focusedProgramme: ProgrammeRowKey?
 
     private func removeProgress(for id: Int) {
@@ -49,20 +50,14 @@ struct ProgrammeRow: View {
                 .padding(.horizontal, IoDesign.contentInset)
                 .accessibilityValue(isLoading ? String(localized: "catalogue.shelf.loading") : "")
             if wrapsCards {
-                let cardWidth = usesPortraitCards ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth
-                let column = GridItem(.adaptive(minimum: cardWidth, maximum: cardWidth), spacing: IoDesign.cardGap)
-                LazyVGrid(columns: [column], alignment: .leading, spacing: IoDesign.cardGap) {
-                    cards(reservesProgressSpace: reservesProgressSpace)
-                }
-                .padding(.horizontal, IoDesign.contentInset)
-                .padding(.top, IoDesign.focusRoom)
+                wrappedRows(reservesProgressSpace: reservesProgressSpace)
             } else {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: IoDesign.cardGap) {
                         if isLoading {
                             ForEach(0..<4) { _ in ProgrammeCardSkeleton() }
                         } else {
-                            cards(reservesProgressSpace: reservesProgressSpace)
+                            cards(items[...], reservesProgressSpace: reservesProgressSpace)
                         }
                     }
                     .padding(.horizontal, IoDesign.contentInset)
@@ -71,6 +66,7 @@ struct ProgrammeRow: View {
                 // Focused tvOS cards cast shadows beyond the shelf bounds.
                 .scrollClipDisabled()
                 .id(isLoading)
+                .ioFullWidthFocusSection()
             }
         }
         .onChange(of: restoredFocusID) { _, id in
@@ -78,8 +74,33 @@ struct ProgrammeRow: View {
         }
     }
 
-    private func cards(reservesProgressSpace: Bool) -> some View {
-        ForEach(items.lazy.map(ProgrammeRowKey.init)) { key in
+    private func wrappedRows(reservesProgressSpace: Bool) -> some View {
+        let cardWidth = usesPortraitCards ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth
+        let rowCount = (items.count + columnCount - 1) / columnCount
+
+        return LazyVStack(alignment: .leading, spacing: IoDesign.cardGap) {
+            ForEach(0..<rowCount, id: \.self) { row in
+                let start = row * columnCount
+                let end = min(start + columnCount, items.count)
+                HStack(alignment: .top, spacing: IoDesign.cardGap) {
+                    cards(items[start..<end], reservesProgressSpace: reservesProgressSpace)
+                }
+                .padding(.horizontal, IoDesign.contentInset)
+                .ioFullWidthFocusSection()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, IoDesign.focusRoom)
+        .onGeometryChange(for: Int.self) { geometry in
+            let availableWidth = geometry.size.width - 2 * IoDesign.contentInset
+            return max(1, Int((availableWidth + IoDesign.cardGap) / (cardWidth + IoDesign.cardGap)))
+        } action: { count in
+            columnCount = count
+        }
+    }
+
+    private func cards(_ programmes: ArraySlice<Programme>, reservesProgressSpace: Bool) -> some View {
+        ForEach(programmes.lazy.map(ProgrammeRowKey.init)) { key in
             let programme = key.programme
             Group {
                 if let playEpisode, programme.source != .lasteekraan || programme.hasVideo {

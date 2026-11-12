@@ -34,6 +34,7 @@ struct LiveHomeView: View {
                     }
                 }
                 .padding(.horizontal, IoDesign.contentInset)
+                .ioFullWidthFocusSection()
 
                 if !favorites.entries.isEmpty {
                     ProgrammeRow(title: String(localized: "live.home.favorites"), items: favorites.entries.map(\.programme), openProgramme: openProgramme)

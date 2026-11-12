@@ -151,6 +151,7 @@ struct ProgrammeSearchView: View {
                 .accessibilityLabel(String(localized: "search.deleteHint"))
                 Button(String(localized: "search.clear")) { phrase = "" }
             }
+            .ioFullWidthFocusSection()
 
             // Ordinary buttons keep tvOS from opening its modal text editor.
             VStack(spacing: IoDesign.Space.medium) {
@@ -168,9 +169,9 @@ struct ProgrammeSearchView: View {
                             .focused($focusedKey, equals: String(character))
                         }
                     }
+                    .ioFullWidthFocusSection()
                 }
             }
         }
-        .focusSection()
     }
 }

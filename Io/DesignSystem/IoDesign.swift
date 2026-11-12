@@ -82,6 +82,12 @@ private struct IoCustomFocusButtonStyle: ButtonStyle {
 }
 
 extension View {
+    /// Give vertical focus moves a target across the row's available width.
+    func ioFullWidthFocusSection() -> some View {
+        frame(maxWidth: .infinity, alignment: .leading)
+            .focusSection()
+    }
+
     /// Use when the button label draws its own focus state.
     func ioCustomButtonFocus() -> some View {
         buttonStyle(IoCustomFocusButtonStyle())

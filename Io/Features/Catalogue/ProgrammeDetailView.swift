@@ -84,6 +84,7 @@ struct ProgrammeDetailView: View {
                         ProgrammeArtwork(url: page.mainContent.imageURL) { Color.white.opacity(0.06) }
                             .frame(width: 600, height: 338).clipped().clipShape(RoundedRectangle(cornerRadius: 20))
                     }.padding(.horizontal, IoDesign.contentInset)
+                    .ioFullWidthFocusSection()
                     if seasons.count > 1 {
                         ScrollView(.horizontal) {
                             LazyHStack(spacing: IoDesign.Space.large) {
@@ -105,6 +106,7 @@ struct ProgrammeDetailView: View {
                             }.padding(.horizontal, IoDesign.contentInset).padding(.vertical, IoDesign.focusRoom)
                         }
                         .scrollClipDisabled()
+                        .ioFullWidthFocusSection()
                     }
                     if error != nil { loadStatus }
                     let episodes = page.episodes(for: selectedSeasonID)
