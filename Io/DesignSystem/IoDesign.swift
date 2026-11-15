@@ -16,7 +16,7 @@ enum IoDesign {
     // Perfect Fourth: take each step from 60 pt and round to whole points.
     static let pageTitle = Font.system(size: 60, weight: .bold)
     static let sectionTitle = Font.system(size: 45, weight: .semibold)
-    static let cardTitle = Font.system(size: 34, weight: .semibold)
+    static let cardTitle = Font.system(size: 32, weight: .semibold)
     static let body = Font.system(size: 25)
     static let minimumTextSize: CGFloat = 23
     static let metadata = Font.system(size: minimumTextSize, weight: .medium)
