@@ -16,6 +16,7 @@ enum IoDesign {
     // Perfect Fourth: take each step from 60 pt and round to whole points.
     static let pageTitle = Font.system(size: 60, weight: .bold)
     static let sectionTitle = Font.system(size: 45, weight: .semibold)
+    static let sectionTitleLineHeight: CGFloat = 54
     static let cardTitle = Font.system(size: 32, weight: .semibold)
     static let body = Font.system(size: 25)
     static let minimumTextSize: CGFloat = 23
@@ -32,7 +33,7 @@ enum IoDesign {
     static let scheduleChannelWidth = Space.xxxLarge + Space.xxLarge
     static let scheduleRowHeight = Space.xxLarge + Space.xLarge
     static let scheduleAxisHeight = Space.xLarge
-    static let scheduleEdgeShadowWidth = Space.xLarge
+    static let scheduleEdgeFadeWidth = Space.xLarge
     static let scheduleGridCornerRadius = Space.medium
     static let schedulePanelCornerRadius: CGFloat = 20
 
@@ -47,6 +48,11 @@ enum IoDesign {
     static let shelfGap = Space.xLarge
     static let programmeInfoContentInset = Space.large * 1.5
     static let programmeInfoDescriptionMaxWidth: CGFloat = 1050
+
+    static let liveCardMinimumHeight = Space.xxxLarge * 3
+    static let liveChannelCaptionHeight = Space.xLarge
+    static let liveCardFocusStroke = Space.xxSmall
+    static let liveCardTextInset = Space.xxLarge
 
     static let playerInfoWidth: CGFloat = 1200
     static let playerInfoHeight: CGFloat = 260

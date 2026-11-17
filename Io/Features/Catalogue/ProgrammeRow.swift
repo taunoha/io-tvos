@@ -107,6 +107,7 @@ struct ProgrammeRow: View {
                     Button { playEpisode(programme) } label: {
                         ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, playsDirectly: true)
                     }
+                    .accessibilityIdentifier("detail-episode-\(programme.id)")
                 } else if let openProgramme {
                     Button { openProgramme(programme) } label: {
                         ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace)

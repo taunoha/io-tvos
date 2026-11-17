@@ -593,7 +593,7 @@
       }
     },
     "live.home.channels" : {
-      "comment" : "Otse vahelehe riiuli pealkiri.",
+      "comment" : "Otse avalehe kanalikaardi esitustoiming.",
       "extractionState" : "manual",
       "localizations" : {
         "et" : {
@@ -624,6 +624,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lemmikud"
+          }
+        }
+      }
+    },
+    "live.home.onAir" : {
+      "comment" : "Otse avalehe kanalikaardi eetrisoleku märge.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Praegu eetris"
           }
         }
       }

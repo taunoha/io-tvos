@@ -19,6 +19,10 @@ struct ProgrammeDetailView: View {
         var retry = 0
     }
 
+    private enum PlaybackAction: Hashable {
+        case play, restart
+    }
+
     @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(WatchHistory.self) private var history
     @Environment(\.openProgrammeDetail) private var openProgramme
@@ -34,6 +38,8 @@ struct ProgrammeDetailView: View {
     @State private var openedEpisodeID: Int?
     @State private var restoredEpisodeFocusID: Int?
     @FocusState private var focusedSeasonID: Int?
+    @FocusState private var focusedPlaybackAction: PlaybackAction?
+    @State private var scrollPosition = ScrollPosition(edge: .top)
 
     init(programme: Programme) {
         self.programme = programme
@@ -59,13 +65,17 @@ struct ProgrammeDetailView: View {
                             } else if let saved = history.entry(for: page.mainContent.id) {
                                 HStack(spacing: IoDesign.Space.large) {
                                     Button { playing = PlaybackSelection(programme: page.mainContent, position: saved.position) } label: { Label(String(localized: "detail.resume", defaultValue: "Jätka · \(saved.positionLabel)"), systemImage: "play.fill") }
+                                        .focused($focusedPlaybackAction, equals: .play)
                                     Button(String(localized: "detail.restart")) {
                                         history.remove(page.mainContent.id)
                                         playing = PlaybackSelection(programme: page.mainContent, position: 0)
                                     }
+                                    .focused($focusedPlaybackAction, equals: .restart)
                                 }
                             } else {
                                 Button { playing = PlaybackSelection(programme: page.mainContent, position: 0) } label: { Label(String(localized: "detail.play"), systemImage: "play.fill") }
+                                    .focused($focusedPlaybackAction, equals: .play)
+                                    .accessibilityIdentifier("detail-play")
                             }
                             if let favorite = ProgrammeFavorite(programme: programme, mainContent: page.mainContent) {
                                 let isFavorite = favorites.contains(favorite)
@@ -119,6 +129,11 @@ struct ProgrammeDetailView: View {
                     }
                 }
             }.padding(.vertical, IoDesign.focusRoom)
+        }
+        .scrollPosition($scrollPosition)
+        .onChange(of: focusedPlaybackAction) { _, action in
+            // tvOS can leave the tab bar above the screen when focus scrolls back to the header.
+            if action != nil { scrollPosition.scrollTo(edge: .top) }
         }
         .scrollClipDisabled()
         .ignoresSafeArea(.container, edges: .horizontal)

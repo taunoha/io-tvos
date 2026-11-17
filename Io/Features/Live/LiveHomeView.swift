@@ -8,80 +8,52 @@ struct LiveHomeView: View {
     @State private var programmeToOpen: Programme?
     @State private var programmeDetail: Programme?
     @FocusState private var focusedChannelID: String?
-    @State private var backgroundChannelID = LiveChannel.all.first?.id
+    @State private var featuredChannelID = LiveChannel.all.first?.id
+    @State private var carouselPosition = LiveChannel.all.first?.id
     @Namespace private var channelFocusScope
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.resetFocus) private var resetFocus
 
+    private var carouselBottomInset: CGFloat {
+        favorites.entries.isEmpty && history.inProgress.isEmpty ? 0 : IoDesign.focusRoom
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
+        GeometryReader { viewport in
+            ScrollView {
                 VStack(alignment: .leading, spacing: IoDesign.shelfGap) {
-                    Text(verbatim: "Io").font(IoDesign.pageTitle)
-                    VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
-                        Text(String(localized: "live.home.channels")).font(IoDesign.sectionTitle)
-                        HStack(spacing: IoDesign.cardGap) {
-                            ForEach(LiveChannel.all) { channel in
-                                Button { selectedChannel = channel } label: {
-                                    LiveChannelCard(channel: channel)
-                                }
-                                .buttonStyle(.card)
-                                .accessibilityIdentifier("live-channel-\(channel.id)")
-                                .focused($focusedChannelID, equals: channel.id)
-                                .prefersDefaultFocus(channel.id == backgroundChannelID, in: channelFocusScope)
-                            }
-                        }
+                    channelCarousel(width: viewport.size.width, height: channelCardHeight(in: viewport))
+
+                    if !favorites.entries.isEmpty {
+                        ProgrammeRow(title: String(localized: "live.home.favorites"), items: favorites.entries.map(\.programme), openProgramme: openProgramme)
+                            .task { await favorites.resolveLegacyArtwork() }
+                    }
+
+                    if !history.inProgress.isEmpty {
+                        ProgrammeRow(title: String(localized: "live.home.continueShelf"), items: history.inProgress.prefix(7).map(\.programme), allowsRemovingProgress: true, openProgramme: openProgramme)
                     }
                 }
-                .padding(.horizontal, IoDesign.contentInset)
-                .ioFullWidthFocusSection()
-
-                if !favorites.entries.isEmpty {
-                    ProgrammeRow(title: String(localized: "live.home.favorites"), items: favorites.entries.map(\.programme), openProgramme: openProgramme)
-                        .task { await favorites.resolveLegacyArtwork() }
-                }
-
-                if !history.inProgress.isEmpty {
-                    ProgrammeRow(title: String(localized: "live.home.continueShelf"), items: history.inProgress.prefix(7).map(\.programme), allowsRemovingProgress: true, openProgramme: openProgramme)
-                }
-
+                .padding(.vertical, IoDesign.focusRoom)
             }
-            .padding(.vertical, IoDesign.focusRoom)
         }
-        .scrollClipDisabled()
         .ignoresSafeArea(.container, edges: .horizontal)
+        .background {
+            LinearGradient(colors: [Color(white: 0.12), .black], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+        }
         .focusScope(channelFocusScope)
         .onAppear {
             guard programmeToOpen == nil, programmeDetail == nil else { return }
-            focusedChannelID = backgroundChannelID
+            focusedChannelID = featuredChannelID
             resetFocus(in: channelFocusScope)
         }
         .onChange(of: focusedChannelID) { _, channelID in
-            if let channelID { backgroundChannelID = channelID }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background {
-            GeometryReader { geometry in
-                ZStack {
-                    LinearGradient(colors: [Color(white: 0.12), .black], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    LiveBackgroundStage(channelID: backgroundChannelID,
-                                        size: geometry.size,
-                                        isActive: selectedChannel == nil && programmeToOpen == nil
-                                            && programmeDetail == nil && scenePhase == .active)
-                }
-                // A stationary layer above all moving videos and below the browsing UI.
-                .overlay {
-                    LinearGradient(
-                        colors: [.black.opacity(0.92), .black.opacity(0.16)],
-                        startPoint: .topLeading,
-                        endPoint: UnitPoint(x: geometry.size.height / max(geometry.size.width, 1), y: 1)
-                    )
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
+            guard let channelID else { return }
+            featuredChannelID = channelID
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
+                carouselPosition = channelID
             }
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
         }
         .fullScreenCover(item: $selectedChannel, onDismiss: {
             if let programmeToOpen {
@@ -89,11 +61,70 @@ struct LiveHomeView: View {
                 programmeDetail = programmeToOpen
                 self.programmeToOpen = nil
             } else {
-                focusedChannelID = backgroundChannelID
+                focusedChannelID = featuredChannelID
             }
         }) { channel in
             LivePlayerScreen(channel: channel) { programmeToOpen = $0 }
         }
         .programmeDetailDestination($programmeDetail)
+    }
+
+    private func channelCardHeight(in viewport: GeometryProxy) -> CGFloat {
+        let hasShelf = !favorites.entries.isEmpty || !history.inProgress.isEmpty
+        let shelfPreview = IoDesign.shelfGap + IoDesign.sectionTitleLineHeight
+            + IoDesign.sectionHeadingGap + IoDesign.focusRoom + IoDesign.landscapeCardArtworkHeight * 2 / 3
+        let channelCaption = IoDesign.sectionHeadingGap + IoDesign.liveChannelCaptionHeight
+        let reservedHeight = channelCaption + carouselBottomInset + IoDesign.focusRoom
+            + (hasShelf ? shelfPreview : IoDesign.focusRoom)
+        // Shelves draw through the bottom safe area before the viewer scrolls to them.
+        let visibleHeight = viewport.size.height + (hasShelf ? viewport.safeAreaInsets.bottom : 0)
+        return max(IoDesign.liveCardMinimumHeight, visibleHeight - reservedHeight)
+    }
+
+    private func channelCarousel(width: CGFloat, height: CGFloat) -> some View {
+        let cardWidth = max(1, width - IoDesign.contentInset * 2)
+        return VStack(alignment: .leading, spacing: IoDesign.sectionHeadingGap) {
+            ScrollView(.horizontal) {
+                HStack(spacing: IoDesign.cardGap) {
+                    ForEach(LiveChannel.all) { channel in
+                        let isFocused = focusedChannelID == channel.id
+                        Button { selectedChannel = channel } label: {
+                            LiveChannelCard(channel: channel, width: cardWidth, height: height,
+                                            isFocused: isFocused,
+                                            previewsLiveVideo: isFocused && selectedChannel == nil
+                                                && programmeToOpen == nil && programmeDetail == nil
+                                                && scenePhase == .active)
+                        }
+                        .ioCustomButtonFocus()
+                        .accessibilityIdentifier("live-channel-\(channel.id)")
+                        .focused($focusedChannelID, equals: channel.id)
+                        .prefersDefaultFocus(channel.id == featuredChannelID, in: channelFocusScope)
+                    }
+                }
+                .scrollTargetLayout()
+            }
+            .contentMargins(.horizontal, IoDesign.contentInset, for: .scrollContent)
+            .scrollIndicators(.hidden)
+            .scrollPosition(id: $carouselPosition, anchor: .leading)
+
+            HStack(spacing: IoDesign.Space.large) {
+                ForEach(LiveChannel.all) { channel in
+                    Text(channel.title)
+                        .font(IoDesign.metadata)
+                        .foregroundStyle(channel.id == featuredChannelID ? .white : .white.opacity(0.62))
+                        .padding(.bottom, IoDesign.Space.xSmall)
+                        .overlay(alignment: .bottom) {
+                            if channel.id == featuredChannelID {
+                                Capsule().fill(.white).frame(height: IoDesign.Space.xxSmall)
+                            }
+                        }
+                }
+            }
+            .frame(height: IoDesign.liveChannelCaptionHeight)
+            .padding(.horizontal, IoDesign.contentInset)
+            .accessibilityHidden(true)
+        }
+        .padding(.bottom, carouselBottomInset)
+        .ioFullWidthFocusSection()
     }
 }

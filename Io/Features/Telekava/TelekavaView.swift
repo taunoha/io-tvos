@@ -7,7 +7,7 @@ struct TelekavaView: View {
     }
 
     private enum Focus: Hashable {
-        case day(Date), row(Row), retry(String), programmeInfo
+        case day(Date), row(Row), retry(String)
     }
 
     private enum ChannelSchedule {
@@ -90,18 +90,12 @@ struct TelekavaView: View {
             }
         }
         .ignoresSafeArea(.container, edges: .horizontal)
-        .background {
-            LinearGradient(colors: [Color(red: 0.09, green: 0.11, blue: 0.16),
-                                    Color(red: 0.035, green: 0.045, blue: 0.07)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
-        }
         .defaultFocus($focus, selected.map(Focus.row) ?? .day(day))
         .onChange(of: focus) { previous, value in
             if case .row(let row) = value {
                 if let selected, row != selected, loadedDay == day {
                     switch previous {
-                    case .day, .programmeInfo:
+                    case .day:
                         focus = .row(selected)
                         return
                     default:
@@ -235,12 +229,7 @@ struct TelekavaView: View {
                             channelTrack(channel, now: now, width: width)
                         }
                     }
-                    .overlay {
-                        guideEdgeShadows
-                            .mask { guideCardMask(width: width) }
-                            .allowsHitTesting(false)
-                            .accessibilityHidden(true)
-                    }
+                    .mask { guideEdgeFade(width: width) }
                 }
                 .overlay(alignment: .leading) {
                     let x = position(of: now.timeIntervalSince1970, width: width)
@@ -261,40 +250,20 @@ struct TelekavaView: View {
         }
     }
 
-    private var guideEdgeShadows: some View {
-        let hiddenEntries = LiveChannel.all.flatMap { entries(for: $0.id) }.filter(needsMoreRoom)
-        let hasEarlier = loadedDay == day && hiddenEntries.contains { $0.startTime < windowStart }
-        let hasLater = loadedDay == day && hiddenEntries.contains { $0.endTime > windowEnd }
-        return HStack(spacing: 0) {
-            if hasEarlier {
-                guideEdgeShadow(from: .leading, to: .trailing)
-            }
-            Spacer(minLength: 0)
-            if hasLater {
-                guideEdgeShadow(from: .trailing, to: .leading)
-            }
-        }
-    }
-
-    private func guideEdgeShadow(from start: UnitPoint, to end: UnitPoint) -> some View {
-        LinearGradient(colors: [.black.opacity(0.7), .clear], startPoint: start, endPoint: end)
-            .frame(width: IoDesign.scheduleEdgeShadowWidth)
-    }
-
-    private func guideCardMask(width: CGFloat) -> some View {
-        VStack(spacing: IoDesign.sectionHeadingGap) {
-            ForEach(LiveChannel.all) { channel in
-                ZStack(alignment: .leading) {
-                    ForEach(trackEntries(for: channel.id)) { entry in
-                        let frame = programmeFrame(entry, trackWidth: width)
-                        RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius)
-                            .frame(width: frame.width, height: frame.height)
-                            .offset(x: frame.minX)
-                    }
-                }
-                .frame(width: width, height: IoDesign.scheduleRowHeight, alignment: .leading)
-            }
-        }
+    private func guideEdgeFade(width: CGFloat) -> LinearGradient {
+        let hiddenEntries = loadedDay == day
+            ? LiveChannel.all.flatMap { entries(for: $0.id) }.filter(needsMoreRoom)
+            : []
+        let hasEarlier = hiddenEntries.contains { $0.startTime < windowStart }
+        let hasLater = hiddenEntries.contains { $0.endTime > windowEnd }
+        let fade = min(0.5, IoDesign.scheduleEdgeFadeWidth / max(1, width))
+        let edge = Color.white.opacity(0.25)
+        return LinearGradient(stops: [
+            .init(color: hasEarlier ? edge : .white, location: 0),
+            .init(color: .white, location: fade),
+            .init(color: .white, location: 1 - fade),
+            .init(color: hasLater ? edge : .white, location: 1)
+        ], startPoint: .leading, endPoint: .trailing)
     }
 
     private func trackEntries(for channelID: String) -> [TelekavaEntry] {
@@ -450,17 +419,7 @@ struct TelekavaView: View {
             : String(localized: "guide.programme.metadata", defaultValue: "\(entry.timeRange) · \(channel.title)")
         return ProgrammeInfoCard(title: entry.title,
                                  metadata: metadata,
-                                 lead: entry.lead, programme: programme) {
-            if let programme {
-                ProgrammeInfoButton(accessibilityID: "telekava-programme-info") {
-                    detailProgramme = programme.playbackDetailProgramme
-                }
-                .focused($focus, equals: .programmeInfo)
-                .onMoveCommand { direction in
-                    if direction == .up { focusSchedule() }
-                }
-            }
-        }
+                                 lead: entry.lead, programme: programme)
     }
 
     private func catalogueProgramme(for entry: TelekavaEntry) -> Programme? {
@@ -540,8 +499,6 @@ struct TelekavaView: View {
         }
         if direction == .up {
             focus = .day(day)
-        } else if let entry = selectedEntry, catalogueProgramme(for: entry) != nil {
-            focus = .programmeInfo
         }
     }
 
