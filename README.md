@@ -5,7 +5,7 @@
 Io is an independent Apple TV app for watching ERR Jupiter.
 
 - **Otse** opens on a carousel for ETV, ETV2 and ETV+. Press Down to reach **Lemmikud** (favourites) or **Jätka vaatamist** (continue watching), when available. During live playback, open **Saated** next to **Info** to jump to programme starts within the stream’s rewind window.
-- **Telekava** shows the schedule for all three channels, highlights what’s on now and opens live or on-demand playback where available. The info panel shows the selected programme. When a catalogue entry is available, press and hold Select on the programme and choose **Saate info** to open its details.
+- **Telekava** shows the schedule for all three channels, highlights what’s on now and opens live or on-demand playback where available. The info panel shows the selected programme. When a catalogue entry is available, press and hold Select on the programme and choose **Saate info** to open its details on the **Saated** tab. For series, the same menu offers **Lisa lemmikutesse** or **Eemalda lemmikutest**. Favourites appear on **Otse**.
 - **Saated** browses the Jupiter catalogue
 - **Lasteekraan** browses ERR’s children’s catalogue
 - **Jätka** lets you resume unfinished programmes from your saved position.

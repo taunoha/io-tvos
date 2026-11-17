@@ -26,6 +26,7 @@ struct TelekavaView: View {
     }
 
     @Environment(WatchHistory.self) private var history
+    @Environment(\.openProgrammeDetail) private var openProgramme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(LiveChannel.lastWatchedKey) private var lastChannelID = "etv"
     @FocusState private var focus: Focus?
@@ -47,6 +48,7 @@ struct TelekavaView: View {
     @State private var catalogueDetail: Programme?
     @State private var playback: Playback?
     @State private var programmeToOpen: Programme?
+    @State private var contextMenuProgramme: Programme?
     @State private var detailProgramme: Programme?
     @State private var returnFocus: Focus?
 
@@ -124,6 +126,19 @@ struct TelekavaView: View {
         .task(id: LoadRequest(day: day, retry: retry)) {
             await load(day)
         }
+        .task(id: contextMenuProgramme?.id) {
+            guard let programme = contextMenuProgramme else { return }
+            // Give the system menu time to return its row preview before switching tabs.
+            do {
+                try await Task.sleep(for: .milliseconds(450))
+                try Task.checkCancellation()
+                contextMenuProgramme = nil
+                openProgramme(programme)
+            } catch {
+                // Leaving the guide cancels the pending navigation.
+            }
+        }
+        .onDisappear { contextMenuProgramme = nil }
         .fullScreenCover(item: $playback, onDismiss: {
             if let programmeToOpen {
                 detailProgramme = programmeToOpen
@@ -387,7 +402,10 @@ struct TelekavaView: View {
         .contextMenu {
             if isSelected, let programme = catalogueProgramme(for: entry) {
                 Button(String(localized: "action.programmeInfo"), systemImage: "info.circle") {
-                    detailProgramme = programme.playbackDetailProgramme
+                    contextMenuProgramme = programme.playbackDetailProgramme
+                }
+                if let favorite = ProgrammeFavorite(programme: programme, mainContent: programme) {
+                    ProgrammeFavoriteButton(favorite: favorite)
                 }
             }
         }

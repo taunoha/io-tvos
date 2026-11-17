@@ -254,7 +254,7 @@
       }
     },
     "detail.addFavorite" : {
-      "comment" : "Saate detailvaade.",
+      "comment" : "Saate detailvaate ja Telekava kontekstimenüü lemmikutoiming.",
       "extractionState" : "manual",
       "localizations" : {
         "et" : {
@@ -314,7 +314,7 @@
       }
     },
     "detail.removeFavorite" : {
-      "comment" : "Saate detailvaade.",
+      "comment" : "Saate detailvaate ja Telekava kontekstimenüü lemmikutoiming.",
       "extractionState" : "manual",
       "localizations" : {
         "et" : {

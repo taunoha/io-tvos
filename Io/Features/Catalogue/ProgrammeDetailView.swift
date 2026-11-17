@@ -23,7 +23,6 @@ struct ProgrammeDetailView: View {
         case play, restart
     }
 
-    @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(WatchHistory.self) private var history
     @Environment(\.openProgrammeDetail) private var openProgramme
     let programme: Programme
@@ -78,11 +77,7 @@ struct ProgrammeDetailView: View {
                                     .accessibilityIdentifier("detail-play")
                             }
                             if let favorite = ProgrammeFavorite(programme: programme, mainContent: page.mainContent) {
-                                let isFavorite = favorites.contains(favorite)
-                                Button(isFavorite ? String(localized: "detail.removeFavorite") : String(localized: "detail.addFavorite"),
-                                       systemImage: isFavorite ? "star.fill" : "star") {
-                                    favorites.toggle(favorite)
-                                }
+                                ProgrammeFavoriteButton(favorite: favorite)
                             }
                             if history.entry(for: page.mainContent.id) != nil {
                                 Button(String(localized: "action.removeProgress"), systemImage: "trash") {

@@ -38,6 +38,7 @@
 		EED22AEECD7E42E99DAE9DB8 /* OnDemandPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43B69317AE8A42348AE8BD17 /* OnDemandPlayback.swift */; };
 		F00000000000000000000004 /* RemoteFocusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* RemoteFocusTests.swift */; };
 		F88E62E47AB54D4283F07638 /* FairPlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA67144AC89543B3B85A87A7 /* FairPlay.swift */; };
+		F841BDB700E04B8A87CD42A7 /* ProgrammeFavoriteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB47D7D341424E24B64E87AB /* ProgrammeFavoriteButton.swift */; };
 		FE2810AD23AC472CA48274A0 /* ProgrammeFavorites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B1600DA7B54391AFA83973 /* ProgrammeFavorites.swift */; };
 		FFBCA6B5D0A74F2EA7D5DF89 /* OnDemandAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBB43CABEBB340129A320CA1 /* OnDemandAPI.swift */; };
 /* End PBXBuildFile section */
@@ -53,6 +54,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CB47D7D341424E24B64E87AB /* ProgrammeFavoriteButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgrammeFavoriteButton.swift; sourceTree = "<group>"; };
 		30B1600DA7B54391AFA83973 /* ProgrammeFavorites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgrammeFavorites.swift; sourceTree = "<group>"; };
 		37960B17C51746838FB68C72 /* OnDemandPlayerScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDemandPlayerScreen.swift; sourceTree = "<group>"; };
 		3A1670E5D6A046C58714882A /* LivePlaybackDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePlaybackDiagnostics.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 				73AF2AC4299A45639F8EDBAC /* ProgrammeArtwork.swift */,
 				79F31E80A81B4CC08B422063 /* ProgrammeCard.swift */,
 				AA3CFDE2CA9C4410B45CDD29 /* ProgrammeDetailView.swift */,
+				CB47D7D341424E24B64E87AB /* ProgrammeFavoriteButton.swift */,
 				30B1600DA7B54391AFA83973 /* ProgrammeFavorites.swift */,
 				CD48DA7467B940E998330AC8 /* ProgrammeRow.swift */,
 				4457AEA285C74A30AC810838 /* ProgrammeSearchView.swift */,
@@ -318,6 +321,7 @@
 				AEB0ED92210F4E858E023390 /* ProgrammeArtwork.swift in Sources */,
 				6A1202357F9F442981BB23C8 /* ProgrammeCard.swift in Sources */,
 				33D1D5597F064B0594951844 /* ProgrammeDetailView.swift in Sources */,
+				F841BDB700E04B8A87CD42A7 /* ProgrammeFavoriteButton.swift in Sources */,
 				FE2810AD23AC472CA48274A0 /* ProgrammeFavorites.swift in Sources */,
 				7BB78AE6EB334C26BC897D74 /* ProgrammeRow.swift in Sources */,
 				5EA02CAEA4A1420F8DF8DA0E /* ProgrammeSearchView.swift in Sources */,
