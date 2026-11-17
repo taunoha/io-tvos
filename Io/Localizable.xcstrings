@@ -911,7 +911,7 @@
         "et" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ · Vaatad"
+            "value" : "%@ · Praegu eetris"
           }
         }
       }
