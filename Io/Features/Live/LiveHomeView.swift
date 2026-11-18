@@ -88,10 +88,12 @@ struct LiveHomeView: View {
                 HStack(spacing: IoDesign.cardGap) {
                     ForEach(LiveChannel.all) { channel in
                         let isFocused = focusedChannelID == channel.id
+                        let isCardVisible = isChannelRowVisible && visibleChannelID == channel.id
                         Button { selectedChannel = channel } label: {
                             LiveChannelCard(channel: channel, width: cardWidth, height: height,
                                             isFocused: isFocused,
-                                            isPreviewVisible: isChannelRowVisible && visibleChannelID == channel.id,
+                                            isCardVisible: isCardVisible,
+                                            isFeatured: isCardVisible && featuredChannelID == channel.id,
                                             allowsLivePreview: selectedChannel == nil
                                                 && programmeToOpen == nil && programmeDetail == nil
                                                 && scenePhase == .active)

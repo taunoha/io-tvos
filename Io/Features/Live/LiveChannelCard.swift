@@ -5,8 +5,10 @@ struct LiveChannelCard: View {
     let width: CGFloat
     let height: CGFloat
     let isFocused: Bool
-    let isPreviewVisible: Bool
+    let isCardVisible: Bool
+    let isFeatured: Bool
     let allowsLivePreview: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var schedules: [LiveSchedule] = []
     @State private var loaded = false
 
@@ -55,7 +57,7 @@ struct LiveChannelCard: View {
         .background {
             IoDesign.liveCardBackground
                 .overlay {
-                    LiveChannelPreview(channel: channel, isCardVisible: isPreviewVisible, isEnabled: allowsLivePreview)
+                    LiveChannelPreview(channel: channel, isCardVisible: isCardVisible, isEnabled: allowsLivePreview)
                 }
         }
         .clipShape(shape)
@@ -63,6 +65,9 @@ struct LiveChannelCard: View {
             shape.strokeBorder(.white.opacity(isFocused ? 1 : 0), lineWidth: IoDesign.liveCardFocusStroke)
                 .allowsHitTesting(false)
         }
+        .opacity(isFeatured ? 1 : 0.72)
+        .animation(reduceMotion ? nil : .easeInOut(duration: LiveHomeView.carouselScrollDuration),
+                   value: isFeatured)
         .task {
             while !Task.isCancelled {
                 do {
