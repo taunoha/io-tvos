@@ -22,9 +22,37 @@ struct Programme: Decodable, Identifiable {
     let medias: [ProgrammeMedia]?
     let rootContent: RootProgramme?
 
+    var savedReplayDeadline: Date? = nil
     var catalogueSource: CatalogueSource? = nil
     var source: CatalogueSource { catalogueSource ?? .jupiter }
     var hasVideo: Bool { medias?.contains { $0.type == "video" && $0.src?.hls != nil } == true }
+
+    func replayDeadline(at now: Date = .now) -> Date? {
+        let video = medias?.first { $0.type == "video" && $0.src?.hls != nil }
+            ?? medias?.first { $0.type == "video" }
+        let periods = (video?.periods ?? []).compactMap(\.interval).sorted { $0.start < $1.start }
+        var deadline = savedReplayDeadline
+        // A future window extends availability only if playback can continue into it without a gap.
+        for period in periods {
+            if period.start > max(now, deadline ?? now) { break }
+            deadline = max(deadline ?? period.end, period.end)
+        }
+        return deadline
+    }
+
+    var isReplayExpired: Bool { replayDeadline().map { $0 <= .now } == true }
+
+    var playbackMedia: ProgrammeMedia? {
+        medias?.first { $0.src?.hls != nil && (source != .lasteekraan || $0.type == "video") }
+    }
+
+    func replayAvailabilityLabel(at now: Date = .now) -> String? {
+        guard let deadline = replayDeadline(at: now) else { return nil }
+        if deadline <= now { return String(localized: "catalogue.replay.expired") }
+        guard deadline.timeIntervalSince(now) <= 30 * 24 * 60 * 60 else { return nil }
+        let date = deadline.formatted(.dateTime.day().month(.abbreviated))
+        return String(localized: "catalogue.replay.until", defaultValue: "Vaadatav kuni \(date)")
+    }
 
     func from(_ source: CatalogueSource) -> Programme {
         var copy = self
@@ -147,6 +175,19 @@ struct ProgrammeMedia: Decodable {
     let restrictions: Restrictions?
     let jwt: String?
     let licenseServerUrl: LicenseURLs?
+    let periods: [Period]?
+
+    struct Period: Decodable {
+        let publicStart: Double?
+        let publicEnd: Double?
+
+        var interval: DateInterval? {
+            guard let publicStart, let publicEnd, publicStart.isFinite, publicEnd.isFinite,
+                  publicStart > 0, publicEnd > publicStart else { return nil }
+            return DateInterval(start: Date(timeIntervalSince1970: publicStart),
+                                end: Date(timeIntervalSince1970: publicEnd))
+        }
+    }
     struct LicenseURLs: Decodable { let fairPlay: String? }
     struct Sources: Decodable { let hls: String? }
     struct Restrictions: Decodable { let drm: Bool?; let geoBlock: Bool? }

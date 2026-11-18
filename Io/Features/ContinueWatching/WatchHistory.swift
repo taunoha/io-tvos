@@ -15,7 +15,8 @@ struct WatchEntry: Codable, Identifiable {
     var programmeType: String? = nil
     var episodeSubHeading: String? = nil
     var scheduleStart: Double? = nil
-    var artworkResolved: Bool? = nil
+    var replayDeadline: Date? = nil
+    var replayUnavailable: Bool? = nil
 
     var isInProgress: Bool { !completed && position >= 10 }
     var progress: Double { duration > 0 ? min(1, max(0, position / duration)) : 0 }
@@ -46,7 +47,7 @@ struct WatchEntry: Codable, Identifiable {
         let subHeading = programmeType == nil ? legacyEpisodeTitle : episodeSubHeading
         return Programme(id: id, heading: heading, subHeading: subHeading, lead: nil, type: type, scheduleStart: type == "episode" ? scheduleStart ?? legacyDate?.timeIntervalSince1970 : nil,
             photos: photo.map { [$0] }, horizontalPhotos: nil, verticalPhotos: nil, medias: nil,
-            rootContent: seriesHeading.map { .init(heading: $0) }, catalogueSource: catalogueSource)
+            rootContent: seriesHeading.map { .init(heading: $0) }, savedReplayDeadline: replayDeadline, catalogueSource: catalogueSource)
     }
 }
 
@@ -57,7 +58,16 @@ final class WatchHistory {
     private let defaults: UserDefaults
     // Keep the original key so existing installations retain their watch history.
     private let storageKey = "jupiter-watch-history-v1"
-    var inProgress: [WatchEntry] { records.filter(\.isInProgress).sorted { $0.updated > $1.updated } }
+    private var availabilityDate = Date.now
+    var inProgress: [WatchEntry] {
+        let now = max(.now, availabilityDate)
+        return records.filter { $0.isInProgress && $0.replayUnavailable != true && ($0.replayDeadline ?? .distantFuture) > now }
+            .sorted { $0.updated > $1.updated }
+    }
+
+    var nextReplayDeadline: Date? { inProgress.compactMap(\.replayDeadline).min() }
+
+    func updateAvailability() { availabilityDate = .now }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -79,30 +89,41 @@ final class WatchHistory {
             imageAddress: imageAddress ?? saved?.imageAddress, position: position, duration: duration, updated: Date(),
             catalogueSource: programme.source, completed: ended || position / duration >= 0.95,
             programmeType: programme.type ?? "", episodeSubHeading: programme.subHeading.map { String($0.prefix(240)) },
-            scheduleStart: programme.scheduleStart, artworkResolved: imageAddress != nil ? true : saved?.artworkResolved)
+            scheduleStart: programme.scheduleStart,
+            replayDeadline: programme.replayDeadline() ?? saved?.replayDeadline)
         records.removeAll { $0.id == programme.id }
         records.insert(entry, at: 0)
         records = Array(records.prefix(100))
         persist()
     }
-    func restoreImage(for id: Int) async {
-        guard let saved = entry(for: id), saved.artworkResolved == nil else { return }
+    func refreshProgramme(for id: Int) async -> Programme? {
+        guard let saved = entry(for: id) else { return nil }
         do {
             let source = saved.catalogueSource ?? .jupiter
             let detail = try await OnDemandAPI.detail(id, source: source)
             try Task.checkCancellation()
-            let imageURL = detail.mainContent.imageURL
-            guard let index = records.firstIndex(where: {
-                $0.id == id && ($0.catalogueSource ?? .jupiter) == source && $0.artworkResolved == nil
-            }), imageURL != nil || records[index].imageAddress != nil else { return }
-            if let imageURL {
-                records[index].imageAddress = imageURL.absoluteString
-            }
-            records[index].artworkResolved = true
-            persist()
+            guard detail.mainContent.id == id else { return nil }
+            updateProgramme(detail.mainContent)
+            return detail.mainContent
         } catch {
-            // Keep the saved position even when artwork is temporarily unavailable.
+            return nil
         }
+    }
+
+    func updateProgramme(_ programme: Programme) {
+        guard let index = records.firstIndex(where: {
+            $0.id == programme.id && ($0.catalogueSource ?? .jupiter) == programme.source
+        }) else { return }
+        let imageAddress = programme.imageURL?.absoluteString
+        let deadline = programme.replayDeadline()
+        let unavailable = programme.playbackMedia == nil
+        guard (imageAddress != nil && records[index].imageAddress != imageAddress)
+                || records[index].replayUnavailable != unavailable
+                || records[index].replayDeadline != deadline else { return }
+        if let imageAddress { records[index].imageAddress = imageAddress }
+        records[index].replayUnavailable = unavailable
+        records[index].replayDeadline = deadline
+        persist()
     }
 
     func remove(_ id: Int) {

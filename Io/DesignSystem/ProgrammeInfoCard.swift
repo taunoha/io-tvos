@@ -50,6 +50,11 @@ struct ProgrammeInfoCard<Action: View>: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
+                if let availability = programme?.replayAvailabilityLabel() {
+                    Text(availability)
+                        .font(IoDesign.metadata)
+                        .foregroundStyle(.secondary)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 

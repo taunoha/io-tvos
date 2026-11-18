@@ -562,7 +562,7 @@ struct TelekavaView: View {
     }
 
     private func confirmedReplay(for entry: TelekavaEntry, at date: Date) -> Programme? {
-        guard let catalogueDetail, catalogueDetail.hasVideo,
+        guard let catalogueDetail, catalogueDetail.hasVideo, !catalogueDetail.isReplayExpired,
               catalogueDetail.id == entry.replayID(at: date) else { return nil }
         return catalogueDetail
     }

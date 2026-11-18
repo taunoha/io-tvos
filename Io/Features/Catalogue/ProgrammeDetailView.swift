@@ -59,22 +59,11 @@ struct ProgrammeDetailView: View {
                                 if !page.mainContent.episodeLabel.isEmpty { Text(page.mainContent.episodeLabel).font(IoDesign.metadata).foregroundStyle(.secondary) }
                             }
                             Text(page.mainContent.descriptionText).font(IoDesign.body).lineLimit(6).foregroundStyle(.secondary)
-                            if programme.source == .lasteekraan && !page.mainContent.hasVideo {
-                                Text(String(localized: "detail.unavailable")).font(IoDesign.body).foregroundStyle(.secondary)
-                            } else if let saved = history.entry(for: page.mainContent.id) {
-                                HStack(spacing: IoDesign.Space.large) {
-                                    Button { playing = PlaybackSelection(programme: page.mainContent, position: saved.position) } label: { Label(String(localized: "detail.resume", defaultValue: "Jätka · \(saved.positionLabel)"), systemImage: "play.fill") }
-                                        .focused($focusedPlaybackAction, equals: .play)
-                                    Button(String(localized: "detail.restart")) {
-                                        history.remove(page.mainContent.id)
-                                        playing = PlaybackSelection(programme: page.mainContent, position: 0)
-                                    }
-                                    .focused($focusedPlaybackAction, equals: .restart)
-                                }
-                            } else {
-                                Button { playing = PlaybackSelection(programme: page.mainContent, position: 0) } label: { Label(String(localized: "detail.play"), systemImage: "play.fill") }
-                                    .focused($focusedPlaybackAction, equals: .play)
-                                    .accessibilityIdentifier("detail-play")
+                            if let availability = page.mainContent.replayAvailabilityLabel() {
+                                Text(availability).font(IoDesign.metadata).foregroundStyle(.secondary)
+                            }
+                            if !page.mainContent.isReplayExpired {
+                                playbackActions(for: page.mainContent)
                             }
                             if let favorite = ProgrammeFavorite(programme: programme, mainContent: page.mainContent) {
                                 ProgrammeFavoriteButton(favorite: favorite)
@@ -149,6 +138,7 @@ struct ProgrammeDetailView: View {
                 let seasonID = request.seasonID ?? result.currentSeasonID
                 if seasonID != selectedSeasonID { restoredEpisodeFocusID = nil }
                 selectedSeasonID = seasonID
+                history.updateProgramme(result.mainContent)
                 page = result
                 loading = false
             } catch {
@@ -175,6 +165,29 @@ struct ProgrammeDetailView: View {
             ) {
                 programmeToOpen = programme.type == "series" ? programme : selection.programme.playbackDetailProgramme
             }
+        }
+    }
+
+    @ViewBuilder
+    private func playbackActions(for content: Programme) -> some View {
+        let saved = history.entry(for: content.id)
+        if (content.source == .lasteekraan && !content.hasVideo)
+            || (saved != nil && content.playbackMedia == nil) {
+            Text(String(localized: "detail.unavailable")).font(IoDesign.body).foregroundStyle(.secondary)
+        } else if let saved {
+            HStack(spacing: IoDesign.Space.large) {
+                Button { playing = PlaybackSelection(programme: content, position: saved.position) } label: { Label(String(localized: "detail.resume", defaultValue: "Jätka · \(saved.positionLabel)"), systemImage: "play.fill") }
+                    .focused($focusedPlaybackAction, equals: .play)
+                Button(String(localized: "detail.restart")) {
+                    history.remove(content.id)
+                    playing = PlaybackSelection(programme: content, position: 0)
+                }
+                .focused($focusedPlaybackAction, equals: .restart)
+            }
+        } else {
+            Button { playing = PlaybackSelection(programme: content, position: 0) } label: { Label(String(localized: "detail.play"), systemImage: "play.fill") }
+                .focused($focusedPlaybackAction, equals: .play)
+                .accessibilityIdentifier("detail-play")
         }
     }
 

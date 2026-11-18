@@ -265,6 +265,30 @@
         }
       }
     },
+    "catalogue.replay.expired" : {
+      "comment" : "Teade pärast video avaldamisperioodi lõppu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Järelvaatamise aeg on läbi."
+          }
+        }
+      }
+    },
+    "catalogue.replay.until" : {
+      "comment" : "Kohatäide on järelvaatamise lõpu kuupäev.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaadatav kuni %@"
+          }
+        }
+      }
+    },
     "detail.episodes" : {
       "comment" : "Saate detailvaate episoodide riiuli pealkiri.",
       "extractionState" : "manual",

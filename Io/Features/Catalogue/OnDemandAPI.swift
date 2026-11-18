@@ -1,10 +1,11 @@
 import Foundation
 
 enum OnDemandError: LocalizedError {
-    case service(Int), noMedia, protectedContent, regionRestricted
+    case service(Int), noMedia, protectedContent, regionRestricted, replayExpired
     var errorDescription: String? {
         switch self {
         case .service(let status): return String(localized: "catalogue.error.http", defaultValue: "Jupiteri andmeid ei saanud laadida (HTTP \(status)).")
+        case .replayExpired: return String(localized: "catalogue.replay.expired")
         case .noMedia: return String(localized: "catalogue.error.noMedia")
         case .protectedContent: return String(localized: "catalogue.error.protected")
         case .regionRestricted: return String(localized: "catalogue.error.regionRestricted")
@@ -101,9 +102,13 @@ enum OnDemandAPI {
 
     static func playbackSource(_ id: Int, source: CatalogueSource = .jupiter) async throws -> PlaybackSource {
         let page = try await detail(id, source: source)
-        let sources = page.mainContent.medias ?? []
-        guard !sources.isEmpty else { throw OnDemandError.noMedia }
-        guard let media = sources.first(where: { $0.src?.hls != nil && (source != .lasteekraan || $0.type == "video") }) else { throw OnDemandError.noMedia }
+        return try await playbackSource(for: page.mainContent, requestedID: id)
+    }
+
+    static func playbackSource(for programme: Programme, requestedID id: Int) async throws -> PlaybackSource {
+        let source = programme.source
+        guard !programme.isReplayExpired else { throw OnDemandError.replayExpired }
+        guard let media = programme.playbackMedia else { throw OnDemandError.noMedia }
         if media.restrictions?.geoBlock == true {
             let region: Region = try await get("/api/geoblock/getRegionalData")
             guard region.inEstonia else { throw OnDemandError.regionRestricted }

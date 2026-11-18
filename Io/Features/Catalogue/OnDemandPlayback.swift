@@ -39,9 +39,16 @@ final class OnDemandPlayback: ObservableObject {
         let token = generation
         loadTask = Task { [weak self] in
             do {
-                let source = try await OnDemandAPI.playbackSource(id, source: programme.source)
+                let page = try await OnDemandAPI.detail(id, source: programme.source)
                 try Task.checkCancellation()
                 guard let self, self.generation == token else { return }
+                if page.mainContent.id == id {
+                    self.programme = page.mainContent
+                    self.history.updateProgramme(page.mainContent)
+                }
+                let source = try await OnDemandAPI.playbackSource(for: page.mainContent, requestedID: id)
+                try Task.checkCancellation()
+                guard self.generation == token else { return }
                 try self.install(source, token: token)
             } catch is CancellationError { }
             catch {

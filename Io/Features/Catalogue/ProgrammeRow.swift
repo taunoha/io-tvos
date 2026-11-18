@@ -103,7 +103,7 @@ struct ProgrammeRow: View {
         ForEach(programmes.lazy.map(ProgrammeRowKey.init)) { key in
             let programme = key.programme
             Group {
-                if let playEpisode, programme.source != .lasteekraan || programme.hasVideo {
+                if let playEpisode, !programme.isReplayExpired, programme.source != .lasteekraan || programme.hasVideo {
                     Button { playEpisode(programme) } label: {
                         ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, playsDirectly: true)
                     }

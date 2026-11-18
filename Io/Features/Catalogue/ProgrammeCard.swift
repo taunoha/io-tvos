@@ -8,9 +8,12 @@ struct ProgrammeCard: View {
     var reservesProgressSpace = false
     var playsDirectly = false
     var subtitleOverride: String? = nil
+    @State private var replayProgramme: Programme?
     private var cardWidth: CGFloat { usesPortraitImage ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth }
     var body: some View {
         let saved = history.entry(for: programme.id)
+        let replay = replayProgramme ?? programme
+        let availability = replay.replayAvailabilityLabel()
         let subtitle = subtitleOverride ?? programme.cardSubtitle
         let title = Text(programme.cardTitle(showsSeriesTitle: showsSeriesTitle))
             .font(IoDesign.cardTitle)
@@ -22,7 +25,7 @@ struct ProgrammeCard: View {
             }
             .frame(width: cardWidth, height: usesPortraitImage ? 420 : IoDesign.landscapeCardArtworkHeight).clipped()
             .overlay(alignment: .bottomLeading) {
-                if playsDirectly {
+                if playsDirectly && !replay.isReplayExpired {
                     Image(systemName: history.isCompleted(programme.id) ? "arrow.counterclockwise" : "play.fill")
                         .font(IoDesign.metadata.weight(.semibold))
                         .foregroundStyle(.white)
@@ -56,6 +59,11 @@ struct ProgrammeCard: View {
                 } else {
                     title.lineLimit(2, reservesSpace: true)
                 }
+                if let availability {
+                    Text(availability)
+                        .font(IoDesign.caption).foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
                 if reservesProgressSpace {
                     ProgressView(value: saved?.progress ?? 0) {
                         Text(saved?.remainingLabel ?? " ")
@@ -73,10 +81,27 @@ struct ProgrammeCard: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: IoDesign.cardCornerRadius))
         .clipShape(RoundedRectangle(cornerRadius: IoDesign.cardCornerRadius))
         .task(id: programme.id) {
-            if programme.imageURL == nil || reservesProgressSpace {
-                await history.restoreImage(for: programme.id)
+            guard allowsReplayLookup else { return }
+            do {
+                try await Task.sleep(for: .milliseconds(250))
+                if let saved, (saved.catalogueSource ?? .jupiter) == programme.source {
+                    let detail = await history.refreshProgramme(for: programme.id)
+                    try Task.checkCancellation()
+                    replayProgramme = detail
+                } else {
+                    let detail = try await OnDemandAPI.detail(programme.id, source: programme.source)
+                    try Task.checkCancellation()
+                    if detail.mainContent.id == programme.id { replayProgramme = detail.mainContent }
+                }
+            } catch {
+                // A partial catalogue response can still supply the card.
             }
         }
+    }
+
+    private var allowsReplayLookup: Bool {
+        if reservesProgressSpace && history.entry(for: programme.id) != nil { return true }
+        return programme.medias == nil && ["episode", "movie", "clip"].contains(programme.type ?? "")
     }
 }
 
