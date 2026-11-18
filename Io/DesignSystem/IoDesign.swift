@@ -53,12 +53,25 @@ enum IoDesign {
     static let liveChannelCaptionHeight = Space.xLarge
     static let liveCardFocusStroke = Space.xxSmall
     static let liveCardTextInset = Space.xxLarge
+    // The blue-gray gradient tint, with each sRGB component reduced by 8%.
+    static let liveCardBackground = Color(red: 0.15 * 0.92, green: 0.17 * 0.92, blue: 0.19 * 0.92)
 
     static let playerInfoWidth: CGFloat = 1200
     static let playerInfoHeight: CGFloat = 260
     static let playerProgrammeShelfHeight = landscapeCardArtworkHeight + Space.xxxLarge * 2
     static let playerInfoHorizontalInset = Space.xLarge
     static let playerInfoCornerRadius: CGFloat = 24
+}
+
+struct IoCardActionLabel: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .font(IoDesign.body.weight(.semibold))
+            .fixedSize()
+    }
 }
 
 struct IoSelectionPillLabel: View {

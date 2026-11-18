@@ -42,10 +42,6 @@ struct LiveHomeView: View {
             }
         }
         .ignoresSafeArea(.container, edges: .horizontal)
-        .background {
-            LinearGradient(colors: [Color(white: 0.12), .black], startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
-        }
         .focusScope(channelFocusScope)
         .onAppear {
             guard programmeToOpen == nil, programmeDetail == nil else { return }

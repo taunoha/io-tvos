@@ -39,12 +39,11 @@ struct LiveChannelCard: View {
                             .monospacedDigit()
                     }
                 }
-                Label(String(localized: "live.home.channels"), systemImage: "play.fill")
-                    .font(IoDesign.body.weight(.semibold))
-                    .padding(.horizontal, IoDesign.Space.large)
-                    .padding(.vertical, IoDesign.Space.small)
-                    .foregroundStyle(isFocused ? .black : .white)
-                    .background(isFocused ? .white : .white.opacity(0.16), in: Capsule())
+                IoCardActionLabel(title: String(localized: "live.home.channels"), systemImage: "play.fill")
+                    .padding(.horizontal, IoDesign.Space.xLarge)
+                    .padding(.vertical, IoDesign.Space.medium)
+                    .foregroundStyle(.black)
+                    .background(.white, in: Capsule())
             }
             .foregroundStyle(.white)
             .frame(maxWidth: width * 0.55, alignment: .leading)
@@ -54,7 +53,7 @@ struct LiveChannelCard: View {
             .accessibilityElement(children: .combine)
         }
         .background {
-            Color(white: 0.22)
+            IoDesign.liveCardBackground
                 .overlay {
                     LiveChannelPreview(channel: channel, isCardVisible: isPreviewVisible, isEnabled: allowsLivePreview)
                 }

@@ -71,8 +71,7 @@ struct ProgrammeInfoButton: View {
 
     var body: some View {
         Button(action: action) {
-            Label(String(localized: "action.programmeInfo"), systemImage: "info.circle")
-                .font(IoDesign.body.weight(.semibold))
+            IoCardActionLabel(title: String(localized: "action.programmeInfo"), systemImage: "info.circle")
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
