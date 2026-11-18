@@ -40,6 +40,7 @@ final class PlaybackDiagnostics {
     }
     private let session = UUID()
     private let fileURL = URL.cachesDirectory.appendingPathComponent("playback-diagnostics.json")
+    private let writer = DispatchQueue(label: "Io.PlaybackDiagnostics")
     private var samples: [Sample]
 
     private init() {
@@ -70,12 +71,14 @@ final class PlaybackDiagnostics {
             loadedRanges: item?.loadedTimeRanges.compactMap(TimeRange.init),
             fairPlay: fairPlay, errorCode: errorCode, streamErrorCode: item?.errorLog()?.events.last?.errorStatusCode))
         if samples.count > 512 { samples.removeFirst(samples.count - 512) }
-        do {
-            try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            try encoder.encode(samples).write(to: fileURL, options: .atomic)
-        } catch { /* Diagnostics must never interrupt playback. */ }
+        writer.async { [fileURL, samples] in
+            do {
+                try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                try encoder.encode(samples).write(to: fileURL, options: .atomic)
+            } catch { /* Diagnostics must never interrupt playback. */ }
+        }
     }
 }
 #endif

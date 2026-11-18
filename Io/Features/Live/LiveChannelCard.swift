@@ -5,7 +5,8 @@ struct LiveChannelCard: View {
     let width: CGFloat
     let height: CGFloat
     let isFocused: Bool
-    let previewsLiveVideo: Bool
+    let isPreviewVisible: Bool
+    let allowsLivePreview: Bool
     @State private var schedules: [LiveSchedule] = []
     @State private var loaded = false
 
@@ -55,7 +56,7 @@ struct LiveChannelCard: View {
         .background {
             Color(white: 0.22)
                 .overlay {
-                    LiveChannelPreview(channel: channel, isActive: previewsLiveVideo)
+                    LiveChannelPreview(channel: channel, isCardVisible: isPreviewVisible, isEnabled: allowsLivePreview)
                 }
         }
         .clipShape(shape)

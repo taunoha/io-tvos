@@ -32,14 +32,14 @@ final class LivePlayback: ObservableObject {
 
     init(isMuted: Bool = false) { self.isMuted = isMuted }
 
-    func start(_ channel: LiveChannel) {
+    func start(_ channel: LiveChannel, playerStartupDelay: Duration = .zero) {
         stop()
         self.channel = channel
         retries = 0
-        load()
+        load(playerStartupDelay: playerStartupDelay)
     }
 
-    private func load(preferFairPlay: Bool? = nil) {
+    private func load(preferFairPlay: Bool? = nil, playerStartupDelay: Duration = .zero) {
         releasePlayback()
         let token = UUID()
         generation = token
@@ -49,9 +49,14 @@ final class LivePlayback: ObservableObject {
         guard let channel else { return }
         diagnostic("load")
         logger.info("Loading channel \(channel.id, privacy: .public); retry \(self.retries)")
+        let earliestPlayerStart = ContinuousClock.now + playerStartupDelay
         loadTask = Task { [weak self] in
             do {
                 let source = try await LiveAPI.streamSource(for: channel, preferFairPlay: preferFairPlay)
+                if playerStartupDelay > .zero {
+                    // Resolve the stream while the carousel moves, then attach the player.
+                    try await Task.sleep(until: earliestPlayerStart)
+                }
                 try Task.checkCancellation()
                 guard let self, self.generation == token else { return }
                 try self.install(source, token: token)

@@ -2,46 +2,58 @@ import AVKit
 import SwiftUI
 
 struct LiveChannelPreview: View {
+    private static let fadeDuration = 0.4
+
     let channel: LiveChannel
-    let isActive: Bool
+    let isCardVisible: Bool
+    let isEnabled: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @StateObject private var playback = LivePlayback(isMuted: true)
     @State private var readyPlayerID: ObjectIdentifier?
 
+    private var isActive: Bool { isCardVisible && isEnabled }
+
     var body: some View {
         Color.clear.overlay {
-            if isActive, let player = playback.player {
+            if let player = playback.player {
                 let playerID = ObjectIdentifier(player)
-                let isReady = readyPlayerID == playerID
+                let isVisible = isActive && readyPlayerID == playerID
                 LivePreviewVideo(player: player) {
                     readyPlayerID = playerID
                 }
                 .id(playerID)
-                .overlay {
-                    LinearGradient(stops: [.init(color: .black.opacity(0.91), location: 0),
-                                           .init(color: .black.opacity(0.72), location: 0.49),
-                                           .init(color: .black.opacity(0.10), location: 1)],
-                                   startPoint: .leading, endPoint: .trailing)
-                }
-                .opacity(isReady ? 1 : 0)
-                .animation(reduceMotion ? nil : .easeInOut(duration: 0.4), value: isReady)
+                .opacity(isVisible ? 1 : 0)
+                .animation(reduceMotion || !isEnabled ? nil : .easeInOut(duration: Self.fadeDuration),
+                           value: isVisible)
             }
+        }
+        .overlay {
+            LinearGradient(stops: [.init(color: .black.opacity(0.91), location: 0),
+                                   .init(color: .black.opacity(0.72), location: 0.49),
+                                   .init(color: .black.opacity(0.10), location: 1)],
+                           startPoint: .leading, endPoint: .trailing)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
-        .onChange(of: isActive) { _, active in
-            if !active { stop() }
+        .onChange(of: isEnabled) { _, enabled in
+            if !enabled { stop() }
         }
         .task(id: isActive) {
-            guard isActive else { return }
-            // Let quick remote moves settle before opening a live stream.
-            do {
-                try await Task.sleep(for: .milliseconds(350))
-                try Task.checkCancellation()
-                playback.start(channel)
-            } catch {
+            guard !Task.isCancelled else { return }
+            if isActive {
+                // Reuse the stream if the card becomes visible again during its fade-out.
+                if playback.player == nil {
+                    let startupDelay = reduceMotion ? .zero : Duration.seconds(LiveHomeView.carouselScrollDuration)
+                    playback.start(channel, playerStartupDelay: startupDelay)
+                }
                 return
             }
+            if isEnabled, !reduceMotion, readyPlayerID != nil {
+                do { try await Task.sleep(for: .seconds(Self.fadeDuration)) }
+                catch { return }
+            }
+            guard !Task.isCancelled else { return }
+            stop()
         }
         .onDisappear { stop() }
     }

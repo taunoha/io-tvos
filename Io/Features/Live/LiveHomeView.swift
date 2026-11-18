@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct LiveHomeView: View {
+    static let carouselScrollDuration = 0.25
+
     @Environment(\.openProgrammeDetail) private var openProgramme
     @Environment(ProgrammeFavorites.self) private var favorites
     @Environment(WatchHistory.self) private var history
@@ -10,6 +12,8 @@ struct LiveHomeView: View {
     @FocusState private var focusedChannelID: String?
     @State private var featuredChannelID = LiveChannel.all.first?.id
     @State private var carouselPosition = LiveChannel.all.first?.id
+    @State private var visibleChannelID: String?
+    @State private var isChannelRowVisible = false
     @Namespace private var channelFocusScope
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -51,7 +55,7 @@ struct LiveHomeView: View {
         .onChange(of: focusedChannelID) { _, channelID in
             guard let channelID else { return }
             featuredChannelID = channelID
-            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
+            withAnimation(reduceMotion ? nil : .easeOut(duration: Self.carouselScrollDuration)) {
                 carouselPosition = channelID
             }
         }
@@ -91,7 +95,8 @@ struct LiveHomeView: View {
                         Button { selectedChannel = channel } label: {
                             LiveChannelCard(channel: channel, width: cardWidth, height: height,
                                             isFocused: isFocused,
-                                            previewsLiveVideo: isFocused && selectedChannel == nil
+                                            isPreviewVisible: isChannelRowVisible && visibleChannelID == channel.id,
+                                            allowsLivePreview: selectedChannel == nil
                                                 && programmeToOpen == nil && programmeDetail == nil
                                                 && scenePhase == .active)
                         }
@@ -106,6 +111,13 @@ struct LiveHomeView: View {
             .contentMargins(.horizontal, IoDesign.contentInset, for: .scrollContent)
             .scrollIndicators(.hidden)
             .scrollPosition(id: $carouselPosition, anchor: .leading)
+            .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.6) { channelIDs in
+                // Only the main card clears this threshold. The adjacent cards peek in at the edges.
+                visibleChannelID = channelIDs.first
+            }
+            .onScrollVisibilityChange(threshold: 0.01) { visible in
+                isChannelRowVisible = visible
+            }
 
             HStack(spacing: IoDesign.Space.large) {
                 ForEach(LiveChannel.all) { channel in
