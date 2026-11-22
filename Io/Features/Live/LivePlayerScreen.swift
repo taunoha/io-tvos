@@ -72,8 +72,8 @@ private struct LivePlayerWithSchedule: View {
 
     private func programmeTab(entries: [TelekavaEntry], date: Date) -> NativePlayerTab? {
         guard !entries.isEmpty else { return nil }
-        return NativePlayerTab(title: String(localized: "player.live.scheduleTab"), height: IoDesign.playerProgrammeShelfHeight) { onJump in
-            AnyView(LiveProgrammeShelf(entries: entries, viewingDate: date, player: player, onJump: onJump)
+        return NativePlayerTab(title: String(localized: "player.live.scheduleTab"), height: IoDesign.playerProgrammeShelfHeight) { afterClosingPanel in
+            AnyView(LiveProgrammeShelf(entries: entries, viewingDate: date, player: player, afterClosingPanel: afterClosingPanel)
                 .environment(history))
         }
     }

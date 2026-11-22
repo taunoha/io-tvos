@@ -35,7 +35,7 @@ struct LiveProgrammeShelf: View {
     let entries: [TelekavaEntry]
     let viewingDate: Date
     let player: AVPlayer
-    let onJump: () -> Void
+    let afterClosingPanel: (@escaping @MainActor () async -> Void) -> Void
 
     var body: some View {
         ScrollView(.horizontal) {
@@ -59,13 +59,11 @@ struct LiveProgrammeShelf: View {
     private func jump(to date: Date) {
         guard let item = player.currentItem,
               let target = LiveSeekWindow(player: player)?.seekTime(for: date) else { return }
-        player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero) { finished in
-            guard finished else { return }
-            Task { @MainActor in
-                guard player.currentItem === item else { return }
-                player.play()
-                onJump()
-            }
+        afterClosingPanel {
+            guard player.currentItem === item else { return }
+            let finished = await player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
+            guard finished, !Task.isCancelled, player.currentItem === item else { return }
+            player.play()
         }
     }
 }

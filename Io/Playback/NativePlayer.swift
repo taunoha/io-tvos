@@ -10,7 +10,7 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
 
     final class Coordinator: NSObject, AVPlayerViewControllerDelegate {
         var onDismiss: () -> Void
-        var restoreControls: Task<Void, Never>?
+        var panelAction: Task<Void, Never>?
         init(onDismiss: @escaping () -> Void) { self.onDismiss = onDismiss }
         func playerViewControllerShouldDismiss(_ playerViewController: AVPlayerViewController) -> Bool {
             onDismiss()
@@ -41,14 +41,17 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
             if existing != nil { controller.customInfoViewControllers = [infoPanel] }
             return
         }
-        let content = additionalTab.content { [weak controller, weak coordinator] in
-            guard let controller, let coordinator else { return }
+        let content = additionalTab.content { [weak controller, weak coordinator] action in
+            guard let controller, let coordinator, coordinator.panelAction == nil else { return }
             controller.showsPlaybackControls = false
-            coordinator.restoreControls?.cancel()
-            coordinator.restoreControls = Task { @MainActor in
+            coordinator.panelAction = Task { @MainActor in
+                // Give AVKit time to hide the panel before changing playback.
                 try? await Task.sleep(for: .milliseconds(350))
                 guard !Task.isCancelled else { return }
+                await action()
+                guard !Task.isCancelled else { return }
                 controller.showsPlaybackControls = true
+                coordinator.panelAction = nil
             }
         }
         if let existing {
@@ -60,7 +63,7 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
     }
 
     static func dismantleUIViewController(_ controller: AVPlayerViewController, coordinator: Coordinator) {
-        coordinator.restoreControls?.cancel()
+        coordinator.panelAction?.cancel()
         controller.delegate = nil
         controller.player = nil
     }
@@ -69,7 +72,7 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
 struct NativePlayerTab {
     let title: String
     let height: CGFloat
-    let content: (@escaping () -> Void) -> AnyView
+    let content: (@escaping (@escaping @MainActor () async -> Void) -> Void) -> AnyView
 }
 
 private struct PlayerInfoPanel<Content: View>: View {
