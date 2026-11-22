@@ -6,12 +6,16 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
     let onDismiss: () -> Void
     var infoHeight: CGFloat = IoDesign.playerInfoHeight
     var additionalTab: NativePlayerTab? = nil
+    var onDetach: (() -> Void)? = nil
     @ViewBuilder let info: () -> Info
 
     final class Coordinator: NSObject, AVPlayerViewControllerDelegate {
         var onDismiss: () -> Void
-        var panelAction: Task<Void, Never>?
+        var isClosingPanel = false
+        var onDetach: (() -> Void)?
+
         init(onDismiss: @escaping () -> Void) { self.onDismiss = onDismiss }
+
         func playerViewControllerShouldDismiss(_ playerViewController: AVPlayerViewController) -> Bool {
             onDismiss()
             return false // SwiftUI owns the presentation; dismiss its cover explicitly.
@@ -20,6 +24,7 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(onDismiss: onDismiss) }
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
+        context.coordinator.onDetach = onDetach
         controller.player = player
         controller.delegate = context.coordinator
         controller.showsPlaybackControls = true
@@ -41,38 +46,39 @@ struct NativePlayer<Info: View>: UIViewControllerRepresentable {
             if existing != nil { controller.customInfoViewControllers = [infoPanel] }
             return
         }
-        let content = additionalTab.content { [weak controller, weak coordinator] action in
-            guard let controller, let coordinator, coordinator.panelAction == nil else { return }
-            controller.showsPlaybackControls = false
-            coordinator.panelAction = Task { @MainActor in
-                // Give AVKit time to hide the panel before changing playback.
-                try? await Task.sleep(for: .milliseconds(350))
-                guard !Task.isCancelled else { return }
-                await action()
-                guard !Task.isCancelled else { return }
-                controller.showsPlaybackControls = true
-                coordinator.panelAction = nil
+        let panel = existing ?? PlayerInfoPanelController(
+            title: additionalTab.title, content: AnyView(EmptyView()), height: additionalTab.height
+        )
+        let content = additionalTab.content { [weak panel, weak controller, weak coordinator] completion in
+            guard let panel, let controller, let coordinator, !coordinator.isClosingPanel else { return }
+            guard let presentation = panel.infoPresentation(over: controller) else {
+                completion()
+                return
+            }
+            coordinator.isClosingPanel = true
+            presentation.dismiss(animated: false) { [weak controller, weak coordinator] in
+                guard let controller, controller.player != nil, let coordinator else { return }
+                coordinator.isClosingPanel = false
+                completion()
             }
         }
-        if let existing {
-            existing.hostingController.rootView = PlayerInfoPanel(content: content)
-        } else {
-            let panel = PlayerInfoPanelController(title: additionalTab.title, content: content, height: additionalTab.height)
+        panel.hostingController.rootView = PlayerInfoPanel(content: content)
+        if existing == nil {
             controller.customInfoViewControllers = [infoPanel, panel]
         }
     }
 
     static func dismantleUIViewController(_ controller: AVPlayerViewController, coordinator: Coordinator) {
-        coordinator.panelAction?.cancel()
         controller.delegate = nil
         controller.player = nil
+        coordinator.onDetach?()
     }
 }
 
 struct NativePlayerTab {
     let title: String
     let height: CGFloat
-    let content: (@escaping (@escaping @MainActor () async -> Void) -> Void) -> AnyView
+    let content: (@escaping (@escaping () -> Void) -> Void) -> AnyView
 }
 
 private struct PlayerInfoPanel<Content: View>: View {
@@ -98,6 +104,21 @@ private final class PlayerInfoPanelController<Content: View>: UIViewController {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) is unavailable")
+    }
+
+    func infoPresentation(over player: AVPlayerViewController) -> UIViewController? {
+        var ancestor: UIViewController? = self
+        while let candidate = ancestor, candidate !== player {
+            if let presenter = candidate.presentingViewController,
+               presenter.presentedViewController === candidate,
+               let presentationView = candidate.viewIfLoaded,
+               let playerView = player.viewIfLoaded,
+               !playerView.isDescendant(of: presentationView) {
+                return candidate
+            }
+            ancestor = candidate.parent
+        }
+        return nil
     }
 
     override func viewDidLoad() {

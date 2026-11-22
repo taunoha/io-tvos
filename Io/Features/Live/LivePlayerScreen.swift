@@ -45,6 +45,9 @@ private struct LivePlayerWithSchedule: View {
     let onOpenProgramme: (Programme) -> Void
     @Environment(WatchHistory.self) private var history
     @State private var schedules: [Date: [TelekavaEntry]] = [:]
+    @State private var playerPresentationID = UUID()
+    @State private var pendingProgrammeDate: Date?
+    @State private var readyToSeek = false
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -57,9 +60,20 @@ private struct LivePlayerWithSchedule: View {
                 entries.filter { window.seekTime(for: Date(timeIntervalSince1970: $0.startTime)) != nil }
             } ?? []
             let tab = programmeTab(entries: reachable, date: date)
-            NativePlayer(player: player, onDismiss: onDismiss, additionalTab: tab) {
+            let presentationID = playerPresentationID
+            NativePlayer(player: player, onDismiss: onDismiss, additionalTab: tab, onDetach: {
+                // Publish the teardown after SwiftUI finishes updating its view hierarchy.
+                Task { @MainActor in
+                    guard presentationID != playerPresentationID else { return }
+                    readyToSeek = true
+                }
+            }) {
                 LivePlayerInfo(channel: channel, current: current,
                                isOnAir: current?.isCurrent(at: context.date) == true, onOpenProgramme: onOpenProgramme)
+            }
+            .id(presentationID)
+            .task(id: readyToSeek) {
+                await seekToSelectedProgramme()
             }
             .task(id: days) {
                 while !Task.isCancelled {
@@ -72,10 +86,34 @@ private struct LivePlayerWithSchedule: View {
 
     private func programmeTab(entries: [TelekavaEntry], date: Date) -> NativePlayerTab? {
         guard !entries.isEmpty else { return nil }
-        return NativePlayerTab(title: String(localized: "player.live.scheduleTab"), height: IoDesign.playerProgrammeShelfHeight) { afterClosingPanel in
-            AnyView(LiveProgrammeShelf(entries: entries, viewingDate: date, player: player, afterClosingPanel: afterClosingPanel)
+        return NativePlayerTab(
+            title: String(localized: "player.live.scheduleTab"),
+            height: IoDesign.playerProgrammeShelfHeight,
+            content: { closePanel in
+                AnyView(LiveProgrammeShelf(entries: entries, viewingDate: date) { start in
+                    guard pendingProgrammeDate == nil else { return }
+                    pendingProgrammeDate = start
+                    closePanel {
+                        // Rebuild AVKit's controls after dismissing its separate presentation.
+                        playerPresentationID = UUID()
+                    }
+                }
                 .environment(history))
+            }
+        )
+    }
+
+    private func seekToSelectedProgramme() async {
+        guard !Task.isCancelled, readyToSeek, let date = pendingProgrammeDate else { return }
+        defer {
+            pendingProgrammeDate = nil
+            readyToSeek = false
         }
+        guard let item = player.currentItem,
+              let target = LiveSeekWindow(player: player)?.seekTime(for: date) else { return }
+        let finished = await player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
+        guard finished, !Task.isCancelled, player.currentItem === item else { return }
+        player.play()
     }
 
     private func scheduleDays(from start: Date, through end: Date) -> [Date] {

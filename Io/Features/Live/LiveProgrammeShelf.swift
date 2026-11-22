@@ -34,15 +34,14 @@ struct LiveSeekWindow {
 struct LiveProgrammeShelf: View {
     let entries: [TelekavaEntry]
     let viewingDate: Date
-    let player: AVPlayer
-    let afterClosingPanel: (@escaping @MainActor () async -> Void) -> Void
+    let onSelect: (Date) -> Void
 
     var body: some View {
         ScrollView(.horizontal) {
             LazyHStack(spacing: IoDesign.cardGap) {
                 ForEach(entries) { entry in
                     Button {
-                        jump(to: Date(timeIntervalSince1970: entry.startTime))
+                        onSelect(Date(timeIntervalSince1970: entry.startTime))
                     } label: {
                         LiveProgrammeCard(entry: entry, isPlaying: entry.isCurrent(at: viewingDate))
                     }
@@ -54,17 +53,6 @@ struct LiveProgrammeShelf: View {
         }
         .scrollClipDisabled()
         .scrollIndicators(.hidden)
-    }
-
-    private func jump(to date: Date) {
-        guard let item = player.currentItem,
-              let target = LiveSeekWindow(player: player)?.seekTime(for: date) else { return }
-        afterClosingPanel {
-            guard player.currentItem === item else { return }
-            let finished = await player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
-            guard finished, !Task.isCancelled, player.currentItem === item else { return }
-            player.play()
-        }
     }
 }
 
