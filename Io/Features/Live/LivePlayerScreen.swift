@@ -48,6 +48,7 @@ private struct LivePlayerWithSchedule: View {
     @State private var playerPresentationID = UUID()
     @State private var pendingProgrammeDate: Date?
     @State private var readyToSeek = false
+    @State private var seekFailure: String?
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -82,6 +83,24 @@ private struct LivePlayerWithSchedule: View {
                 }
             }
         }
+        .overlay(alignment: .top) {
+            if let seekFailure {
+                Text(seekFailure)
+                    .font(IoDesign.metadata)
+                    .padding(.horizontal, IoDesign.Space.xLarge)
+                    .padding(.vertical, IoDesign.Space.medium)
+                    .glassEffect(in: .capsule)
+                    .padding(.top, IoDesign.focusRoom)
+                    .allowsHitTesting(false)
+            }
+        }
+        .task(id: seekFailure) {
+            guard let seekFailure else { return }
+            AccessibilityNotification.Announcement(seekFailure).post()
+            try? await Task.sleep(for: .seconds(5))
+            guard !Task.isCancelled else { return }
+            self.seekFailure = nil
+        }
     }
 
     private func programmeTab(entries: [TelekavaEntry], date: Date) -> NativePlayerTab? {
@@ -92,6 +111,7 @@ private struct LivePlayerWithSchedule: View {
             content: { closePanel in
                 AnyView(LiveProgrammeShelf(entries: entries, viewingDate: date) { start in
                     guard pendingProgrammeDate == nil else { return }
+                    seekFailure = nil
                     pendingProgrammeDate = start
                     closePanel {
                         // Rebuild AVKit's controls after dismissing its separate presentation.
@@ -110,10 +130,17 @@ private struct LivePlayerWithSchedule: View {
             readyToSeek = false
         }
         guard let item = player.currentItem,
-              let target = LiveSeekWindow(player: player)?.seekTime(for: date) else { return }
+              let target = LiveSeekWindow(player: player)?.seekTime(for: date) else {
+            seekFailure = String(localized: "player.live.jumpUnavailable", defaultValue: "Saate algus ei ole enam kerimisulatuses")
+            return
+        }
         let finished = await player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
-        guard finished, !Task.isCancelled, player.currentItem === item else { return }
-        player.play()
+        guard !Task.isCancelled, player.currentItem === item else { return }
+        if finished {
+            player.play()
+        } else {
+            seekFailure = String(localized: "player.live.jumpFailed", defaultValue: "Saate algusesse ei õnnestunud liikuda")
+        }
     }
 
     private func scheduleDays(from start: Date, through end: Date) -> [Date] {

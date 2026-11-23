@@ -5,14 +5,16 @@ struct ProgrammeInfoCard<Action: View>: View {
     let metadata: String?
     let lead: String?
     let programme: Programme?
+    let playbackStatus: String?
     let action: Action
 
     init(title: String, metadata: String?, lead: String? = nil, programme: Programme? = nil,
-         @ViewBuilder action: () -> Action = { EmptyView() }) {
+         playbackStatus: String? = nil, @ViewBuilder action: () -> Action = { EmptyView() }) {
         self.title = title
         self.metadata = metadata
         self.lead = lead
         self.programme = programme
+        self.playbackStatus = playbackStatus
         self.action = action()
     }
 
@@ -49,6 +51,12 @@ struct ProgrammeInfoCard<Action: View>: View {
                         .font(IoDesign.metadata)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                }
+                if let playbackStatus {
+                    Text(playbackStatus)
+                        .font(IoDesign.metadata)
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("guide-playback-status")
                 }
                 if let availability = programme?.replayAvailabilityLabel() {
                     Text(availability)

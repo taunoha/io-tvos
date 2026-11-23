@@ -484,6 +484,30 @@
         }
       }
     },
+    "guide.replayCheckFailed" : {
+      "comment" : "Telekava infokaart, kui järelvaatamise andmete päring ebaõnnestus.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Järelvaatamist ei õnnestunud kontrollida"
+          }
+        }
+      }
+    },
+    "guide.replayChecking" : {
+      "comment" : "Telekava infokaart järelvaatamise saadavuse kontrollimise ajal.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollin järelvaatamise saadavust…"
+          }
+        }
+      }
+    },
     "guide.replayHint" : {
       "comment" : "VoiceOveri vihje Telekava reale, mille saadet saab järelvaadata.",
       "extractionState" : "manual",
@@ -492,6 +516,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vaata järele"
+          }
+        }
+      }
+    },
+    "guide.replayUnavailable" : {
+      "comment" : "Telekava infokaart, kui saadet ei saa järelvaadata.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Järelvaatamine pole saadaval"
           }
         }
       }
@@ -856,6 +892,18 @@
         }
       }
     },
+    "player.live.jumpFailed" : {
+      "comment" : "Otsemängija teade ebaõnnestunud hüppe järel.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saate algusesse ei õnnestunud liikuda"
+          }
+        }
+      }
+    },
     "player.live.jumpHint" : {
       "comment" : "Mängija saatekava kaardi VoiceOveri vihje.",
       "extractionState" : "manual",
@@ -876,6 +924,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laadin otsepilti…"
+          }
+        }
+      }
+    },
+    "player.live.jumpUnavailable" : {
+      "comment" : "Otsemängija teade, kui valitud saate algus on kerimisulatusest väljunud.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saate algus ei ole enam kerimisulatuses"
           }
         }
       }

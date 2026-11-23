@@ -161,7 +161,8 @@ struct ProgrammeDetailView: View {
             OnDemandPlayerScreen(
                 programme: selection.programme,
                 startPosition: selection.position,
-                history: history
+                history: history,
+                startsOver: selection.startsOver
             ) {
                 programmeToOpen = programme.type == "series" ? programme : selection.programme.playbackDetailProgramme
             }
@@ -179,8 +180,7 @@ struct ProgrammeDetailView: View {
                 Button { playing = PlaybackSelection(programme: content, position: saved.position) } label: { Label(String(localized: "detail.resume", defaultValue: "Jätka · \(saved.positionLabel)"), systemImage: "play.fill") }
                     .focused($focusedPlaybackAction, equals: .play)
                 Button(String(localized: "detail.restart")) {
-                    history.remove(content.id)
-                    playing = PlaybackSelection(programme: content, position: 0)
+                    playing = PlaybackSelection(programme: content, position: 0, startsOver: true)
                 }
                 .focused($focusedPlaybackAction, equals: .restart)
             }

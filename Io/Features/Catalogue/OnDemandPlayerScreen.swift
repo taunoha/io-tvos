@@ -5,24 +5,31 @@ struct PlaybackSelection: Identifiable {
     let id = UUID()
     let programme: Programme
     let position: Double
+    var startsOver = false
 }
 
 struct OnDemandPlayerScreen: View {
     let programme: Programme
     let startPosition: Double
     let history: WatchHistory
+    let startsOver: Bool
     let onOpenProgramme: () -> Void
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
     @StateObject private var playback: OnDemandPlayback
 
-    init(programme: Programme, startPosition: Double, history: WatchHistory,
+    init(programme: Programme, startPosition: Double, history: WatchHistory, startsOver: Bool = false,
          onOpenProgramme: @escaping () -> Void) {
         self.programme = programme
         self.startPosition = startPosition
         self.history = history
+        self.startsOver = startsOver
         self.onOpenProgramme = onOpenProgramme
         _playback = StateObject(wrappedValue: OnDemandPlayback(history: history))
+    }
+
+    private var playbackStartPosition: Double {
+        startsOver ? 0 : history.entry(for: programme.id)?.position ?? startPosition
     }
 
     var body: some View {
@@ -49,7 +56,7 @@ struct OnDemandPlayerScreen: View {
                         Text(error).font(IoDesign.body).multilineTextAlignment(.center).frame(maxWidth: 1100)
                     }
                     HStack(spacing: IoDesign.Space.xLarge) {
-                        Button(String(localized: "action.retry")) { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }
+                        Button(String(localized: "action.retry")) { playback.start(programme, position: playbackStartPosition) }
                         Button(String(localized: "player.onDemand.back")) { dismiss() }
                     }
                 }
@@ -57,7 +64,7 @@ struct OnDemandPlayerScreen: View {
                 ProgressView(String(localized: "player.onDemand.loading")).padding(IoDesign.Space.xLarge).background(.black.opacity(0.8), in: RoundedRectangle(cornerRadius: 20)).allowsHitTesting(false)
             }
         }
-        .onAppear { playback.start(programme, position: history.entry(for: programme.id)?.position ?? startPosition) }
+        .onAppear { playback.start(programme, position: playbackStartPosition) }
         .onChange(of: playback.didFinish) { _, finished in
             if finished { dismiss() }
         }

@@ -45,7 +45,7 @@ struct TelekavaView: View {
     private var windowEnd: TimeInterval { windowStart + windowDuration }
     @State private var pendingScheduleFocus: Date?
     @State private var retry = 0
-    @State private var catalogueDetail: Programme?
+    @State private var catalogueLookup: (id: Int, result: Result<Programme?, any Error>)?
     @State private var playback: Playback?
     @State private var programmeToOpen: Programme?
     @State private var contextMenuProgramme: Programme?
@@ -76,18 +76,19 @@ struct TelekavaView: View {
                 today = newToday
             }
             .task(id: contentID) {
-                if let contentID, catalogueDetail?.id == contentID { return }
-                catalogueDetail = nil
+                if let contentID, catalogueLookup?.id == contentID,
+                   case .success = catalogueLookup?.result { return }
+                catalogueLookup = nil
                 guard let contentID else { return }
                 do {
                     try await Task.sleep(for: .milliseconds(350))
                     let page = try await OnDemandAPI.detail(contentID)
                     try Task.checkCancellation()
-                    if page.mainContent.id == contentID {
-                        catalogueDetail = page.mainContent
-                    }
+                    let programme = page.mainContent.id == contentID ? page.mainContent : nil
+                    catalogueLookup = (contentID, .success(programme))
                 } catch {
-                    // The schedule supplies the basic details when the catalogue is unavailable.
+                    guard !Task.isCancelled else { return }
+                    catalogueLookup = (contentID, .failure(error))
                 }
             }
         }
@@ -357,8 +358,11 @@ struct TelekavaView: View {
         let current = entry.isCurrent(at: now)
         let shape = RoundedRectangle(cornerRadius: IoDesign.scheduleGridCornerRadius)
         return Button {
-            if let item = playback(for: entry, channel: channel, now: .now) {
+            let selectionTime = Date.now
+            if let item = playback(for: entry, channel: channel, now: selectionTime) {
                 present(item, returningTo: .row(row))
+            } else if let status = playbackStatus(for: entry, now: selectionTime) {
+                AccessibilityNotification.Announcement(status).post()
             }
         } label: {
             VStack(alignment: .leading, spacing: IoDesign.Space.xxSmall) {
@@ -394,7 +398,8 @@ struct TelekavaView: View {
         .focused($focus, equals: .row(row))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityLabel(scheduleAccessibilityLabel(entry, channel: channel, isCurrent: current))
-        .accessibilityHint(confirmedReplay(for: entry, at: now) != nil ? String(localized: "guide.replayHint") : "")
+        .accessibilityHint(confirmedReplay(for: entry, at: now) != nil
+            ? String(localized: "guide.replayHint") : playbackStatus(for: entry, now: now) ?? "")
         .accessibilityIdentifier(current ? "telekava-\(channel.id)-current-\(entry.id)" : "telekava-\(channel.id)-\(entry.id)")
         .onMoveCommand { direction in
             move(direction, from: row)
@@ -437,11 +442,28 @@ struct TelekavaView: View {
             : String(localized: "guide.programme.metadata", defaultValue: "\(entry.timeRange) · \(channel.title)")
         return ProgrammeInfoCard(title: entry.title,
                                  metadata: metadata,
-                                 lead: entry.lead, programme: programme)
+                                 lead: entry.lead, programme: programme,
+                                 playbackStatus: playbackStatus(for: entry, now: now))
     }
 
     private func catalogueProgramme(for entry: TelekavaEntry) -> Programme? {
-        catalogueDetail?.id == entry.contentId ? catalogueDetail : nil
+        guard let catalogueLookup, catalogueLookup.id == entry.contentId,
+              case .success(let programme) = catalogueLookup.result else { return nil }
+        return programme
+    }
+
+    private func playbackStatus(for entry: TelekavaEntry, now: Date) -> String? {
+        if entry.isCurrent(at: now) || confirmedReplay(for: entry, at: now) != nil { return nil }
+        guard let id = entry.replayID(at: now) else {
+            return String(localized: "guide.replayUnavailable", defaultValue: "Järelvaatamine pole saadaval")
+        }
+        guard let catalogueLookup, catalogueLookup.id == id else {
+            return String(localized: "guide.replayChecking", defaultValue: "Kontrollin järelvaatamise saadavust…")
+        }
+        if case .failure = catalogueLookup.result {
+            return String(localized: "guide.replayCheckFailed", defaultValue: "Järelvaatamist ei õnnestunud kontrollida")
+        }
+        return String(localized: "guide.replayUnavailable", defaultValue: "Järelvaatamine pole saadaval")
     }
 
     private var selectedEntry: TelekavaEntry? {
@@ -562,7 +584,7 @@ struct TelekavaView: View {
     }
 
     private func confirmedReplay(for entry: TelekavaEntry, at date: Date) -> Programme? {
-        guard let catalogueDetail, catalogueDetail.hasVideo, !catalogueDetail.isReplayExpired,
+        guard let catalogueDetail = catalogueProgramme(for: entry), catalogueDetail.hasVideo, !catalogueDetail.isReplayExpired,
               catalogueDetail.id == entry.replayID(at: date) else { return nil }
         return catalogueDetail
     }
