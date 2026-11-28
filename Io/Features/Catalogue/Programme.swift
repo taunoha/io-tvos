@@ -86,8 +86,11 @@ struct Programme: Decodable, Identifiable {
     }
 
     static func plainDescription(_ lead: String?) -> String {
-        (lead ?? "").replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "&quot;", with: "\"")
+        decodeTextEntities((lead ?? "").replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression))
+    }
+
+    private static func decodeTextEntities(_ text: String) -> String {
+        text.replacingOccurrences(of: "&quot;", with: "\"")
             .replacingOccurrences(of: "&amp;", with: "&")
             .replacingOccurrences(of: "&nbsp;", with: " ")
     }
@@ -98,13 +101,21 @@ struct Programme: Decodable, Identifiable {
         return Date(timeIntervalSince1970: time).formatted(Self.legacyAirDateFormat.locale(.current))
     }
 
-    func cardTitle(showsSeriesTitle: Bool) -> String {
+    func cardTitle(showsSeriesTitle: Bool, seriesTitle: String? = nil) -> String {
         guard type == "episode" else { return heading }
         if showsSeriesTitle { return rootContent?.heading ?? heading }
-        if let cardSubtitle { return cardSubtitle }
+        let seriesTitle = (rootContent?.heading ?? seriesTitle).map(Self.episodeTitleText)
+        let title = Self.episodeTitleText(heading)
+        let subtitle = subHeading.map(Self.episodeTitleText)
+        if let subtitle, !subtitle.isEmpty, subtitle != title, subtitle != seriesTitle { return subtitle }
+        if let seriesTitle, !seriesTitle.isEmpty, !title.isEmpty, title != seriesTitle { return title }
         return airDateLabel.map { date in
             String(localized: "catalogue.episode.datedFallback", defaultValue: "Episood · \(date)")
         } ?? String(localized: "catalogue.episode.fallback")
+    }
+
+    private static func episodeTitleText(_ text: String) -> String {
+        decodeTextEntities(text).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     var cardSubtitle: String? {

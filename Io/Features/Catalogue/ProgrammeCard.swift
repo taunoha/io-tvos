@@ -7,6 +7,7 @@ struct ProgrammeCard: View {
     var showsSeriesTitle = true
     var reservesProgressSpace = false
     var playsDirectly = false
+    var seriesTitle: String? = nil
     var subtitleOverride: String? = nil
     @State private var replayProgramme: Programme?
     private var cardWidth: CGFloat { usesPortraitImage ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth }
@@ -15,7 +16,7 @@ struct ProgrammeCard: View {
         let replay = replayProgramme ?? programme
         let availability = replay.replayAvailabilityLabel()
         let subtitle = subtitleOverride ?? programme.cardSubtitle
-        let title = Text(programme.cardTitle(showsSeriesTitle: showsSeriesTitle))
+        let title = Text(programme.cardTitle(showsSeriesTitle: showsSeriesTitle, seriesTitle: seriesTitle))
             .font(IoDesign.cardTitle)
 
         VStack(alignment: .leading, spacing: IoDesign.Space.medium) {

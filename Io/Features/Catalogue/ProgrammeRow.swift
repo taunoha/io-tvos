@@ -24,6 +24,7 @@ struct ProgrammeRow: View {
     var allowsRemovingProgress = false
     var wrapsCards = false
     var showsSeriesTitle = true
+    var seriesTitle: String? = nil
     var isLoading = false
     var restoredFocusID: Int? = nil
     var openProgramme: ((Programme) -> Void)? = nil
@@ -105,16 +106,16 @@ struct ProgrammeRow: View {
             Group {
                 if let playEpisode, !programme.isReplayExpired, programme.source != .lasteekraan || programme.hasVideo {
                     Button { playEpisode(programme) } label: {
-                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, playsDirectly: true)
+                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, playsDirectly: true, seriesTitle: seriesTitle)
                     }
                     .accessibilityIdentifier("detail-episode-\(programme.id)")
                 } else if let openProgramme {
                     Button { openProgramme(programme) } label: {
-                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace)
+                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, seriesTitle: seriesTitle)
                     }
                 } else {
                     NavigationLink { ProgrammeDetailView(programme: programme) } label: {
-                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace)
+                        ProgrammeCard(programme: programme, usesPortraitImage: usesPortraitCards, showsSeriesTitle: showsSeriesTitle, reservesProgressSpace: reservesProgressSpace, seriesTitle: seriesTitle)
                     }
                 }
             }

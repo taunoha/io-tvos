@@ -104,8 +104,11 @@ struct ProgrammeDetailView: View {
                     }
                     if error != nil { loadStatus }
                     let episodes = page.episodes(for: selectedSeasonID)
+                    let seriesTitle = page.mainContent.rootContent?.heading
+                        ?? (page.mainContent.type == "series" ? page.mainContent.heading : nil)
+                        ?? (programme.type == "series" ? programme.heading : nil)
                     if loading || !episodes.isEmpty {
-                        ProgrammeRow(title: String(localized: "detail.episodes"), items: episodes, showsSeriesTitle: false, isLoading: loading, restoredFocusID: restoredEpisodeFocusID, playEpisode: { episode in
+                        ProgrammeRow(title: String(localized: "detail.episodes"), items: episodes, showsSeriesTitle: false, seriesTitle: seriesTitle, isLoading: loading, restoredFocusID: restoredEpisodeFocusID, playEpisode: { episode in
                             restoredEpisodeFocusID = nil
                             openedEpisodeID = episode.id
                             playing = PlaybackSelection(programme: episode, position: history.entry(for: episode.id)?.position ?? 0)
