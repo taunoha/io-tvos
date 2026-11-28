@@ -153,8 +153,8 @@ struct TelekavaView: View {
                 LivePlayerScreen(channel: channel) { programmeToOpen = $0 }
             case .replay(let programme):
                 OnDemandPlayerScreen(programme: programme, startPosition: history.entry(for: programme.id)?.position ?? 0,
-                                     history: history) {
-                    programmeToOpen = programme.playbackDetailProgramme
+                                     history: history) { current in
+                    programmeToOpen = current
                 }
             }
         }

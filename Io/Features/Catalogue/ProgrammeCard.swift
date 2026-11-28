@@ -9,6 +9,7 @@ struct ProgrammeCard: View {
     var playsDirectly = false
     var seriesTitle: String? = nil
     var subtitleOverride: String? = nil
+    var statusLabel: String? = nil
     @State private var replayProgramme: Programme?
     private var cardWidth: CGFloat { usesPortraitImage ? IoDesign.portraitCardWidth : IoDesign.landscapeCardWidth }
     var body: some View {
@@ -25,6 +26,17 @@ struct ProgrammeCard: View {
                 Rectangle().fill(.white.opacity(0.08)).overlay(Image(systemName: "play.rectangle").font(IoDesign.pageTitle).foregroundStyle(.secondary))
             }
             .frame(width: cardWidth, height: usesPortraitImage ? 420 : IoDesign.landscapeCardArtworkHeight).clipped()
+            .overlay(alignment: .topLeading) {
+                if let statusLabel {
+                    Text(statusLabel)
+                        .font(IoDesign.caption)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, IoDesign.Space.large)
+                        .padding(.vertical, IoDesign.Space.xSmall)
+                        .background(.black.opacity(0.8), in: Capsule())
+                        .padding(IoDesign.Space.medium)
+                }
+            }
             .overlay(alignment: .bottomLeading) {
                 if playsDirectly && !replay.isReplayExpired {
                     Image(systemName: history.isCompleted(programme.id) ? "arrow.counterclockwise" : "play.fill")

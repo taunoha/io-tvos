@@ -1060,6 +1060,18 @@
         }
       }
     },
+    "player.onDemand.episodesTab" : {
+      "comment" : "AVKiti järelvaatamise vaheleht sama hooaja episoodide valimiseks.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episoodid"
+          }
+        }
+      }
+    },
     "player.onDemand.error.interrupted" : {
       "comment" : "Järelvaatamise veateade.",
       "extractionState" : "manual",
@@ -1128,6 +1140,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laadin videot…"
+          }
+        }
+      }
+    },
+    "player.onDemand.watchingEpisode" : {
+      "comment" : "Mängija episoodiriiuli aktiivse episoodi märge.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Praegu vaatad"
           }
         }
       }

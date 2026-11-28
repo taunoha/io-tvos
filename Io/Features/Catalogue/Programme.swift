@@ -261,6 +261,10 @@ struct ProgrammeDetail: Decodable {
             ?? seasons.first { $0.episodes.contains { $0.id == mainContent.id } }?.id
     }
 
+    func season(containingEpisodeID id: Int) -> SeasonChoice? {
+        seasons.first { $0.episodes.contains { $0.id == id } }
+    }
+
     var episodes: [Programme] { episodes(for: nil) }
 
     func episodes(for seasonID: Int?) -> [Programme] {

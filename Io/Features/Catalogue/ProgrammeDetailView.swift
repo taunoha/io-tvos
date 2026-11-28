@@ -166,8 +166,8 @@ struct ProgrammeDetailView: View {
                 startPosition: selection.position,
                 history: history,
                 startsOver: selection.startsOver
-            ) {
-                programmeToOpen = programme.type == "series" ? programme : selection.programme.playbackDetailProgramme
+            ) { current in
+                programmeToOpen = programme.type == "series" ? programme : current
             }
         }
     }

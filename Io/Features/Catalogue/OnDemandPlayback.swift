@@ -9,6 +9,7 @@ final class OnDemandPlayback: ObservableObject {
         self.history = history
     }
 
+    private(set) var detail: ProgrammeDetail?
     @Published private(set) var didFinish = false
     @Published private(set) var player: AVPlayer?
     @Published private(set) var error: String?
@@ -43,6 +44,7 @@ final class OnDemandPlayback: ObservableObject {
                 try Task.checkCancellation()
                 guard let self, self.generation == token else { return }
                 if page.mainContent.id == id {
+                    self.detail = page
                     self.programme = page.mainContent
                     self.history.updateProgramme(page.mainContent)
                 }
@@ -165,6 +167,7 @@ final class OnDemandPlayback: ObservableObject {
         if let observer = progressObserver { player?.removeTimeObserver(observer) }; progressObserver = nil
         player?.pause(); player?.replaceCurrentItem(with: nil); player = nil
         fairPlay?.stop(); fairPlay = nil
+        detail = nil
         programme = nil
         hasPlayed = false
     }
