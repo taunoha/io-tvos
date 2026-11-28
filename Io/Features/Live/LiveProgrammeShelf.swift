@@ -40,12 +40,14 @@ struct LiveProgrammeShelf: View {
         ScrollView(.horizontal) {
             LazyHStack(spacing: IoDesign.cardGap) {
                 ForEach(entries) { entry in
+                    let isPlaying = entry.isCurrent(at: viewingDate)
                     Button {
                         onSelect(Date(timeIntervalSince1970: entry.startTime))
                     } label: {
-                        LiveProgrammeCard(entry: entry, isPlaying: entry.isCurrent(at: viewingDate))
+                        LiveProgrammeCard(entry: entry, isPlaying: isPlaying)
                     }
                     .buttonStyle(.card)
+                    .accessibilityAddTraits(isPlaying ? .isSelected : [])
                     .accessibilityHint(String(localized: "player.live.jumpHint"))
                 }
             }
@@ -68,10 +70,8 @@ private struct LiveProgrammeCard: View {
             photos: artworkProgramme?.photos, horizontalPhotos: artworkProgramme?.horizontalPhotos,
             verticalPhotos: artworkProgramme?.verticalPhotos, medias: nil, rootContent: nil
         )
-        let subtitle = isPlaying
-            ? String(localized: "player.live.schedule.watching", defaultValue: "\(entry.startLabel) · Vaatad")
-            : entry.startLabel
-        ProgrammeCard(programme: programme, subtitleOverride: subtitle)
+        ProgrammeCard(programme: programme, subtitleOverride: entry.startLabel,
+                      statusLabel: isPlaying ? String(localized: "player.onDemand.watchingEpisode") : nil)
             .task(id: entry.contentId) {
                 artworkProgramme = nil
                 guard let id = entry.contentId,

@@ -1000,18 +1000,6 @@
         }
       }
     },
-    "player.live.schedule.watching" : {
-      "comment" : "Mängija riiuli aktiivne saade. Kohatäide on saate algusaeg.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "et" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · Praegu eetris"
-          }
-        }
-      }
-    },
     "player.live.scheduleTab" : {
       "comment" : "AVKiti otsemängija vaheleht, kus saate valimine kerib saate algusaega.",
       "extractionState" : "manual",
@@ -1145,7 +1133,7 @@
       }
     },
     "player.onDemand.watchingEpisode" : {
-      "comment" : "Mängija episoodiriiuli aktiivse episoodi märge.",
+      "comment" : "Mängija parajasti vaadatava saate või episoodi kaardimärge.",
       "extractionState" : "manual",
       "localizations" : {
         "et" : {
